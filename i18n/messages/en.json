@@ -1,0 +1,137 @@
+{
+  "common": {
+    "appName": "Petfendy",
+    "appFullName": "Petfendy Pet Hotel And Dog Training Center",
+    "appTagline": "Ankara's cat, dog and pet hotel",
+    "welcome": "Welcome",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "selectLanguage": "Select Language",
+    "turkish": "Türkçe",
+    "english": "English"
+  },
+  "auth": {
+    "loginTitle": "Login",
+    "registerTitle": "Register",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "name": "Full Name",
+    "phone": "Phone",
+    "forgotPassword": "Forgot Password",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "emailVerification": "Email Verification",
+    "verificationSent": "Verification email sent. Please check your email.",
+    "verificationCode": "Verification Code",
+    "verify": "Verify",
+    "resendCode": "Resend Code",
+    "emailVerified": "Your email has been verified!",
+    "invalidCode": "Invalid verification code",
+    "platformSubtitle": "Pet Services Platform"
+  },
+  "home": {
+    "welcomeMessage": "Welcome, {name}"
+  },
+  "tabs": {
+    "hotel": "Pet Hotel",
+    "taxi": "Pet Taxi",
+    "pets": "Pets",
+    "cart": "Cart",
+    "invoices": "Invoices",
+    "reports": "Reports",
+    "profile": "Profile",
+    "admin": "Admin"
+  },
+  "hotel": {
+    "title": "Pet Hotel Reservation",
+    "selectRoom": "Select Room",
+    "roomDetails": "{roomName} - Reservation Details",
+    "capacity": "Capacity",
+    "price": "Price",
+    "perNight": "/night",
+    "amenities": "Amenities",
+    "checkIn": "Check-in Date",
+    "checkOut": "Check-out Date",
+    "specialRequests": "Special Requests",
+    "specialRequestsPlaceholder": "E.g: Hypoallergenic food, extra toys, etc.",
+    "nights": "Number of Nights",
+    "nightPrice": "Night Price",
+    "total": "Total",
+    "addToCart": "Add to Cart",
+    "addedToCart": "{roomName} added to cart!",
+    "selectRoomError": "Please select a room",
+    "selectDatesError": "Please select check-in and check-out dates",
+    "dateValidationError": "Check-out date must be after check-in date",
+    "pets": "pets",
+    "roomTypes": {
+      "standard": "Standard",
+      "deluxe": "Deluxe",
+      "suite": "Suite"
+    }
+  },
+  "profile": {
+    "title": "My Profile",
+    "personalInfo": "Personal Information",
+    "myReservations": "My Reservations",
+    "noReservations": "You don't have any reservations yet.",
+    "reservationType": "Reservation Type",
+    "status": "Status",
+    "totalPrice": "Total Price",
+    "createdAt": "Created At",
+    "viewDetails": "View Details",
+    "cancelReservation": "Cancel Reservation",
+    "hotelReservation": "Hotel Reservation",
+    "taxiReservation": "Taxi Reservation",
+    "statusTypes": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "reservationDetails": {
+      "room": "Room",
+      "checkIn": "Check-in",
+      "checkOut": "Check-out",
+      "nights": "Nights",
+      "pickupLocation": "Pickup Location",
+      "dropoffLocation": "Dropoff Location",
+      "scheduledDate": "Date",
+      "distance": "Distance",
+      "roundTrip": "Round Trip"
+    }
+  },
+  "payment": {
+    "title": "Payment",
+    "cardNumber": "Card Number",
+    "cardHolder": "Card Holder",
+    "expiryDate": "Expiry Date",
+    "cvv": "CVV",
+    "payNow": "Pay Now",
+    "paymentSuccess": "Payment successful! Your reservation has been created.",
+    "paymentFailed": "Payment failed. Please try again.",
+    "totalAmount": "Total Amount",
+    "processing": "Processing..."
+  },
+  "cart": {
+    "title": "My Cart",
+    "empty": "Your cart is empty",
+    "removeItem": "Remove",
+    "checkout": "Checkout",
+    "total": "Total",
+    "continueAsGuest": "Continue as Guest",
+    "loginToContinue": "Login or register to continue"
+  }
+}
+

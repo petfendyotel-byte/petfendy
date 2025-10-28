@@ -1,0 +1,137 @@
+{
+  "common": {
+    "appName": "Petfendy",
+    "appFullName": "Petfendy Evcil Hayvan Oteli Ve Köpek Eğitim Merkezi",
+    "appTagline": "Ankara'nın kedi, köpek ve evcil hayvan oteli",
+    "welcome": "Hoş geldiniz",
+    "logout": "Çıkış Yap",
+    "login": "Giriş Yap",
+    "register": "Kayıt Ol",
+    "submit": "Gönder",
+    "cancel": "İptal",
+    "save": "Kaydet",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "back": "Geri",
+    "next": "İleri",
+    "loading": "Yükleniyor...",
+    "error": "Hata",
+    "success": "Başarılı",
+    "selectLanguage": "Dil Seçin",
+    "turkish": "Türkçe",
+    "english": "English"
+  },
+  "auth": {
+    "loginTitle": "Giriş Yapın",
+    "registerTitle": "Kayıt Olun",
+    "email": "E-posta",
+    "password": "Şifre",
+    "confirmPassword": "Şifre Tekrar",
+    "name": "Ad Soyad",
+    "phone": "Telefon",
+    "forgotPassword": "Şifremi Unuttum",
+    "noAccount": "Hesabınız yok mu?",
+    "hasAccount": "Zaten hesabınız var mı?",
+    "emailVerification": "E-posta Doğrulama",
+    "verificationSent": "Doğrulama e-postası gönderildi. Lütfen e-postanızı kontrol edin.",
+    "verificationCode": "Doğrulama Kodu",
+    "verify": "Doğrula",
+    "resendCode": "Kodu Tekrar Gönder",
+    "emailVerified": "E-posta adresiniz doğrulandı!",
+    "invalidCode": "Geçersiz doğrulama kodu",
+    "platformSubtitle": "Evcil Hayvan Hizmetleri Platformu"
+  },
+  "home": {
+    "welcomeMessage": "Hoş geldiniz, {name}"
+  },
+  "tabs": {
+    "hotel": "Pet Otel",
+    "taxi": "Hayvan Taksi",
+    "pets": "Evcil Hayvanlar",
+    "cart": "Sepet",
+    "invoices": "Faturalar",
+    "reports": "Raporlar",
+    "profile": "Profil",
+    "admin": "Admin"
+  },
+  "hotel": {
+    "title": "Pet Otel Rezervasyonu",
+    "selectRoom": "Oda Seçin",
+    "roomDetails": "{roomName} - Rezervasyon Detayları",
+    "capacity": "Kapasite",
+    "price": "Fiyat",
+    "perNight": "/gece",
+    "amenities": "Olanaklar",
+    "checkIn": "Giriş Tarihi",
+    "checkOut": "Çıkış Tarihi",
+    "specialRequests": "Özel İstekler",
+    "specialRequestsPlaceholder": "Örn: Hypoallergenic mama, ek oyuncak vb.",
+    "nights": "Gece Sayısı",
+    "nightPrice": "Gece Fiyatı",
+    "total": "Toplam",
+    "addToCart": "Sepete Ekle",
+    "addedToCart": "{roomName} sepete eklendi!",
+    "selectRoomError": "Lütfen bir oda seçin",
+    "selectDatesError": "Lütfen giriş ve çıkış tarihlerini seçin",
+    "dateValidationError": "Çıkış tarihi giriş tarihinden sonra olmalıdır",
+    "pets": "evcil hayvan",
+    "roomTypes": {
+      "standard": "Standart",
+      "deluxe": "Deluxe",
+      "suite": "Suit"
+    }
+  },
+  "profile": {
+    "title": "Profilim",
+    "personalInfo": "Kişisel Bilgiler",
+    "myReservations": "Rezervasyonlarım",
+    "noReservations": "Henüz rezervasyonunuz bulunmuyor.",
+    "reservationType": "Rezervasyon Tipi",
+    "status": "Durum",
+    "totalPrice": "Toplam Fiyat",
+    "createdAt": "Oluşturulma Tarihi",
+    "viewDetails": "Detayları Gör",
+    "cancelReservation": "Rezervasyonu İptal Et",
+    "hotelReservation": "Otel Rezervasyonu",
+    "taxiReservation": "Taksi Rezervasyonu",
+    "statusTypes": {
+      "pending": "Beklemede",
+      "confirmed": "Onaylandı",
+      "completed": "Tamamlandı",
+      "cancelled": "İptal Edildi"
+    },
+    "reservationDetails": {
+      "room": "Oda",
+      "checkIn": "Giriş",
+      "checkOut": "Çıkış",
+      "nights": "Gece",
+      "pickupLocation": "Kalkış Noktası",
+      "dropoffLocation": "Varış Noktası",
+      "scheduledDate": "Tarih",
+      "distance": "Mesafe",
+      "roundTrip": "Gidiş-Dönüş"
+    }
+  },
+  "payment": {
+    "title": "Ödeme",
+    "cardNumber": "Kart Numarası",
+    "cardHolder": "Kart Sahibi",
+    "expiryDate": "Son Kullanma Tarihi",
+    "cvv": "CVV",
+    "payNow": "Şimdi Öde",
+    "paymentSuccess": "Ödeme başarılı! Rezervasyonunuz oluşturuldu.",
+    "paymentFailed": "Ödeme başarısız oldu. Lütfen tekrar deneyin.",
+    "totalAmount": "Toplam Tutar",
+    "processing": "İşleniyor..."
+  },
+  "cart": {
+    "title": "Sepetim",
+    "empty": "Sepetiniz boş",
+    "removeItem": "Kaldır",
+    "checkout": "Ödemeye Geç",
+    "total": "Toplam",
+    "continueAsGuest": "Misafir Olarak Devam Et",
+    "loginToContinue": "Devam etmek için giriş yapın veya kayıt olun"
+  }
+}
+

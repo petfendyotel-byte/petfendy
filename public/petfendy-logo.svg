@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1000">
+  <defs>
+    <style>
+      .logo-text { font-family: 'Arial Black', Arial, sans-serif; font-weight: 900; }
+    </style>
+  </defs>
+  
+  <!-- Pentagon outline (black border) -->
+  <path d="M600 100 L1000 360 L850 800 L350 800 L200 360 Z" 
+        fill="white" stroke="#000000" stroke-width="50" stroke-linejoin="round"/>
+  
+  <!-- Dog silhouette (red/orange gradient) -->
+  <path d="M580 200 Q640 200 670 230 Q690 250 700 280 Q710 310 720 340 L780 450 Q790 490 790 530 Q790 570 770 600 Q750 620 720 630 L600 630 Q560 630 530 610 Q510 590 500 560 L460 450 Q450 420 440 390 Q430 360 425 330 Q420 300 430 270 Q440 240 470 220 Q500 200 540 200 Q560 200 580 200 Z" 
+        fill="#CC3333" stroke="#FFFFFF" stroke-width="10" stroke-linejoin="round"/>
+  
+  <!-- Cat silhouette (orange) -->
+  <path d="M500 380 Q470 380 450 400 Q435 415 425 440 Q415 465 410 490 L390 560 Q385 590 390 620 Q395 645 410 660 Q425 670 445 670 L565 670 Q590 670 605 655 Q615 640 615 620 L605 560 Q600 530 590 500 Q585 475 575 450 Q565 425 550 405 Q535 390 510 385 Q505 380 500 380 Z" 
+        fill="#E67E22" stroke="#FFFFFF" stroke-width="10" stroke-linejoin="round"/>
+  
+  <!-- PETFENDY text -->
+  <text x="600" y="920" class="logo-text" font-size="140" text-anchor="middle" fill="#000000">PETFENDY</text>
+</svg>
+
