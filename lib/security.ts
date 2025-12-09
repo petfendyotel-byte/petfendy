@@ -2,9 +2,38 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-// JWT Secret - In production, use environment variable and rotate regularly
-const JWT_SECRET = process.env.JWT_SECRET || 'petfendy-jwt-secret-change-in-production';
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'petfendy-refresh-secret-change-in-production';
+// JWT Secret - MUST be set via environment variable
+// In development, generate with: openssl rand -base64 64
+const getJWTSecret = (): string => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('JWT_SECRET environment variable is required in production');
+    }
+    // Development-only fallback with warning
+    console.warn('⚠️ WARNING: Using development JWT secret. Set JWT_SECRET in .env.local');
+    return 'dev-only-jwt-secret-' + (process.env.NODE_ENV || 'development');
+  }
+  if (secret.length < 32) {
+    throw new Error('JWT_SECRET must be at least 32 characters long');
+  }
+  return secret;
+};
+
+const getJWTRefreshSecret = (): string => {
+  const secret = process.env.JWT_REFRESH_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('JWT_REFRESH_SECRET environment variable is required in production');
+    }
+    console.warn('⚠️ WARNING: Using development refresh secret. Set JWT_REFRESH_SECRET in .env.local');
+    return 'dev-only-refresh-secret-' + (process.env.NODE_ENV || 'development');
+  }
+  if (secret.length < 32) {
+    throw new Error('JWT_REFRESH_SECRET must be at least 32 characters long');
+  }
+  return secret;
+};
 
 // CSRF token generation and validation (browser-safe)
 export function generateCSRFToken(): string {
@@ -109,7 +138,7 @@ export function generateToken(userId: string, email: string, role: string = 'use
     exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24), // 24 hours
   };
 
-  return jwt.sign(payload, JWT_SECRET, { algorithm: 'HS256' });
+  return jwt.sign(payload, getJWTSecret(), { algorithm: 'HS256' });
 }
 
 // Generate refresh token (longer expiry)
@@ -121,13 +150,13 @@ export function generateRefreshToken(userId: string): string {
     exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 7), // 7 days
   };
 
-  return jwt.sign(payload, JWT_REFRESH_SECRET, { algorithm: 'HS256' });
+  return jwt.sign(payload, getJWTRefreshSecret(), { algorithm: 'HS256' });
 }
 
 // Verify JWT token
 export function verifyToken(token: string): { valid: boolean; payload?: any; error?: string } {
   try {
-    const payload = jwt.verify(token, JWT_SECRET);
+    const payload = jwt.verify(token, getJWTSecret());
     return { valid: true, payload };
   } catch (error: any) {
     if (error.name === 'TokenExpiredError') {
@@ -143,7 +172,7 @@ export function verifyToken(token: string): { valid: boolean; payload?: any; err
 // Verify refresh token
 export function verifyRefreshToken(token: string): { valid: boolean; payload?: any; error?: string } {
   try {
-    const payload = jwt.verify(token, JWT_REFRESH_SECRET);
+    const payload = jwt.verify(token, getJWTRefreshSecret());
     return { valid: true, payload };
   } catch (error: any) {
     return { valid: false, error: error.message };

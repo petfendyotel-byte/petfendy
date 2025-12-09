@@ -3,8 +3,45 @@
 
 import CryptoJS from 'crypto-js';
 
-// In production, store this in environment variables and rotate regularly
-const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_KEY || 'petfendy-secret-key-change-in-production-2025';
+/**
+ * SECURITY WARNING:
+ * - Client-side encryption is NOT secure for payment data
+ * - In production, card data should go directly to payment gateway (Stripe, Iyzico, etc.)
+ * - This is for NON-SENSITIVE data encryption only in test environment
+ *
+ * For production payment processing:
+ * 1. Use Stripe Elements / Iyzico CheckoutForm
+ * 2. Never handle raw card data on your servers
+ * 3. Tokenization must happen at payment gateway level
+ */
+
+// Get encryption key - server-side only in production
+const getEncryptionKey = (): string => {
+  // Check if we're in a browser context
+  const isBrowser = typeof window !== 'undefined';
+
+  if (process.env.NODE_ENV === 'production') {
+    if (isBrowser) {
+      throw new Error('Client-side encryption is not allowed in production. Use payment gateway tokenization.');
+    }
+    const key = process.env.ENCRYPTION_KEY;
+    if (!key) {
+      throw new Error('ENCRYPTION_KEY environment variable is required in production');
+    }
+    if (key.length < 32) {
+      throw new Error('ENCRYPTION_KEY must be at least 32 characters long');
+    }
+    return key;
+  }
+
+  // Development/Test environment
+  const key = process.env.ENCRYPTION_KEY || process.env.NEXT_PUBLIC_ENCRYPTION_KEY;
+  if (!key) {
+    console.warn('⚠️ WARNING: Using development encryption key. Set ENCRYPTION_KEY in .env.local');
+    return 'dev-only-encryption-key-not-for-production';
+  }
+  return key;
+};
 
 /**
  * Encrypt sensitive data using AES-256
@@ -12,7 +49,8 @@ const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_KEY || 'petfendy-secre
  */
 export function encryptData(data: string): string {
   try {
-    return CryptoJS.AES.encrypt(data, ENCRYPTION_KEY).toString();
+    const key = getEncryptionKey();
+    return CryptoJS.AES.encrypt(data, key).toString();
   } catch (error) {
     console.error('Encryption error:', error);
     throw new Error('Veri şifreleme başarısız');
@@ -24,7 +62,8 @@ export function encryptData(data: string): string {
  */
 export function decryptData(encryptedData: string): string {
   try {
-    const bytes = CryptoJS.AES.decrypt(encryptedData, ENCRYPTION_KEY);
+    const key = getEncryptionKey();
+    const bytes = CryptoJS.AES.decrypt(encryptedData, key);
     return bytes.toString(CryptoJS.enc.Utf8);
   } catch (error) {
     console.error('Decryption error:', error);

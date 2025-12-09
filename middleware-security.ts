@@ -7,12 +7,44 @@ import type { NextRequest } from 'next/server';
 // Rate limiting storage (in production, use Redis or database)
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
+// Allowed origins for CORS - configure via environment variable
+const getAllowedOrigins = (): string[] => {
+  const envOrigins = process.env.ALLOWED_ORIGINS;
+
+  if (envOrigins) {
+    return envOrigins.split(',').map(origin => origin.trim());
+  }
+
+  // Default allowed origins based on environment
+  if (process.env.NODE_ENV === 'production') {
+    return [
+      'https://petfendy.com',
+      'https://www.petfendy.com',
+    ];
+  }
+
+  // Development/Test environment
+  return [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://127.0.0.1:3000',
+  ];
+};
+
+// Validate origin against allowed list
+const isOriginAllowed = (origin: string | null): boolean => {
+  if (!origin) return false;
+  const allowedOrigins = getAllowedOrigins();
+  return allowedOrigins.includes(origin);
+};
+
 // Security middleware
 export function securityMiddleware(request: NextRequest) {
   const response = NextResponse.next();
+  const origin = request.headers.get('origin');
 
   // 1. Security Headers (HTTPS enforcement, XSS protection, etc.)
-  
+
   // Strict-Transport-Security: Force HTTPS for 1 year
   response.headers.set(
     'Strict-Transport-Security',
@@ -32,6 +64,7 @@ export function securityMiddleware(request: NextRequest) {
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
   // Content-Security-Policy: Prevent XSS and injection attacks
+  // TODO: Consider nonce-based CSP for production (requires Next.js 14+)
   const csp = [
     "default-src 'self'",
     "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // Next.js requires unsafe-inline/eval
@@ -43,7 +76,7 @@ export function securityMiddleware(request: NextRequest) {
     "base-uri 'self'",
     "form-action 'self'",
   ].join('; ');
-  
+
   response.headers.set('Content-Security-Policy', csp);
 
   // Permissions-Policy: Control browser features
@@ -52,10 +85,15 @@ export function securityMiddleware(request: NextRequest) {
     'camera=(), microphone=(), geolocation=(), interest-cohort=()'
   );
 
-  // 2. CORS Headers (customize based on your needs)
-  response.headers.set('Access-Control-Allow-Origin', request.headers.get('origin') || '*');
+  // 2. CORS Headers - Only allow specific origins (no wildcard!)
+  if (origin && isOriginAllowed(origin)) {
+    response.headers.set('Access-Control-Allow-Origin', origin);
+    response.headers.set('Access-Control-Allow-Credentials', 'true');
+  }
+  // If origin not allowed, don't set CORS headers (browser will block)
+
   response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-CSRF-Token');
   response.headers.set('Access-Control-Max-Age', '86400');
 
   // 3. Remove sensitive server information
