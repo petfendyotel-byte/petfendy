@@ -6,6 +6,8 @@ import { Geist, Geist_Mono } from "next/font/google"
 import "../globals.css"
 import { AuthProvider } from "@/components/auth-context"
 import { Toaster } from "@/components/ui/toaster"
+import { ThemeProvider } from "@/components/theme-provider"
+import { WhatsAppButton } from "@/components/whatsapp-button"
 
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
@@ -68,12 +70,20 @@ export default async function LocaleLayout({
   }
 
   return (
-    <html lang={locale}>
-      <body className={`font-sans antialiased`}>
-        <NextIntlClientProvider messages={messages} locale={locale}>
-          <AuthProvider>{children}</AuthProvider>
-          <Toaster />
-        </NextIntlClientProvider>
+    <html lang={locale} suppressHydrationWarning>
+      <body className={`font-sans antialiased`} suppressHydrationWarning>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <NextIntlClientProvider messages={messages} locale={locale}>
+            <AuthProvider>{children}</AuthProvider>
+            <Toaster />
+            <WhatsAppButton />
+          </NextIntlClientProvider>
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>

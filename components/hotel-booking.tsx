@@ -1,9 +1,10 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter, useParams } from "next/navigation"
 import type { HotelRoom } from "@/lib/types"
 import { mockHotelRooms } from "@/lib/mock-data"
-import { addToCart } from "@/lib/storage"
+import { setTempReservation } from "@/lib/storage"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -13,10 +14,15 @@ import { toast } from "@/components/ui/use-toast"
 
 export function HotelBooking() {
   const t = useTranslations('hotel');
+  const router = useRouter()
+  const params = useParams()
+  const locale = (params?.locale as string) || 'tr'
+  
   const [rooms] = useState<HotelRoom[]>(mockHotelRooms)
   const [selectedRoom, setSelectedRoom] = useState<HotelRoom | null>(null)
   const [checkInDate, setCheckInDate] = useState("")
   const [checkOutDate, setCheckOutDate] = useState("")
+  const [petCount, setPetCount] = useState(1)
   const [specialRequests, setSpecialRequests] = useState("")
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
@@ -25,12 +31,19 @@ export function HotelBooking() {
     if (!checkInDate || !checkOutDate) return 0
     const checkIn = new Date(checkInDate)
     const checkOut = new Date(checkOutDate)
-    return Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24))
+    const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24))
+    return nights > 0 ? nights : 0
   }
 
   const calculateTotal = (): number => {
     if (!selectedRoom) return 0
-    return selectedRoom.pricePerNight * calculateNights()
+    const nights = calculateNights()
+    const basePrice = selectedRoom.pricePerNight * nights
+
+    // İlk hayvan fiyata dahil, ek hayvanlar için %50 ücret
+    const additionalPetFee = petCount > 1 ? (selectedRoom.pricePerNight * 0.5) * (petCount - 1) * nights : 0
+
+    return basePrice + additionalPetFee
   }
 
   const handleBooking = () => {
@@ -55,38 +68,47 @@ export function HotelBooking() {
       return
     }
 
+    if (petCount < 1) {
+      setError("Lütfen en az 1 hayvan seçin")
+      return
+    }
+
+    if (petCount > selectedRoom.capacity) {
+      setError(`Bu oda en fazla ${selectedRoom.capacity} hayvan kapasitesine sahiptir`)
+      return
+    }
+
     const nights = calculateNights()
     const total = calculateTotal()
 
-    const cartItem = {
-      id: `hotel-${Date.now()}`,
-      type: "hotel" as const,
-      itemId: selectedRoom.id,
-      quantity: nights,
-      price: total,
-      details: {
-        roomName: selectedRoom.name,
-        checkInDate,
-        checkOutDate,
-        specialRequests,
-        pricePerNight: selectedRoom.pricePerNight,
-      },
+    // Create reservation data
+    const reservationData = {
+      roomId: selectedRoom.id,
+      roomName: selectedRoom.name,
+      checkInDate,
+      checkOutDate,
+      nights,
+      petCount,
+      specialRequests,
+      additionalServices: [], // No additional services in this old component
+      basePrice: total,
+      servicesTotal: 0,
+      totalPrice: total,
     }
 
-    addToCart(cartItem)
-    setSuccess(t('addedToCart', { roomName: selectedRoom.name }))
-    
+    setTempReservation(reservationData)
+
     // Show toast notification
     toast({
-      title: "✅ Sepete Eklendi!",
-      description: `${selectedRoom.name} sepetinize eklendi. Toplam: ₺${total}`,
-      duration: 3000,
+      title: "✅ Rezervasyon Hazır!",
+      description: `${selectedRoom.name} - ${petCount} hayvan, ${nights} gece. Ödeme sayfasına yönlendiriliyorsunuz...`,
+      duration: 2000,
     })
-    
-    setSelectedRoom(null)
-    setCheckInDate("")
-    setCheckOutDate("")
-    setSpecialRequests("")
+
+    // Redirect to checkout
+    setTimeout(() => {
+      router.push(`/${locale}/checkout`)
+    }, 500)
   }
 
   return (
@@ -156,6 +178,23 @@ export function HotelBooking() {
             </div>
 
             <div className="space-y-2">
+              <label className="text-sm font-medium">Hayvan Sayısı (Kapasite: {selectedRoom.capacity})</label>
+              <Input
+                type="number"
+                min="1"
+                max={selectedRoom.capacity}
+                value={petCount}
+                onChange={(e) => setPetCount(parseInt(e.target.value) || 1)}
+                placeholder="Kaç hayvan?"
+              />
+              {petCount > 1 && (
+                <p className="text-xs text-muted-foreground">
+                  İlk hayvan fiyata dahil. Ek {petCount - 1} hayvan için gecelik +₺{(selectedRoom.pricePerNight * 0.5 * (petCount - 1)).toFixed(2)} ek ücret.
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
               <label className="text-sm font-medium">{t('specialRequests')}</label>
               <Input
                 type="text"
@@ -175,15 +214,27 @@ export function HotelBooking() {
                   <span>{t('nightPrice')}:</span>
                   <span className="font-semibold">₺{selectedRoom.pricePerNight}</span>
                 </div>
+                <div className="flex justify-between">
+                  <span>Hayvan Sayısı:</span>
+                  <span className="font-semibold">{petCount}</span>
+                </div>
+                {petCount > 1 && (
+                  <div className="flex justify-between text-sm text-amber-600">
+                    <span>Ek Hayvan Ücreti ({petCount - 1} hayvan):</span>
+                    <span className="font-semibold">
+                      +₺{((selectedRoom.pricePerNight * 0.5) * (petCount - 1) * calculateNights()).toFixed(2)}
+                    </span>
+                  </div>
+                )}
                 <div className="border-t pt-2 flex justify-between text-lg font-bold">
                   <span>{t('total')}:</span>
-                  <span className="text-primary">₺{calculateTotal()}</span>
+                  <span className="text-primary">₺{calculateTotal().toFixed(2)}</span>
                 </div>
               </div>
             )}
 
             <Button onClick={handleBooking} className="w-full" size="lg">
-              {t('addToCart')}
+              Satın Al
             </Button>
           </CardContent>
         </Card>

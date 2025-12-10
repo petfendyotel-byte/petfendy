@@ -51,8 +51,9 @@ export function securityMiddleware(request: NextRequest) {
     'max-age=31536000; includeSubDomains; preload'
   );
 
-  // X-Frame-Options: Prevent clickjacking
-  response.headers.set('X-Frame-Options', 'DENY');
+  // X-Frame-Options: Allow same-origin and Google Maps iframes
+  // Note: SAMEORIGIN allows iframes from same origin, which is needed for Google Maps embed
+  response.headers.set('X-Frame-Options', 'SAMEORIGIN');
 
   // X-Content-Type-Options: Prevent MIME sniffing
   response.headers.set('X-Content-Type-Options', 'nosniff');
@@ -67,11 +68,12 @@ export function securityMiddleware(request: NextRequest) {
   // TODO: Consider nonce-based CSP for production (requires Next.js 14+)
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // Next.js requires unsafe-inline/eval
-    "style-src 'self' 'unsafe-inline'", // Tailwind requires unsafe-inline
-    "img-src 'self' data: https:",
-    "font-src 'self' data:",
-    "connect-src 'self' https:",
+    "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.google.com https://*.googleapis.com https://*.gstatic.com", // Next.js requires unsafe-inline/eval, Google Maps scripts
+    "style-src 'self' 'unsafe-inline' https://*.googleapis.com", // Tailwind requires unsafe-inline, Google Maps styles
+    "img-src 'self' data: https: https://*.google.com https://*.googleapis.com https://*.gstatic.com", // Google Maps images
+    "font-src 'self' data: https://*.googleapis.com https://*.gstatic.com", // Google Maps fonts
+    "connect-src 'self' https: https://*.google.com https://*.googleapis.com", // Google Maps API calls
+    "frame-src 'self' https://*.google.com https://www.google.com", // Allow Google Maps iframes
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",

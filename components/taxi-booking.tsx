@@ -1,26 +1,50 @@
 "use client"
 
-import { useState } from "react"
-import type { TaxiService, CityPricing } from "@/lib/types"
+import { useState, useEffect } from "react"
+import { useRouter, useParams } from "next/navigation"
+import type { TaxiService, TaxiVehicle, CityPricing } from "@/lib/types"
 import { mockTaxiServices, mockCityPricings, mockTurkishCities } from "@/lib/mock-data"
-import { addToCart } from "@/lib/storage"
 import { Button } from "@/components/ui/button"
+import { toast } from "@/components/ui/use-toast"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 export function TaxiBooking() {
+  const router = useRouter()
+  const params = useParams()
+  const locale = (params?.locale as string) || 'tr'
+  
   const [services] = useState<TaxiService[]>(mockTaxiServices)
   const [cityPricings] = useState<CityPricing[]>(mockCityPricings)
+  const [taxiVehicles, setTaxiVehicles] = useState<TaxiVehicle[]>([])
   const [selectedService, setSelectedService] = useState<TaxiService | null>(null)
+  const [selectedVehicle, setSelectedVehicle] = useState<TaxiVehicle | null>(null)
   const [fromCity, setFromCity] = useState("")
   const [toCity, setToCity] = useState("")
   const [isRoundTrip, setIsRoundTrip] = useState(false)
   const [scheduledDate, setScheduledDate] = useState("")
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+
+  // Load taxi vehicles from localStorage
+  useEffect(() => {
+    const storedVehicles = JSON.parse(localStorage.getItem("petfendy_taxi_vehicles") || "[]")
+    setTaxiVehicles(storedVehicles)
+
+    // Listen for vehicle updates
+    const handleVehiclesUpdate = () => {
+      const updated = JSON.parse(localStorage.getItem("petfendy_taxi_vehicles") || "[]")
+      setTaxiVehicles(updated)
+    }
+
+    window.addEventListener('taxiVehiclesUpdated', handleVehiclesUpdate)
+    return () => window.removeEventListener('taxiVehiclesUpdated', handleVehiclesUpdate)
+  }, [])
 
   // Calculate distance based on city pairs or use default
   const getDistance = (): number => {
@@ -54,28 +78,31 @@ export function TaxiBooking() {
 
   const calculatePrice = (): number => {
     if (!selectedService || !fromCity || !toCity) return 0
-    
+
     const distance = getDistance()
     const cityPricing = getCityPricing()
-    
+
+    // Use vehicle's pricePerKm if selected, otherwise use service's pricePerKm
+    const pricePerKm = selectedVehicle ? selectedVehicle.pricePerKm : selectedService.pricePerKm
+
     // Calculate base price: basePrice + (distance * pricePerKm)
-    let totalPrice = selectedService.basePrice + (selectedService.pricePerKm * distance)
-    
+    let totalPrice = selectedService.basePrice + (pricePerKm * distance)
+
     // Apply round trip multiplier (2x for return journey)
     if (isRoundTrip) {
       totalPrice *= 2
     }
-    
+
     // Apply city-specific additional fees
     if (cityPricing) {
       totalPrice += cityPricing.additionalFee
-      
+
       // Apply discount if available
       if (cityPricing.discount > 0) {
         totalPrice -= (totalPrice * cityPricing.discount) / 100
       }
     }
-    
+
     return totalPrice
   }
 
@@ -85,6 +112,11 @@ export function TaxiBooking() {
 
     if (!selectedService) {
       setError("Lütfen bir taksi hizmeti seçin")
+      return
+    }
+
+    if (!selectedVehicle) {
+      setError("Lütfen bir araç seçin")
       return
     }
 
@@ -101,34 +133,39 @@ export function TaxiBooking() {
     const distance = getDistance()
     const price = calculatePrice()
     const cityPricing = getCityPricing()
-    
-    const cartItem = {
-      id: `taxi-${Date.now()}`,
-      type: "taxi" as const,
-      itemId: selectedService.id,
-      quantity: 1,
-      price,
-      details: {
-        serviceName: selectedService.name,
-        pickupLocation: fromCity,
-        dropoffLocation: toCity,
-        distance,
-        scheduledDate,
-        isRoundTrip,
-        basePrice: selectedService.basePrice,
-        pricePerKm: selectedService.pricePerKm,
-        additionalFee: cityPricing?.additionalFee || 0,
-        discount: cityPricing?.discount || 0,
-      },
+
+    // Store taxi reservation temporarily
+    const taxiReservation = {
+      serviceName: selectedService.name,
+      vehicleId: selectedVehicle.id,
+      vehicleName: selectedVehicle.name,
+      vehicleType: selectedVehicle.type,
+      pickupCity: fromCity,
+      dropoffCity: toCity,
+      distance,
+      scheduledDate,
+      isRoundTrip,
+      basePrice: selectedService.basePrice,
+      pricePerKm: selectedVehicle.pricePerKm,
+      additionalFee: cityPricing?.additionalFee || 0,
+      discount: cityPricing?.discount || 0,
+      totalPrice: price,
     }
 
-    addToCart(cartItem)
-    setSuccess(`${selectedService.name} sepete eklendi!`)
-    setSelectedService(null)
-    setFromCity("")
-    setToCity("")
-    setIsRoundTrip(false)
-    setScheduledDate("")
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('petfendy_temp_taxi_reservation', JSON.stringify(taxiReservation))
+    }
+
+    toast({
+      title: "✅ Rezervasyon Hazır!",
+      description: `${selectedService.name} - ${selectedVehicle.name}. Ödeme sayfasına yönlendiriliyorsunuz...`,
+      duration: 2000,
+    })
+
+    // Redirect to checkout
+    setTimeout(() => {
+      router.push(`/${locale}/checkout`)
+    }, 500)
   }
 
   return (
@@ -222,6 +259,72 @@ export function TaxiBooking() {
               </Label>
             </div>
 
+            {/* Vehicle Selection */}
+            {fromCity && toCity && (
+              <div className="space-y-3">
+                <label className="text-sm font-medium">Araç Seçimi *</label>
+                {taxiVehicles.filter(v => v.isAvailable).length === 0 ? (
+                  <Alert>
+                    <AlertDescription>
+                      Şu anda müsait araç bulunmamaktadır. Lütfen yönetici ile iletişime geçin.
+                    </AlertDescription>
+                  </Alert>
+                ) : (
+                  <RadioGroup value={selectedVehicle?.id || ""} onValueChange={(value) => {
+                    const vehicle = taxiVehicles.find(v => v.id === value)
+                    setSelectedVehicle(vehicle || null)
+                  }}>
+                    <div className="grid gap-3">
+                      {taxiVehicles.filter(v => v.isAvailable).map((vehicle) => (
+                        <div key={vehicle.id} className="relative">
+                          <RadioGroupItem
+                            value={vehicle.id}
+                            id={vehicle.id}
+                            className="peer sr-only"
+                          />
+                          <Label
+                            htmlFor={vehicle.id}
+                            className="flex flex-col gap-2 p-4 border-2 rounded-lg cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 hover:bg-accent transition-colors"
+                          >
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="font-semibold">{vehicle.name}</span>
+                                  <Badge variant={vehicle.type === "vip" ? "default" : "secondary"}>
+                                    {vehicle.type === "vip" ? "VIP Taksi" : "Paylaşımlı Taksi"}
+                                  </Badge>
+                                </div>
+                                {vehicle.description && (
+                                  <p className="text-sm text-muted-foreground mb-2">{vehicle.description}</p>
+                                )}
+                                {vehicle.features && vehicle.features.length > 0 && (
+                                  <div className="flex flex-wrap gap-1">
+                                    {vehicle.features.map((feature, idx) => (
+                                      <Badge key={idx} variant="outline" className="text-xs">
+                                        {feature}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="text-right">
+                                <div className="text-sm font-medium text-primary">
+                                  ₺{vehicle.pricePerKm}/km
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {vehicle.capacity} kişi
+                                </div>
+                              </div>
+                            </div>
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </RadioGroup>
+                )}
+              </div>
+            )}
+
             <div className="space-y-2">
               <label className="text-sm font-medium">Tarih ve Saat</label>
               <Input type="datetime-local" value={scheduledDate} onChange={(e) => setScheduledDate(e.target.value)} />
@@ -240,9 +343,15 @@ export function TaxiBooking() {
                 <div className="flex justify-between text-sm">
                   <span>Mesafe Ücreti ({getDistance()} km):</span>
                   <span className="font-semibold">
-                    ₺{(selectedService.pricePerKm * getDistance()).toFixed(2)}
+                    ₺{((selectedVehicle ? selectedVehicle.pricePerKm : selectedService.pricePerKm) * getDistance()).toFixed(2)}
                   </span>
                 </div>
+                {selectedVehicle && (
+                  <div className="flex justify-between text-sm text-primary">
+                    <span>Seçilen Araç:</span>
+                    <span className="font-semibold">{selectedVehicle.name} (₺{selectedVehicle.pricePerKm}/km)</span>
+                  </div>
+                )}
                 {isRoundTrip && (
                   <div className="flex justify-between text-sm text-blue-600">
                     <span>Gidiş-Dönüş:</span>

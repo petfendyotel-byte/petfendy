@@ -185,3 +185,84 @@ export function generatePaymentNonce(): string {
   return CryptoJS.SHA256(combined).toString();
 }
 
+/**
+ * Encrypt payment gateway credentials (API keys, secrets)
+ */
+export function encryptPaymentCredential(credential: string): string {
+  if (!credential || credential.trim() === '') return ''
+  return encryptData(credential)
+}
+
+/**
+ * Decrypt payment gateway credentials
+ */
+export function decryptPaymentCredential(encryptedCredential: string): string {
+  if (!encryptedCredential || encryptedCredential.trim() === '') return ''
+  try {
+    return decryptData(encryptedCredential)
+  } catch {
+    return ''
+  }
+}
+
+/**
+ * Mask sensitive credentials for display (show only first 4 and last 4 chars)
+ */
+export function maskCredential(credential: string): string {
+  if (!credential || credential.length < 8) return '****'
+  return `${credential.slice(0, 4)}${'*'.repeat(credential.length - 8)}${credential.slice(-4)}`
+}
+
+/**
+ * Validate payment gateway credentials format
+ */
+export function validatePaymentCredentials(
+  provider: 'paytr' | 'paratika',
+  credentials: Record<string, string>
+): { valid: boolean; errors: string[] } {
+  const errors: string[] = []
+
+  if (provider === 'paytr') {
+    if (!credentials.merchantId || credentials.merchantId.length < 5) {
+      errors.push('PayTR Merchant ID geçersiz (minimum 5 karakter)')
+    }
+    if (!credentials.merchantKey || credentials.merchantKey.length < 10) {
+      errors.push('PayTR Merchant Key geçersiz (minimum 10 karakter)')
+    }
+    if (!credentials.merchantSalt || credentials.merchantSalt.length < 10) {
+      errors.push('PayTR Merchant Salt geçersiz (minimum 10 karakter)')
+    }
+  } else if (provider === 'paratika') {
+    if (!credentials.merchantId || credentials.merchantId.length < 5) {
+      errors.push('Paratika Merchant ID geçersiz (minimum 5 karakter)')
+    }
+    if (!credentials.merchantKey || credentials.merchantKey.length < 10) {
+      errors.push('Paratika Merchant Key geçersiz (minimum 10 karakter)')
+    }
+    if (!credentials.apiKey || credentials.apiKey.length < 10) {
+      errors.push('Paratika API Key geçersiz (minimum 10 karakter)')
+    }
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors
+  }
+}
+
+/**
+ * Sanitize URL input for payment callbacks
+ */
+export function sanitizePaymentUrl(url: string): string {
+  try {
+    const parsed = new URL(url)
+    // Only allow http and https protocols
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      return ''
+    }
+    return parsed.toString()
+  } catch {
+    return ''
+  }
+}
+

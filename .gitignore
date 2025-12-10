@@ -17,7 +17,10 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files
-.env*
+.env
+.env.local
+.env.*.local
+!.env.example
 
 # vercel
 .vercel
@@ -25,3 +28,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# uploads
+/public/uploads
+
+# IDE and editor files
+.cursor/
+.kiro/
+
+# Embedded repositories
+SuperClaude_Framework/
+my-next-app/
+
+# Windows special files
+nul

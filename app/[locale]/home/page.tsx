@@ -1,794 +1,485 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import Image from "next/image"
 import { useTranslations } from 'next-intl'
 import { Button } from "@/components/ui/button"
-import { toast } from "@/components/ui/use-toast"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { addToCart, getCart } from "@/lib/storage"
-import { mockHotelRooms, mockTaxiServices, mockTurkishCities } from "@/lib/mock-data"
-import type { HotelRoom, TaxiService } from "@/lib/types"
-import { 
-  Home, 
-  Award, 
-  Users, 
-  Calendar,
-  Star,
-  Check,
-  ShoppingCart,
-  ChevronRight,
-  PawPrint,
-  Heart,
-  Shield,
+import { Navbar } from "@/components/navbar"
+import { Footer } from "@/components/footer"
+import {
+  Home as HomeIcon,
   Car,
+  Building2,
+  Shield,
+  UserPlus,
+  Calendar,
+  CreditCard,
+  Navigation,
+  Bell,
+  Headphones,
+  Heart,
   MapPin,
-  Clock
+  Clock,
+  Instagram,
+  PawPrint,
+  Sparkles,
 } from "lucide-react"
 
 export default function HomePage() {
-  const t = useTranslations('hotel')
-  const tCommon = useTranslations('common')
+  const tHome = useTranslations('homepage')
+  const tNew = useTranslations('homepage.newHome')
   const router = useRouter()
-  
-  // Hotel states
-  const [rooms] = useState<HotelRoom[]>(mockHotelRooms)
-  const [selectedRoom, setSelectedRoom] = useState<HotelRoom | null>(null)
-  const [checkInDate, setCheckInDate] = useState("")
-  const [checkOutDate, setCheckOutDate] = useState("")
-  const [specialRequests, setSpecialRequests] = useState("")
-  
-  // Taxi states
-  const [taxiServices] = useState<TaxiService[]>(mockTaxiServices)
-  const [selectedService, setSelectedService] = useState<TaxiService | null>(null)
-  const [pickupCity, setPickupCity] = useState("")
-  const [dropoffCity, setDropoffCity] = useState("")
-  const [pickupLocation, setPickupLocation] = useState("")
-  const [dropoffLocation, setDropoffLocation] = useState("")
-  const [pickupDate, setPickupDate] = useState("")
-  const [pickupTime, setPickupTime] = useState("")
-  const [petCount, setPetCount] = useState(1)
-  
-  // Common states
-  const [showReservation, setShowReservation] = useState(false)
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
-  const [cartItemCount, setCartItemCount] = useState(0)
-  
-  // Update cart count
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const updateCount = () => {
-        setCartItemCount(getCart().length)
-      }
-      updateCount()
-      
-      window.addEventListener('cartUpdated', updateCount)
-      return () => window.removeEventListener('cartUpdated', updateCount)
-    }
-  }, [])
+  const params = useParams()
+  const locale = (params?.locale as string) || 'tr'
 
-  const stats = [
-    { icon: Users, label: "Misafir Edilen Dostlar", value: "1000+" },
-    { icon: Award, label: "Eğitim Verilen Köpek", value: "200+" },
-    { icon: Calendar, label: "Kreş ve Sosyalleşme", value: "400+" },
-  ]
-
-  const features = [
-    {
-      icon: Home,
-      title: "Kafessiz Konaklama",
-      description: "7/24 açık, konforlu ve geniş alanlar"
-    },
-    {
-      icon: Award,
-      title: "Profesyonel Eğitim",
-      description: "Temel ve ileri seviye köpek eğitimi"
-    },
-    {
-      icon: Heart,
-      title: "Özenli Bakım",
-      description: "Pet kuaför ve özel bakım hizmetleri"
-    },
-    {
-      icon: Shield,
-      title: "Güvenli Ortam",
-      description: "24 saat veteriner desteği ve güvenlik"
-    }
-  ]
-
-  const calculateNights = (): number => {
-    if (!checkInDate || !checkOutDate) return 0
-    const checkIn = new Date(checkInDate)
-    const checkOut = new Date(checkOutDate)
-    return Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24))
-  }
-
-  const calculateTotal = (): number => {
-    if (!selectedRoom) return 0
-    return selectedRoom.pricePerNight * calculateNights()
-  }
-
-  const handleReservationClick = () => {
-    setShowReservation(true)
-    setTimeout(() => {
-      document.getElementById('reservation-section')?.scrollIntoView({ behavior: 'smooth' })
-    }, 100)
-  }
-
-  const handleAddHotelToCart = () => {
-    setError("")
-    setSuccess("")
-
-    if (!selectedRoom) {
-      setError(t('selectRoomError'))
-      return
-    }
-
-    if (!checkInDate || !checkOutDate) {
-      setError(t('selectDatesError'))
-      return
-    }
-
-    const checkIn = new Date(checkInDate)
-    const checkOut = new Date(checkOutDate)
-
-    if (checkOut <= checkIn) {
-      setError(t('dateValidationError'))
-      return
-    }
-
-    const nights = calculateNights()
-    const total = calculateTotal()
-
-    const cartItem = {
-      id: `hotel-${Date.now()}`,
-      type: "hotel" as const,
-      itemId: selectedRoom.id,
-      quantity: nights,
-      price: total,
-      details: {
-        roomName: selectedRoom.name,
-        checkInDate,
-        checkOutDate,
-        specialRequests,
-        pricePerNight: selectedRoom.pricePerNight,
-      },
-    }
-
-    addToCart(cartItem)
-    setSuccess(t('addedToCart', { roomName: selectedRoom.name }))
-    
-    // Show toast notification
-    toast({
-      title: "✅ Sepete Eklendi!",
-      description: `${selectedRoom.name} sepetinize eklendi. Sepete gidip siparişi tamamlayabilirsiniz.`,
-      duration: 3000,
-    })
-  }
-
-  const calculateDistance = (): number => {
-    // Mock distance calculation - in real app, this would use a mapping service
-    if (!pickupCity || !dropoffCity) return 0
-    
-    // If same city, random distance between 5-30km
-    if (pickupCity === dropoffCity) {
-      return Math.floor(Math.random() * 25) + 5
-    }
-    
-    // If different cities, random distance between 100-600km
-    return Math.floor(Math.random() * 500) + 100
-  }
-
-  const calculateTaxiTotal = (): number => {
-    if (!selectedService) return 0
-    const distance = calculateDistance()
-    return selectedService.pricePerKm * distance
-  }
-
-  const handleAddTaxiToCart = () => {
-    setError("")
-    setSuccess("")
-
-    if (!selectedService) {
-      setError("Lütfen bir taksi servisi seçin")
-      return
-    }
-
-    if (!pickupCity || !dropoffCity) {
-      setError("Lütfen kalkış ve varış şehirlerini seçin")
-      return
-    }
-
-    if (!pickupLocation || !dropoffLocation) {
-      setError("Lütfen kalkış ve varış adreslerini girin")
-      return
-    }
-
-    if (!pickupDate || !pickupTime) {
-      setError("Lütfen tarih ve saat seçin")
-      return
-    }
-
-    const distance = calculateDistance()
-    const total = calculateTaxiTotal()
-
-    const cartItem = {
-      id: `taxi-${Date.now()}`,
-      type: "taxi" as const,
-      itemId: selectedService.id,
-      quantity: distance,
-      price: total,
-      details: {
-        serviceName: selectedService.name,
-        pickupCity,
-        dropoffCity,
-        pickupLocation,
-        dropoffLocation,
-        pickupDate,
-        pickupTime,
-        petCount,
-        distance,
-        pricePerKm: selectedService.pricePerKm,
-      },
-    }
-
-    addToCart(cartItem)
-    setSuccess(`${selectedService.name} sepetinize eklendi`)
-    
-    // Show toast notification
-    toast({
-      title: "✅ Sepete Eklendi!",
-      description: `${selectedService.name} sepetinize eklendi. Sepete gidip siparişi tamamlayabilirsiniz.`,
-      duration: 3000,
-    })
+  const scrollToReservation = () => {
+    document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header / Navigation */}
-      <header className="sticky top-0 z-50 bg-white border-b shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <Image
-              src="/petfendy-logo.svg"
-              alt="Petfendy Logo"
-              width={48}
-              height={48}
-              className="w-12 h-12"
-              priority
-            />
-            <div>
-              <h1 className="text-xl font-bold text-primary">PETFENDY</h1>
-              <p className="text-xs text-muted-foreground hidden sm:block">
-                Evcil Hayvan Oteli
-              </p>
-            </div>
-          </div>
-          
-          <div className="flex gap-2 items-center">
-            <Button 
-              variant="outline" 
-              className="gap-2"
-              onClick={() => router.push('/tr')}
-            >
-              <ShoppingCart className="w-4 h-4" />
-              <span className="hidden sm:inline">Sepet</span>
-              {cartItemCount > 0 && (
-                <Badge variant="destructive" className="ml-1">{cartItemCount}</Badge>
-              )}
-            </Button>
-            <Button onClick={() => router.push('/tr')}>
-              Giriş Yap
-            </Button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-white">
+      {/* Navbar */}
+      <Navbar locale={locale} />
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-50 to-indigo-100 py-20">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl sm:text-5xl font-bold text-primary mb-4">
-              Petfendy Evcil Hayvan Oteli Ve Köpek Eğitim Merkezi
-            </h1>
-            <p className="text-xl text-muted-foreground mb-8">
-              Ankara'nın kedi, köpek ve evcil hayvan oteli
-            </p>
-            <Button 
-              size="lg" 
-              className="gap-2"
-              onClick={handleReservationClick}
+      <section className="relative h-[700px] md:h-[800px] flex items-center justify-center overflow-hidden">
+        {/* Gradient Background Overlay */}
+        <div className="absolute inset-0 z-0 gradient-primary opacity-90"></div>
+        
+        {/* Background Image with Overlay */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=1920&h=800&fit=crop"
+            alt="Pet Hotel & Taxi"
+            fill
+            className="object-cover mix-blend-overlay"
+            priority
+          />
+        </div>
+
+        {/* Decorative Pet Icons */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <PawPrint className="absolute top-20 left-10 w-16 h-16 text-white/20 animate-float" style={{ animationDelay: '0s' }} />
+          <PawPrint className="absolute top-40 right-20 w-12 h-12 text-white/15 animate-float" style={{ animationDelay: '1s' }} />
+          <PawPrint className="absolute bottom-32 left-1/4 w-14 h-14 text-white/20 animate-float" style={{ animationDelay: '2s' }} />
+          <PawPrint className="absolute bottom-20 right-1/3 w-10 h-10 text-white/15 animate-float" style={{ animationDelay: '1.5s' }} />
+          <Sparkles className="absolute top-1/4 right-1/4 w-20 h-20 text-yellow-300/30 animate-bounce-slow" style={{ animationDelay: '0.5s' }} />
+          <Sparkles className="absolute bottom-1/3 left-1/3 w-16 h-16 text-pink-300/30 animate-bounce-slow" style={{ animationDelay: '1.2s' }} />
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 text-center text-white px-4 max-w-5xl mx-auto">
+          {/* Pet Icon Animation */}
+          <div className="flex justify-center mb-6">
+            <div className="relative">
+              <PawPrint className="w-20 h-20 md:w-24 md:h-24 text-white animate-bounce-slow" />
+              <Sparkles className="absolute -top-2 -right-2 w-8 h-8 text-yellow-300 animate-pulse" />
+            </div>
+          </div>
+
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 drop-shadow-2xl">
+            <span className="text-gradient bg-gradient-to-r from-white via-yellow-200 to-pink-200 bg-clip-text text-transparent">
+              {tNew('heroTitle')}
+            </span>
+          </h1>
+          <p className="text-xl md:text-2xl lg:text-3xl mb-10 opacity-95 font-medium drop-shadow-lg">
+            {tNew('heroSubtitle')}
+          </p>
+
+          {/* Buttons */}
+          <div className="flex flex-col sm:flex-row gap-5 justify-center items-center">
+            <Button
+              size="lg"
+              className="bg-white text-gray-900 hover:bg-gray-50 gap-3 px-8 py-6 text-lg rounded-2xl hover-scale shadow-2xl font-semibold"
+              onClick={scrollToReservation}
             >
-              Rezervasyon Yap
-              <ChevronRight className="w-4 h-4" />
+              <HomeIcon className="w-6 h-6" />
+              {tNew('hotelButton')}
+            </Button>
+            <Button
+              size="lg"
+              className="gradient-orange-pink hover:opacity-90 gap-3 px-8 py-6 text-lg rounded-2xl hover-scale shadow-2xl font-semibold text-white border-2 border-white/30"
+              onClick={scrollToReservation}
+            >
+              <Car className="w-6 h-6" />
+              {tNew('taxiButton')}
             </Button>
           </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-            {stats.map((stat, idx) => (
-              <Card key={idx} className="text-center">
-                <CardContent className="pt-6">
-                  <stat.icon className="w-12 h-12 mx-auto mb-4 text-primary" />
-                  <h3 className="text-3xl font-bold text-primary mb-2">{stat.value}</h3>
-                  <p className="text-muted-foreground">{stat.label}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">
-            Neden Petfendy?
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, idx) => (
-              <Card key={idx} className="text-center hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <feature.icon className="w-12 h-12 mx-auto mb-4 text-primary" />
-                  <CardTitle className="text-lg">{feature.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Reservation Section */}
-      {showReservation && (
-        <section id="reservation-section" className="py-20 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">
-              Rezervasyon Yapın
+      {/* Service Cards */}
+      <section id="services" className="py-20 px-4 bg-gradient-to-b from-white to-orange-50/30">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center justify-center mb-4">
+              <PawPrint className="w-12 h-12 text-orange-500 animate-bounce-slow" />
+              <Sparkles className="w-8 h-8 text-pink-500 -ml-4 animate-pulse" />
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-gradient mb-4">
+              Hizmetlerimiz
             </h2>
-
-            <Tabs defaultValue="hotel" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-8">
-                <TabsTrigger value="hotel" className="gap-2">
-                  <Home className="w-4 h-4" />
-                  Otel Rezervasyonu
-                </TabsTrigger>
-                <TabsTrigger value="taxi" className="gap-2">
-                  <Car className="w-4 h-4" />
-                  Taksi Rezervasyonu
-                </TabsTrigger>
-              </TabsList>
-
-              {/* Hotel Tab */}
-              <TabsContent value="hotel" className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  {rooms.map((room) => (
-                    <Card
-                      key={room.id}
-                      className={`cursor-pointer transition-all hover:shadow-xl ${
-                        selectedRoom?.id === room.id ? "ring-2 ring-primary shadow-lg" : ""
-                      }`}
-                      onClick={() => setSelectedRoom(room)}
-                    >
-                      <CardHeader>
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <CardTitle className="text-xl">{room.name}</CardTitle>
-                            <CardDescription>{t(`roomTypes.${room.type}`)}</CardDescription>
-                          </div>
-                          {selectedRoom?.id === room.id && (
-                            <Badge variant="default" className="gap-1">
-                              <Check className="w-3 h-3" />
-                              Seçildi
-                            </Badge>
-                          )}
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">Kapasite</span>
-                          <span className="font-semibold flex items-center gap-1">
-                            <PawPrint className="w-4 h-4" />
-                            {room.capacity} {t('pets')}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">Fiyat</span>
-                          <span className="text-2xl font-bold text-primary">
-                            ₺{room.pricePerNight}{t('perNight')}
-                          </span>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium mb-2">{t('amenities')}:</p>
-                          <ul className="text-sm space-y-1">
-                            {room.amenities.slice(0, 3).map((amenity, idx) => (
-                              <li key={idx} className="flex items-center gap-2">
-                                <Star className="w-3 h-3 text-primary fill-primary" />
-                                {amenity}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-
-                {/* Hotel Reservation Details */}
-                {selectedRoom && (
-                  <Card className="max-w-2xl mx-auto">
-                    <CardHeader>
-                      <CardTitle>{t('roomDetails', { roomName: selectedRoom.name })}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {error && (
-                        <Alert variant="destructive">
-                          <AlertDescription>{error}</AlertDescription>
-                        </Alert>
-                      )}
-                      {success && (
-                        <Alert className="border-green-200 bg-green-50">
-                          <AlertDescription className="text-green-800">{success}</AlertDescription>
-                        </Alert>
-                      )}
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium">{t('checkIn')}</label>
-                          <Input 
-                            type="date" 
-                            value={checkInDate} 
-                            onChange={(e) => setCheckInDate(e.target.value)}
-                            min={new Date().toISOString().split('T')[0]}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium">{t('checkOut')}</label>
-                          <Input 
-                            type="date" 
-                            value={checkOutDate} 
-                            onChange={(e) => setCheckOutDate(e.target.value)}
-                            min={checkInDate || new Date().toISOString().split('T')[0]}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">{t('specialRequests')}</label>
-                        <Input
-                          type="text"
-                          placeholder={t('specialRequestsPlaceholder')}
-                          value={specialRequests}
-                          onChange={(e) => setSpecialRequests(e.target.value)}
-                        />
-                      </div>
-
-                      {checkInDate && checkOutDate && (
-                        <div className="bg-primary/5 p-4 rounded-lg space-y-2">
-                          <div className="flex justify-between">
-                            <span>{t('nights')}:</span>
-                            <span className="font-semibold">{calculateNights()}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>{t('nightPrice')}:</span>
-                            <span className="font-semibold">₺{selectedRoom.pricePerNight}</span>
-                          </div>
-                          <div className="border-t pt-2 flex justify-between text-lg font-bold">
-                            <span>{t('total')}:</span>
-                            <span className="text-primary">₺{calculateTotal()}</span>
-                          </div>
-                        </div>
-                      )}
-
-                      <Button 
-                        onClick={handleAddHotelToCart} 
-                        className="w-full" 
-                        size="lg"
-                        disabled={!checkInDate || !checkOutDate}
-                      >
-                        {t('addToCart')}
-                      </Button>
-                      
-                      <p className="text-xs text-center text-muted-foreground">
-                        Rezervasyonu tamamlamak için giriş yapmanız gerekecektir
-                      </p>
-                    </CardContent>
-                  </Card>
-                )}
-              </TabsContent>
-
-              {/* Taxi Tab */}
-              <TabsContent value="taxi" className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  {taxiServices.map((service) => (
-                    <Card
-                      key={service.id}
-                      className={`cursor-pointer transition-all hover:shadow-xl ${
-                        selectedService?.id === service.id ? "ring-2 ring-primary shadow-lg" : ""
-                      }`}
-                      onClick={() => setSelectedService(service)}
-                    >
-                      <CardHeader>
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <CardTitle className="text-xl">{service.name}</CardTitle>
-                            <CardDescription>{service.description}</CardDescription>
-                          </div>
-                          {selectedService?.id === service.id && (
-                            <Badge variant="default" className="gap-1">
-                              <Check className="w-3 h-3" />
-                              Seçildi
-                            </Badge>
-                          )}
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">Kapasite</span>
-                          <span className="font-semibold flex items-center gap-1">
-                            <PawPrint className="w-4 h-4" />
-                            {service.capacity} evcil hayvan
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">Fiyat</span>
-                          <span className="text-2xl font-bold text-primary">
-                            ₺{service.pricePerKm}/km
-                          </span>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium mb-2">Özellikler:</p>
-                          <ul className="text-sm space-y-1">
-                            {service.features.slice(0, 3).map((feature, idx) => (
-                              <li key={idx} className="flex items-center gap-2">
-                                <Star className="w-3 h-3 text-primary fill-primary" />
-                                {feature}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-
-                {/* Taxi Reservation Details */}
-                {selectedService && (
-                  <Card className="max-w-2xl mx-auto">
-                    <CardHeader>
-                      <CardTitle>Taksi Rezervasyon Detayları - {selectedService.name}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {error && (
-                        <Alert variant="destructive">
-                          <AlertDescription>{error}</AlertDescription>
-                        </Alert>
-                      )}
-                      {success && (
-                        <Alert className="border-green-200 bg-green-50">
-                          <AlertDescription className="text-green-800">{success}</AlertDescription>
-                        </Alert>
-                      )}
-
-                      <div className="space-y-4">
-                        {/* City Selection */}
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium flex items-center gap-2">
-                              <MapPin className="w-4 h-4" />
-                              Kalkış Şehri
-                            </label>
-                            <Select value={pickupCity} onValueChange={setPickupCity}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Şehir seçin" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {mockTurkishCities.map((city) => (
-                                  <SelectItem key={city} value={city}>
-                                    {city}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium flex items-center gap-2">
-                              <MapPin className="w-4 h-4" />
-                              Varış Şehri
-                            </label>
-                            <Select value={dropoffCity} onValueChange={setDropoffCity}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Şehir seçin" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {mockTurkishCities.map((city) => (
-                                  <SelectItem key={city} value={city}>
-                                    {city}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-
-                        {/* Address Details */}
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium flex items-center gap-2">
-                              <MapPin className="w-4 h-4" />
-                              Kalkış Adresi
-                            </label>
-                            <Input 
-                              type="text" 
-                              placeholder="Detaylı kalkış adresi"
-                              value={pickupLocation} 
-                              onChange={(e) => setPickupLocation(e.target.value)}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium flex items-center gap-2">
-                              <MapPin className="w-4 h-4" />
-                              Varış Adresi
-                            </label>
-                            <Input 
-                              type="text" 
-                              placeholder="Detaylı varış adresi"
-                              value={dropoffLocation} 
-                              onChange={(e) => setDropoffLocation(e.target.value)}
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium flex items-center gap-2">
-                            <Calendar className="w-4 h-4" />
-                            Tarih
-                          </label>
-                          <Input 
-                            type="date" 
-                            value={pickupDate} 
-                            onChange={(e) => setPickupDate(e.target.value)}
-                            min={new Date().toISOString().split('T')[0]}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium flex items-center gap-2">
-                            <Clock className="w-4 h-4" />
-                            Saat
-                          </label>
-                          <Input 
-                            type="time" 
-                            value={pickupTime} 
-                            onChange={(e) => setPickupTime(e.target.value)}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium flex items-center gap-2">
-                          <PawPrint className="w-4 h-4" />
-                          Evcil Hayvan Sayısı
-                        </label>
-                        <Input 
-                          type="number" 
-                          min="1" 
-                          max={selectedService.capacity}
-                          value={petCount} 
-                          onChange={(e) => setPetCount(parseInt(e.target.value) || 1)}
-                        />
-                      </div>
-
-                      {pickupCity && dropoffCity && (
-                        <div className="bg-primary/5 p-4 rounded-lg space-y-2">
-                          <div className="flex justify-between">
-                            <span>Güzergah:</span>
-                            <span className="font-semibold">{pickupCity} → {dropoffCity}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>Mesafe:</span>
-                            <span className="font-semibold">{calculateDistance()} km</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>Km başına fiyat:</span>
-                            <span className="font-semibold">₺{selectedService.pricePerKm}</span>
-                          </div>
-                          <div className="border-t pt-2 flex justify-between text-lg font-bold">
-                            <span>Toplam:</span>
-                            <span className="text-primary">₺{calculateTaxiTotal()}</span>
-                          </div>
-                        </div>
-                      )}
-
-                      <Button 
-                        onClick={handleAddTaxiToCart} 
-                        className="w-full" 
-                        size="lg"
-                        disabled={!pickupCity || !dropoffCity || !pickupLocation || !dropoffLocation || !pickupDate || !pickupTime}
-                      >
-                        Sepete Ekle
-                      </Button>
-                      
-                      <p className="text-xs text-center text-muted-foreground">
-                        Rezervasyonu tamamlamak için giriş yapmanız gerekecektir
-                      </p>
-                    </CardContent>
-                  </Card>
-                )}
-              </TabsContent>
-            </Tabs>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Evcil dostlarınız için en iyi hizmetleri sunuyoruz
+            </p>
           </div>
-        </section>
-      )}
+          
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Pet Otel Card */}
+            <Card className="border-0 shadow-xl hover-scale rounded-3xl overflow-hidden group cursor-pointer bg-white">
+              <div className="gradient-orange-pink p-8 relative overflow-hidden">
+                {/* Decorative Pet Icons */}
+                <PawPrint className="absolute top-4 right-4 w-20 h-20 text-white/20 group-hover:scale-110 transition-transform duration-300" />
+                <PawPrint className="absolute bottom-4 left-4 w-16 h-16 text-white/15 group-hover:scale-110 transition-transform duration-300" />
+                
+                <div className="relative z-10">
+                  <div className="w-20 h-20 bg-white/30 backdrop-blur-sm rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                    <HomeIcon className="w-10 h-10 text-white" />
+                  </div>
+                  <CardTitle className="text-3xl text-white mb-3 font-bold drop-shadow-lg">
+                    {tNew('petHotelTitle')}
+                  </CardTitle>
+                  <CardDescription className="text-white/90 text-lg leading-relaxed">
+                    {tNew('petHotelDesc')}
+                  </CardDescription>
+                </div>
+              </div>
+              <CardContent className="p-8 bg-white">
+                <Button 
+                  className="w-full gradient-orange-pink hover:opacity-90 text-white py-6 text-lg rounded-2xl font-semibold hover-scale shadow-lg"
+                  onClick={() => router.push(`/${locale}`)}
+                >
+                  <HomeIcon className="w-5 h-5 mr-2" />
+                  {tNew('hotelButton')}
+                </Button>
+              </CardContent>
+            </Card>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-primary text-primary-foreground">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">
-            Evcil Dostunuz İçin En İyisini Seçin
-          </h2>
-          <p className="text-lg mb-8 opacity-90">
-            Kafessiz konaklama, profesyonel eğitim ve özenli bakım hizmetlerimiz ile
-            evcil dostlarınız güvende
-          </p>
-          <Button 
-            size="lg" 
-            variant="secondary"
-            onClick={handleReservationClick}
-          >
-            Hemen Rezervasyon Yap
-          </Button>
+            {/* Pet Taksi Card */}
+            <Card className="border-0 shadow-xl hover-scale rounded-3xl overflow-hidden group cursor-pointer bg-white">
+              <div className="gradient-warm p-8 relative overflow-hidden">
+                {/* Decorative Pet Icons */}
+                <PawPrint className="absolute top-4 right-4 w-20 h-20 text-white/20 group-hover:scale-110 transition-transform duration-300" />
+                <PawPrint className="absolute bottom-4 left-4 w-16 h-16 text-white/15 group-hover:scale-110 transition-transform duration-300" />
+                
+                <div className="relative z-10">
+                  <div className="w-20 h-20 bg-white/30 backdrop-blur-sm rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                    <Car className="w-10 h-10 text-white" />
+                  </div>
+                  <CardTitle className="text-3xl text-white mb-3 font-bold drop-shadow-lg">
+                    {tNew('petTaxiTitle')}
+                  </CardTitle>
+                  <CardDescription className="text-white/90 text-lg leading-relaxed">
+                    {tNew('petTaxiDesc')}
+                  </CardDescription>
+                </div>
+              </div>
+              <CardContent className="p-8 bg-white">
+                <Button 
+                  className="w-full gradient-warm hover:opacity-90 text-white py-6 text-lg rounded-2xl font-semibold hover-scale shadow-lg"
+                  onClick={() => router.push(`/${locale}`)}
+                >
+                  <Car className="w-5 h-5 mr-2" />
+                  {tNew('taxiButton')}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-            <div>
-              <h3 className="font-bold text-lg mb-4">İletişim</h3>
-              <p className="text-sm text-gray-400">
-                Şehit Hikmet Özer Cd. No:101<br />
-                Etimesgut/Ankara
-              </p>
-              <p className="text-sm text-gray-400 mt-2">
-                Tel: +90 532 307 3264<br />
-                Email: petfendyotel@gmail.com
-              </p>
-            </div>
-            <div>
-              <h3 className="font-bold text-lg mb-4">Çalışma Saatleri</h3>
-              <p className="text-sm text-gray-400">
-                Pazartesi - Pazar<br />
-                08:00 - 20:00
-              </p>
-            </div>
-            <div>
-              <h3 className="font-bold text-lg mb-4">Hizmetler</h3>
-              <ul className="text-sm text-gray-400 space-y-2">
-                <li>• Köpek Eğitimi</li>
-                <li>• Kedi - Köpek Oteli</li>
-                <li>• Pet Kuaför</li>
-                <li>• Kreş ve Sosyalleşme</li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-400">
-            © 2025 Petfendy Evcil Hayvan Oteli. Tüm hakları saklıdır.
+      {/* Security Cards */}
+      <section className="py-16 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Pet Otel Güvenliği */}
+            <Card className="border-2 hover:border-purple-300 transition-colors">
+              <CardHeader>
+                <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mb-4">
+                  <Building2 className="w-8 h-8 text-orange-600" />
+                </div>
+                <CardTitle className="text-xl">{tNew('hotelSecurityTitle')}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  {tNew('hotelSecurityDesc')}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Pet Taksi Güvenliği */}
+            <Card className="border-2 hover:border-purple-300 transition-colors">
+              <CardHeader>
+                <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-4">
+                  <Car className="w-8 h-8 text-purple-600" />
+                </div>
+                <CardTitle className="text-xl">{tNew('taxiSecurityTitle')}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  {tNew('taxiSecurityDesc')}
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
-      </footer>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-16 px-4 bg-gray-50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{tNew('howItWorksTitle')}</h2>
+            <p className="text-gray-600 text-lg">{tNew('howItWorksSubtitle')}</p>
+          </div>
+
+          <div className="grid md:grid-cols-4 gap-8">
+            {/* Step 1 */}
+            <Card className="text-center border-0 shadow-lg">
+              <CardContent className="pt-6">
+                <div className="w-16 h-16 bg-yellow-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <UserPlus className="w-8 h-8 text-orange-600" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">{tNew('step1Title')}</h3>
+                <p className="text-sm text-gray-600">
+                  {tNew('step1Desc')}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Step 2 */}
+            <Card className="text-center border-0 shadow-lg">
+              <CardContent className="pt-6">
+                <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Calendar className="w-8 h-8 text-blue-600" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">{tNew('step2Title')}</h3>
+                <p className="text-sm text-gray-600">
+                  {tNew('step2Desc')}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Step 3 */}
+            <Card className="text-center border-0 shadow-lg">
+              <CardContent className="pt-6">
+                <div className="w-16 h-16 bg-pink-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <CreditCard className="w-8 h-8 text-pink-600" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">{tNew('step3Title')}</h3>
+                <p className="text-sm text-gray-600">
+                  {tNew('step3Desc')}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Step 4 */}
+            <Card className="text-center border-0 shadow-lg">
+              <CardContent className="pt-6">
+                <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Navigation className="w-8 h-8 text-purple-600" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">{tNew('step4Title')}</h3>
+                <p className="text-sm text-gray-600">
+                  {tNew('step4Desc')}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Why Petfendy */}
+      <section className="py-16 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold">{tNew('whyPetfendyTitle')}</h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Feature 1 */}
+            <Card className="text-center border-0 shadow-lg hover:shadow-xl transition-shadow">
+              <CardContent className="pt-6">
+                <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Shield className="w-8 h-8 text-red-600" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">{tNew('feature1')}</h3>
+              </CardContent>
+            </Card>
+
+            {/* Feature 2 */}
+            <Card className="text-center border-0 shadow-lg hover:shadow-xl transition-shadow">
+              <CardContent className="pt-6">
+                <div className="w-16 h-16 bg-yellow-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Bell className="w-8 h-8 text-orange-600" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">{tNew('feature2')}</h3>
+              </CardContent>
+            </Card>
+
+            {/* Feature 3 */}
+            <Card className="text-center border-0 shadow-lg hover:shadow-xl transition-shadow">
+              <CardContent className="pt-6">
+                <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Headphones className="w-8 h-8 text-blue-600" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">{tNew('feature3')}</h3>
+              </CardContent>
+            </Card>
+
+            {/* Feature 4 */}
+            <Card className="text-center border-0 shadow-lg hover:shadow-xl transition-shadow">
+              <CardContent className="pt-6">
+                <div className="w-16 h-16 bg-pink-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Heart className="w-8 h-8 text-pink-600" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">{tNew('feature4')}</h3>
+              </CardContent>
+            </Card>
+
+            {/* Feature 5 */}
+            <Card className="text-center border-0 shadow-lg hover:shadow-xl transition-shadow">
+              <CardContent className="pt-6">
+                <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <MapPin className="w-8 h-8 text-green-600" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">{tNew('feature5')}</h3>
+              </CardContent>
+            </Card>
+
+            {/* Feature 6 */}
+            <Card className="text-center border-0 shadow-lg hover:shadow-xl transition-shadow">
+              <CardContent className="pt-6">
+                <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Clock className="w-8 h-8 text-purple-600" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">{tNew('feature6')}</h3>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Instagram Section */}
+      <section className="py-16 px-4 bg-gray-50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-8">{tNew('instagramTitle')}</h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 mb-8">
+            {/* Instagram Post 1 */}
+            <Card className="overflow-hidden border-0 shadow-lg">
+              <div className="relative h-64">
+                <Image
+                  src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&h=400&fit=crop"
+                  alt="Petfendy oyun anları"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <CardContent className="p-4">
+                <p className="text-sm text-gray-600">Petfendy oyun anları 🐾</p>
+              </CardContent>
+            </Card>
+
+            {/* Instagram Post 2 */}
+            <Card className="overflow-hidden border-0 shadow-lg">
+              <div className="relative h-64">
+                <Image
+                  src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=400&fit=crop"
+                  alt="Petfendy'de kedi ve köpek sevgisi"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <CardContent className="p-4">
+                <p className="text-sm text-gray-600">Petfendy'de kedi ve köpek sevgisi 🐱😺</p>
+              </CardContent>
+            </Card>
+
+            {/* Instagram Post 3 */}
+            <Card className="overflow-hidden border-0 shadow-lg">
+              <div className="relative h-64">
+                <Image
+                  src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=400&fit=crop"
+                  alt="Petfendy ailesiyle beraber"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <CardContent className="p-4">
+                <p className="text-sm text-gray-600">Petfendy ailesiyle beraber 🐾✨</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="text-center">
+            <Button
+              size="lg"
+              className="gradient-orange-pink hover:opacity-90 text-white font-semibold shadow-lg hover-scale rounded-2xl px-8 py-6 text-lg gap-3"
+              onClick={() => window.open('https://www.instagram.com/petfendy/', '_blank')}
+            >
+              <Instagram className="w-6 h-6" />
+              {tNew('instagramButton')}
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Safety Banner Section */}
+      <section className="py-16 px-4 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            {/* Text Content */}
+            <div className="space-y-6">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+                {tNew('safetyBannerTitle')}
+              </h2>
+              <p className="text-lg text-gray-600 leading-relaxed">
+                {tNew('safetyBannerDesc')}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button
+                  size="lg"
+                  className="gradient-warm hover:opacity-90 text-white font-semibold shadow-lg hover-scale rounded-2xl px-8 py-6 text-lg"
+                  onClick={scrollToReservation}
+                >
+                  {tNew('safetyBannerButton1')}
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-2 border-orange-400 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 font-semibold rounded-2xl px-8 py-6 text-lg"
+                  onClick={() => router.push(`/${locale}/hakkimda`)}
+                >
+                  {tNew('safetyBannerButton2')}
+                </Button>
+              </div>
+            </div>
+
+            {/* Image */}
+            <div className="relative">
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                <Image
+                  src="/images/pet-services-hero.svg"
+                  alt={tNew('safetyBannerAlt')}
+                  width={600}
+                  height={600}
+                  className="w-full h-auto"
+                  priority={false}
+                />
+              </div>
+              {/* Decorative elements */}
+              <div className="absolute -top-4 -right-4 w-24 h-24 bg-orange-200 rounded-full opacity-50 blur-xl"></div>
+              <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-purple-200 rounded-full opacity-50 blur-xl"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <Footer locale={locale} />
     </div>
   )
 }
-

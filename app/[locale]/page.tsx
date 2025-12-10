@@ -7,7 +7,6 @@ import { LoginForm } from "@/components/login-form"
 import { RegisterForm } from "@/components/register-form"
 import { HotelBooking } from "@/components/hotel-booking"
 import { TaxiBooking } from "@/components/taxi-booking"
-import { Cart } from "@/components/cart"
 import { AdminDashboard } from "@/components/admin-dashboard"
 import { PetManagement } from "@/components/pet-management"
 import { UserProfile } from "@/components/user-profile"
@@ -15,7 +14,7 @@ import { InvoiceSystem } from "@/components/invoice-system"
 import { ReportsAnalytics } from "@/components/reports-analytics"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { LogOut, ShoppingCart, LayoutDashboard, PawPrint, User, FileText, BarChart3, Globe } from "lucide-react"
+import { LogOut, LayoutDashboard, PawPrint, User, FileText, BarChart3, Globe } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,48 +23,16 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, usePathname } from 'next/navigation';
-import { getCart } from "@/lib/storage"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function Home() {
   const { user, isAuthenticated, logout, isLoading } = useAuth()
   const [showRegister, setShowRegister] = useState(false)
   const [activeTab, setActiveTab] = useState("hotel")
-  const [cartCount, setCartCount] = useState(0)
   
-  // Update cart count
+  // Auto-redirect to admin panel if admin
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const updateCartCount = () => {
-        setCartCount(getCart().length)
-      }
-      updateCartCount()
-      
-      // Listen for storage changes
-      window.addEventListener('storage', updateCartCount)
-      // Custom event for same-page cart updates
-      window.addEventListener('cartUpdated', updateCartCount)
-      
-      return () => {
-        window.removeEventListener('storage', updateCartCount)
-        window.removeEventListener('cartUpdated', updateCartCount)
-      }
-    }
-  }, [])
-  
-  // Auto-redirect to cart if user has items after login
-  useEffect(() => {
-    if (isAuthenticated && typeof window !== 'undefined') {
-      // If admin, go to admin panel
-      if (user?.role === "admin") {
-        setActiveTab("admin")
-      } else {
-        // If user has cart items, go to cart
-        const cart = getCart()
-        if (cart.length > 0) {
-          setActiveTab("cart")
-        }
-      }
+    if (isAuthenticated && user?.role === "admin") {
+      setActiveTab("admin")
     }
   }, [isAuthenticated, user?.role])
   
@@ -88,9 +55,6 @@ export default function Home() {
     )
   }
 
-  // Check if user has items in cart (coming from home page)
-  const hasCartItems = typeof window !== 'undefined' && getCart().length > 0;
-
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -98,15 +62,16 @@ export default function Home() {
           <div className="text-center mb-8">
             {/* Logo */}
             <div className="flex justify-center mb-4 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => router.push(`/${locale}/home`)}>
-              <Image
-                src="/petfendy-logo.svg"
-                alt="Petfendy Logo"
-                width={160}
-                height={160}
-                sizes="(max-width: 640px) 8rem, 10rem"
-                className="w-32 h-32 sm:w-40 sm:h-40"
-                priority
-              />
+              <div className="w-48 h-32 sm:w-56 sm:h-40">
+                <Image
+                  src="/petfendy-logo.svg"
+                  alt="Petfendy Logo"
+                  width={224}
+                  height={160}
+                  className="w-full h-full object-contain"
+                  priority
+                />
+              </div>
             </div>
             
             {/* Language Selector */}
@@ -133,14 +98,6 @@ export default function Home() {
             <p className="text-muted-foreground text-sm sm:text-base mt-2">
               {t('common.appTagline')}
             </p>
-            
-            {hasCartItems && (
-              <Alert className="mt-4">
-                <AlertDescription>
-                  Rezervasyonunuzu tamamlamak için lütfen giriş yapın veya kayıt olun
-                </AlertDescription>
-              </Alert>
-            )}
           </div>
 
           {showRegister ? (
@@ -175,18 +132,20 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             {/* Logo */}
-            <div 
+            <div
               className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => router.push(`/${locale}/home`)}
             >
-              <Image
-                src="/petfendy-logo.svg"
-                alt="Petfendy Logo"
-                width={64}
-                height={64}
-                className="h-12 w-12 sm:h-16 sm:w-16"
-                priority
-              />
+              <div className="w-16 h-12 sm:w-20 sm:h-16">
+                <Image
+                  src="/petfendy-logo.svg"
+                  alt="Petfendy Logo"
+                  width={80}
+                  height={64}
+                  className="w-full h-full object-contain"
+                  priority
+                />
+              </div>
             </div>
 
             {/* Right Side Actions */}
@@ -227,7 +186,7 @@ export default function Home() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 overflow-x-auto">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 overflow-x-auto">
             <TabsTrigger value="hotel" className="text-xs sm:text-sm">
               {t('tabs.hotel')}
             </TabsTrigger>
@@ -237,15 +196,6 @@ export default function Home() {
             <TabsTrigger value="pets" className="gap-1 text-xs sm:text-sm">
               <PawPrint className="w-3 h-3 sm:w-4 sm:h-4" />
               <span className="hidden sm:inline">{t('tabs.pets')}</span>
-            </TabsTrigger>
-            <TabsTrigger value="cart" className="gap-1 text-xs sm:text-sm relative">
-              <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4" />
-              <span className="hidden sm:inline">{t('tabs.cart')}</span>
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                  {cartCount}
-                </span>
-              )}
             </TabsTrigger>
             <TabsTrigger value="invoices" className="gap-1 text-xs sm:text-sm">
               <FileText className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -277,10 +227,6 @@ export default function Home() {
 
           <TabsContent value="pets" className="mt-6">
             <PetManagement />
-          </TabsContent>
-
-          <TabsContent value="cart" className="mt-6">
-            <Cart />
           </TabsContent>
 
           <TabsContent value="invoices" className="mt-6">

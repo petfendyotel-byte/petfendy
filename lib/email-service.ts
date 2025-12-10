@@ -1,6 +1,8 @@
 // Mock SendGrid Email Service
 // In production, replace with actual SendGrid API integration
 
+import type { EmailServiceConfig } from './types'
+
 export interface EmailTemplate {
   to: string
   subject: string
@@ -31,22 +33,67 @@ export interface BookingConfirmationData {
 }
 
 class EmailService {
-  private apiKey: string = process.env.SENDGRID_API_KEY || "mock_sendgrid_key"
-  private fromEmail: string = "noreply@petfendy.com"
-  private fromName: string = "Petfendy"
+  private config: EmailServiceConfig | null = null
 
-  async sendEmail(template: EmailTemplate): Promise<boolean> {
-    // Mock email sending
-    console.log("📧 [Email Service] Sending email...")
+  configure(config: EmailServiceConfig): void {
+    this.config = config
+  }
+
+  private async sendWithProvider(
+    provider: EmailServiceConfig['provider'],
+    apiKey: string,
+    fromEmail: string,
+    fromName: string,
+    template: EmailTemplate
+  ): Promise<boolean> {
+    // Mock email sending (placeholders for real SDKs)
+    console.log(`📧 [Email Service] Sending via ${provider}...`)
+    console.log("From:", fromName, `<${fromEmail}>`)
     console.log("To:", template.to)
     console.log("Subject:", template.subject)
     console.log("Content:", template.text || template.html)
 
     // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 500))
+    // Mock success
+    return !!apiKey
+  }
 
-    // Mock success response
-    return true
+  async sendEmail(template: EmailTemplate): Promise<boolean> {
+    // Eğer konfigürasyon yapılmadıysa mock değerlerle devam et
+    if (!this.config) {
+      return this.sendWithProvider(
+        'sendgrid',
+        process.env.SENDGRID_API_KEY || 'mock_sendgrid_key',
+        'noreply@petfendy.com',
+        'Petfendy',
+        template
+      )
+    }
+
+    const primaryOk = await this.sendWithProvider(
+      this.config.provider,
+      this.config.primaryApiKey,
+      this.config.primaryFromEmail,
+      this.config.primaryFromName,
+      template
+    )
+
+    if (primaryOk) return true
+
+    // Fallback dene
+    if (this.config.fallbackProvider && this.config.fallbackApiKey && this.config.fallbackFromEmail && this.config.fallbackFromName) {
+      console.log('[Email Service] Primary failed, trying fallback...')
+      return this.sendWithProvider(
+        this.config.fallbackProvider,
+        this.config.fallbackApiKey,
+        this.config.fallbackFromEmail,
+        this.config.fallbackFromName,
+        template
+      )
+    }
+
+    return false
   }
 
   async sendInvoiceEmail(data: InvoiceEmailData): Promise<boolean> {
@@ -287,6 +334,81 @@ Petfendy Ekibi
     return this.sendEmail({
       to: email,
       subject: "Petfendy - E-posta Doğrulama",
+      html: htmlContent,
+      text: textContent,
+    })
+  }
+
+  async sendContactFormEmail(data: {
+    name: string
+    email: string
+    phone: string
+    message: string
+  }): Promise<boolean> {
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #8B5CF6 0%, #F97316 100%); color: white; padding: 20px; text-align: center; }
+          .content { background: #f9fafb; padding: 30px; margin-top: 20px; }
+          .info-row { margin-bottom: 15px; }
+          .label { font-weight: bold; color: #666; }
+          .value { margin-top: 5px; }
+          .message-box { background: white; padding: 15px; border-left: 4px solid #8B5CF6; margin-top: 10px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🐾 Yeni İletişim Mesajı</h1>
+            <p>Petfendy İletişim Formu</p>
+          </div>
+          <div class="content">
+            <div class="info-row">
+              <div class="label">Gönderen:</div>
+              <div class="value">${data.name}</div>
+            </div>
+            <div class="info-row">
+              <div class="label">E-posta:</div>
+              <div class="value">${data.email}</div>
+            </div>
+            <div class="info-row">
+              <div class="label">Telefon:</div>
+              <div class="value">${data.phone || 'Belirtilmedi'}</div>
+            </div>
+            <div class="info-row">
+              <div class="label">Mesaj:</div>
+              <div class="message-box">${data.message}</div>
+            </div>
+            <p style="margin-top: 20px; font-size: 12px; color: #999;">
+              Bu mesaj ${new Date().toLocaleString('tr-TR')} tarihinde gönderildi.
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+
+    const textContent = `
+Yeni İletişim Mesajı - Petfendy
+
+Gönderen: ${data.name}
+E-posta: ${data.email}
+Telefon: ${data.phone || 'Belirtilmedi'}
+
+Mesaj:
+${data.message}
+
+---
+Bu mesaj ${new Date().toLocaleString('tr-TR')} tarihinde gönderildi.
+    `
+
+    return this.sendEmail({
+      to: "petfendyotel@gmail.com",
+      subject: `Yeni İletişim Mesajı - ${data.name}`,
       html: htmlContent,
       text: textContent,
     })

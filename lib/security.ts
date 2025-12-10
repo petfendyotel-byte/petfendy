@@ -1,5 +1,4 @@
 // Security utilities for Petfendy platform
-import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 // JWT Secret - MUST be set via environment variable
@@ -99,33 +98,43 @@ export function validatePhone(phone: string): boolean {
   return phoneRegex.test(phone.replace(/\s/g, ""))
 }
 
-// Password strength validation
+// Password strength validation - Minimum 12 karakter
 export function validatePassword(password: string): { valid: boolean; errors: string[] } {
   const errors: string[] = []
 
-  if (password.length < 8) errors.push("Şifre en az 8 karakter olmalıdır")
-  if (!/[A-Z]/.test(password)) errors.push("Şifre büyük harf içermelidir")
-  if (!/[a-z]/.test(password)) errors.push("Şifre küçük harf içermelidir")
+  if (password.length < 12) errors.push("Şifre en az 12 karakter olmalıdır")
+  if (!/[A-ZÇĞİÖŞÜ]/.test(password)) errors.push("Şifre büyük harf içermelidir")
+  if (!/[a-zçğıöşü]/.test(password)) errors.push("Şifre küçük harf içermelidir")
   if (!/[0-9]/.test(password)) errors.push("Şifre rakam içermelidir")
-  if (!/[!@#$%^&*]/.test(password)) errors.push("Şifre özel karakter (!@#$%^&*) içermelidir")
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) errors.push("Şifre özel karakter içermelidir")
+  
+  // Tekrar eden karakter kontrolü
+  if (/(.)\1{2,}/.test(password)) {
+    errors.push("Şifre üç veya daha fazla tekrar eden karakter içermemelidir")
+  }
 
   return { valid: errors.length === 0, errors }
 }
 
-// Secure password hashing with bcrypt (industry standard)
+const isServer = typeof window === 'undefined'
+
+// Hash/verify fonksiyonlarını runtime'da uygun ortama göre dinamik yükle
 export async function hashPassword(password: string): Promise<string> {
-  const saltRounds = 12; // Higher = more secure but slower
-  return bcrypt.hash(password, saltRounds);
+  if (isServer) {
+    const { hashPasswordServer } = await import('./security-server')
+    return hashPasswordServer(password)
+  }
+  const { hashPasswordClient } = await import('./security-client')
+  return hashPasswordClient(password)
 }
 
-// Verify password against hash
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  try {
-    return await bcrypt.compare(password, hash);
-  } catch (error) {
-    console.error('Password verification error:', error);
-    return false;
+  if (isServer) {
+    const { verifyPasswordServer } = await import('./security-server')
+    return verifyPasswordServer(password, hash)
   }
+  const { verifyPasswordClient } = await import('./security-client')
+  return verifyPasswordClient(password, hash)
 }
 
 // Generate secure JWT token
