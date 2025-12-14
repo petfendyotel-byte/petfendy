@@ -6,7 +6,6 @@ import { useState } from "react"
 import { useAuth } from "./auth-context"
 import { EmailVerification } from "./email-verification"
 import { sanitizeInput, validateEmail, validatePassword, validatePhone } from "@/lib/security"
-import { hashPassword } from "@/lib/security"
 import { setPendingUser } from "@/lib/storage"
 import { emailService } from "@/lib/email-service"
 import { Button } from "@/components/ui/button"
@@ -34,30 +33,25 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
     e.preventDefault()
     const newErrors: Record<string, string> = {}
 
-    // Validate email
     const sanitizedEmail = sanitizeInput(formData.email)
     if (!validateEmail(sanitizedEmail)) {
       newErrors.email = "Geçerli bir e-posta adresi girin"
     }
 
-    // Validate password
     const passwordValidation = validatePassword(formData.password)
     if (!passwordValidation.valid) {
       newErrors.password = passwordValidation.errors[0]
     }
 
-    // Validate password confirmation
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Şifreler eşleşmiyor"
     }
 
-    // Validate name
     const sanitizedName = sanitizeInput(formData.name)
     if (sanitizedName.length < 2) {
       newErrors.name = "Ad en az 2 karakter olmalıdır"
     }
 
-    // Validate phone
     if (!validatePhone(formData.phone)) {
       newErrors.phone = "Geçerli bir telefon numarası girin"
     }
@@ -69,19 +63,17 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
 
     setIsLoading(true)
     try {
-      // Generate verification code
       const verificationCode = Math.floor(100000 + Math.random() * 900000).toString()
       const expiry = new Date()
       expiry.setMinutes(expiry.getMinutes() + 15)
 
-      // Create pending user
-      const passwordHash = await hashPassword(formData.password)
+      // Store plain password temporarily - will be hashed when user completes verification
       const pendingUser: Partial<User> = {
         id: `user-${Date.now()}`,
         email: sanitizedEmail,
         name: sanitizedName,
         phone: formData.phone,
-        passwordHash,
+        password: formData.password, // Plain text temporarily
         role: "user",
         emailVerified: false,
         verificationCode,
@@ -90,13 +82,10 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
         updatedAt: new Date(),
       }
 
-      // Save to storage
       setPendingUser(pendingUser)
 
-      // Send verification email
       await emailService.sendVerificationEmail(sanitizedEmail, verificationCode, sanitizedName)
 
-      // Show verification screen
       setShowVerification(true)
     } catch (err) {
       setErrors({ submit: "Kayıt başarısız. Lütfen tekrar deneyin." })
