@@ -4,7 +4,7 @@ import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
 import type { User } from "@/lib/types"
 import { getCurrentUser, setCurrentUser, clearAllData, getAuthToken, setAuthToken } from "@/lib/storage"
-import { generateToken, verifyToken, verifyPassword, hashPassword } from "@/lib/security"
+import { generateToken, verifyToken } from "@/lib/security"
 
 interface AuthContextType {
   user: Partial<User> | null
@@ -17,19 +17,19 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-// Test users database - In production, this should be in a secure backend database
-// WARNING: This is for DEVELOPMENT/TEST environment only
-const TEST_USERS_DB: Map<string, { passwordHash: string; user: Partial<User> }> = new Map()
+// IMPORTANT: This is a client-side only test implementation
+// Password verification is mocked with plain text comparison
+// In production, use proper API routes with server-side password hashing
+const TEST_USERS_DB: Map<string, { password: string; user: Partial<User> }> = new Map()
 
 // Initialize test admin user only in development
 if (process.env.NODE_ENV === 'development') {
-  // Admin credentials from environment variables (set in .env.local)
   const testAdminEmail = process.env.NEXT_PUBLIC_TEST_ADMIN_EMAIL
-  const testAdminPasswordHash = process.env.NEXT_PUBLIC_TEST_ADMIN_PASSWORD_HASH
+  const testAdminPassword = process.env.NEXT_PUBLIC_TEST_ADMIN_PASSWORD
 
-  if (testAdminEmail && testAdminPasswordHash) {
+  if (testAdminEmail && testAdminPassword) {
     TEST_USERS_DB.set(testAdminEmail, {
-      passwordHash: testAdminPasswordHash,
+      password: testAdminPassword, // Plain text for dev only
       user: {
         id: 'admin-1',
         email: testAdminEmail,
@@ -65,28 +65,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     setIsLoading(true)
     try {
-      // Check if running in production without proper backend
       if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_API_URL) {
         throw new Error('Authentication backend not configured for production')
       }
 
-      // Look up user in test database
       const userRecord = TEST_USERS_DB.get(email)
 
       if (!userRecord) {
-        // Simulate timing to prevent user enumeration
         await new Promise(resolve => setTimeout(resolve, 500))
         throw new Error('Geçersiz email veya şifre')
       }
 
-      // Verify password against hash
-      const isValidPassword = await verifyPassword(password, userRecord.passwordHash)
+      // Simple comparison for dev/test only
+      const isValidPassword = password === userRecord.password
 
       if (!isValidPassword) {
         throw new Error('Geçersiz email veya şifre')
       }
 
-      // Generate secure JWT token
       const token = generateToken(
         userRecord.user.id!,
         userRecord.user.email!,
@@ -107,20 +103,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (email: string, password: string, name: string, phone: string) => {
     setIsLoading(true)
     try {
-      // Check if running in production without proper backend
       if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_API_URL) {
         throw new Error('Registration backend not configured for production')
       }
 
-      // Check if user already exists
       if (TEST_USERS_DB.has(email)) {
         throw new Error('Bu email adresi zaten kayıtlı')
       }
 
-      // Hash password securely
-      const passwordHash = await hashPassword(password)
-
-      // Create new user
       const newUser: Partial<User> = {
         id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         email,
@@ -128,15 +118,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         role: "user",
       }
 
-      // Store in test database (development only)
       if (process.env.NODE_ENV === 'development') {
         TEST_USERS_DB.set(email, {
-          passwordHash,
+          password, // Plain text for dev only
           user: newUser
         })
       }
 
-      // Generate secure JWT token
       const token = generateToken(newUser.id!, email, 'user')
 
       setAuthToken(token)

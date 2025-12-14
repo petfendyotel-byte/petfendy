@@ -118,23 +118,22 @@ export function validatePassword(password: string): { valid: boolean; errors: st
 
 const isServer = typeof window === 'undefined'
 
-// Hash/verify fonksiyonlarını runtime'da uygun ortama göre dinamik yükle
+// Note: Password hashing should ONLY be done on the server
+// These functions will throw an error if called on the client
 export async function hashPassword(password: string): Promise<string> {
-  if (isServer) {
-    const { hashPasswordServer } = await import('./security-server')
-    return hashPasswordServer(password)
+  if (!isServer) {
+    throw new Error('hashPassword can only be called on the server side')
   }
-  const { hashPasswordClient } = await import('./security-client')
-  return hashPasswordClient(password)
+  const { hashPasswordServer } = await import('./security-server')
+  return hashPasswordServer(password)
 }
 
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  if (isServer) {
-    const { verifyPasswordServer } = await import('./security-server')
-    return verifyPasswordServer(password, hash)
+  if (!isServer) {
+    throw new Error('verifyPassword can only be called on the server side')
   }
-  const { verifyPasswordClient } = await import('./security-client')
-  return verifyPasswordClient(password, hash)
+  const { verifyPasswordServer } = await import('./security-server')
+  return verifyPasswordServer(password, hash)
 }
 
 // Generate secure JWT token
