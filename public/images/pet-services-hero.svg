@@ -1,0 +1,180 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1092 1092" fill="none">
+  <!-- Pet Otel Section (Top Half) -->
+  <g id="pet-hotel">
+    <rect x="60" y="0" width="972" height="546" fill="#FFF4E6"/>
+    
+    <!-- Background elements -->
+    <rect x="100" y="40" width="872" height="466" fill="#FFE4C4" rx="8"/>
+    
+    <!-- Pet Otel Sign -->
+    <g transform="translate(140, 60)">
+      <path d="M0 20 Q0 0 20 0 L180 0 Q200 0 200 20 L200 80 Q200 100 180 100 L20 100 Q0 100 0 80 Z" fill="#D2691E"/>
+      <rect x="10" y="10" width="180" height="80" fill="#F4A460" rx="8"/>
+      <text x="100" y="60" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#8B4513" text-anchor="middle">PET OTEL</text>
+      <!-- Paw print decoration -->
+      <circle cx="40" cy="30" r="8" fill="#D2691E"/>
+      <circle cx="35" cy="45" r="5" fill="#D2691E"/>
+      <circle cx="45" cy="45" r="5" fill="#D2691E"/>
+      <circle cx="30" cy="55" r="5" fill="#D2691E"/>
+      <circle cx="50" cy="55" r="5" fill="#D2691E"/>
+    </g>
+    
+    <!-- Bed/Couch -->
+    <g transform="translate(140, 220)">
+      <ellipse cx="150" cy="180" rx="120" ry="30" fill="#FFD7A8" opacity="0.3"/>
+      <rect x="30" y="80" width="240" height="100" fill="#FF8C42" rx="20"/>
+      <rect x="40" y="70" width="220" height="90" fill="#FFB366" rx="15"/>
+      <!-- Pillow -->
+      <ellipse cx="80" cy="100" rx="40" ry="25" fill="#FFF" opacity="0.8"/>
+      <!-- Dog on bed -->
+      <g transform="translate(120, 80)">
+        <ellipse cx="0" cy="20" rx="45" ry="35" fill="#FFA500"/>
+        <circle cx="-15" cy="10" r="15" fill="#FFA500"/>
+        <ellipse cx="-20" cy="5" rx="8" ry="12" fill="#FFA500"/>
+        <ellipse cx="10" cy="5" rx="8" ry="12" fill="#FFA500"/>
+        <circle cx="-8" cy="8" r="3" fill="#000"/>
+        <circle cx="8" cy="8" r="3" fill="#000"/>
+        <path d="M -5 15 Q 0 18 5 15" stroke="#000" stroke-width="2" fill="none"/>
+        <ellipse cx="-25" cy="40" rx="8" ry="15" fill="#FFA500"/>
+        <ellipse cx="25" cy="40" rx="8" ry="15" fill="#FFA500"/>
+      </g>
+      <!-- Pet Otel Sign on stand -->
+      <rect x="10" y="140" width="60" height="40" fill="#F4A460" rx="4"/>
+      <rect x="35" y="180" width="10" height="20" fill="#8B4513"/>
+      <text x="40" y="165" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#8B4513" text-anchor="middle">PET</text>
+      <text x="40" y="178" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#8B4513" text-anchor="middle">OTEL</text>
+    </g>
+    
+    <!-- Window with play area -->
+    <g transform="translate(500, 180)">
+      <rect x="0" y="0" width="350" height="250" fill="#87CEEB" opacity="0.3" rx="8"/>
+      <rect x="10" y="10" width="330" height="230" fill="#FFF9E6" rx="8"/>
+      <!-- Vertical bars -->
+      <line x1="175" y1="10" x2="175" y2="240" stroke="#D2691E" stroke-width="8"/>
+      <line x1="10" y1="125" x2="340" y2="125" stroke="#D2691E" stroke-width="8"/>
+      
+      <!-- Play area inside -->
+      <g transform="translate(20, 140)">
+        <rect x="0" y="0" width="150" height="80" fill="#FFE4B5" rx="4"/>
+        <rect x="10" y="10" width="50" height="30" fill="#FF6347" rx="2"/>
+        <rect x="70" y="10" width="50" height="30" fill="#4169E1" rx="2"/>
+        <circle cx="140" cy="60" r="15" fill="#FFD700"/>
+      </g>
+    </g>
+    
+    <!-- Lamp -->
+    <g transform="translate(460, 80)">
+      <line x1="0" y1="0" x2="0" y2="60" stroke="#8B4513" stroke-width="4"/>
+      <path d="M -20 60 L 20 60 L 15 90 L -15 90 Z" fill="#FFD700"/>
+      <ellipse cx="0" cy="0" rx="8" ry="4" fill="#8B4513"/>
+    </g>
+    
+    <!-- Bone toy -->
+    <g transform="translate(200, 420)">
+      <ellipse cx="0" cy="0" rx="15" ry="10" fill="#F5DEB3"/>
+      <rect x="-5" y="-5" width="50" height="10" fill="#F5DEB3" rx="3"/>
+      <ellipse cx="50" cy="0" rx="15" ry="10" fill="#F5DEB3"/>
+    </g>
+    
+    <!-- Ball toy -->
+    <g transform="translate(320, 440)">
+      <circle cx="0" cy="0" r="20" fill="#FF6347"/>
+      <circle cx="-5" cy="-5" r="5" fill="#FFF" opacity="0.5"/>
+    </g>
+  </g>
+  
+  <!-- Pet Taksi Section (Bottom Half) -->
+  <g id="pet-taxi">
+    <rect x="60" y="546" width="972" height="546" fill="#FFF9E6"/>
+    
+    <!-- Road -->
+    <ellipse cx="546" cy="1000" rx="400" ry="60" fill="#696969" opacity="0.3"/>
+    
+    <!-- Taxi Car -->
+    <g transform="translate(300, 750)">
+      <!-- Shadow -->
+      <ellipse cx="230" cy="180" rx="200" ry="30" fill="#000" opacity="0.2"/>
+      
+      <!-- Car body -->
+      <rect x="50" y="80" width="360" height="100" fill="#FFD700" rx="20"/>
+      <path d="M 80 80 L 130 20 L 330 20 L 380 80 Z" fill="#FFA500"/>
+      
+      <!-- Windows -->
+      <path d="M 140 25 L 160 70 L 240 70 L 220 25 Z" fill="#87CEEB" opacity="0.6"/>
+      <path d="M 250 25 L 270 70 L 350 70 L 330 25 Z" fill="#87CEEB" opacity="0.6"/>
+      
+      <!-- Taxi sign on top -->
+      <rect x="180" y="-10" width="100" height="35" fill="#FFD700" rx="8"/>
+      <rect x="190" y="0" width="80" height="20" fill="#8B4513" rx="4"/>
+      <text x="230" y="15" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#FFD700" text-anchor="middle">PET TAKSİ</text>
+      
+      <!-- Door line -->
+      <line x1="230" y1="80" x2="230" y2="180" stroke="#FFA500" stroke-width="4"/>
+      
+      <!-- Taxi logo on door -->
+      <circle cx="320" cy="130" r="35" fill="#8B4513"/>
+      <text x="320" y="140" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#FFD700" text-anchor="middle">PET</text>
+      <text x="320" y="155" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#FFD700" text-anchor="middle">TAKSİ</text>
+      
+      <!-- Checkered pattern -->
+      <rect x="350" y="120" width="15" height="15" fill="#000"/>
+      <rect x="365" y="135" width="15" height="15" fill="#000"/>
+      <rect x="350" y="150" width="15" height="15" fill="#000"/>
+      
+      <!-- Front grill -->
+      <rect x="30" y="100" width="30" height="60" fill="#C0C0C0" rx="5"/>
+      <line x1="35" y1="110" x2="55" y2="110" stroke="#696969" stroke-width="2"/>
+      <line x1="35" y1="120" x2="55" y2="120" stroke="#696969" stroke-width="2"/>
+      <line x1="35" y1="130" x2="55" y2="130" stroke="#696969" stroke-width="2"/>
+      <line x1="35" y1="140" x2="55" y2="140" stroke="#696969" stroke-width="2"/>
+      <line x1="35" y1="150" x2="55" y2="150" stroke="#696969" stroke-width="2"/>
+      
+      <!-- Headlight -->
+      <rect x="50" y="110" width="20" height="15" fill="#FFF" rx="3"/>
+      
+      <!-- License plate -->
+      <rect x="40" y="165" width="50" height="15" fill="#FFF" rx="2"/>
+      
+      <!-- Wheels -->
+      <circle cx="120" cy="180" r="35" fill="#2F4F4F"/>
+      <circle cx="120" cy="180" r="25" fill="#696969"/>
+      <circle cx="120" cy="180" r="10" fill="#C0C0C0"/>
+      
+      <circle cx="340" cy="180" r="35" fill="#2F4F4F"/>
+      <circle cx="340" cy="180" r="25" fill="#696969"/>
+      <circle cx="340" cy="180" r="10" fill="#C0C0C0"/>
+      
+      <!-- Cat passenger -->
+      <g transform="translate(180, 50)">
+        <circle cx="0" cy="0" r="25" fill="#FFA500"/>
+        <circle cx="-10" cy="-5" r="3" fill="#000"/>
+        <circle cx="10" cy="-5" r="3" fill="#000"/>
+        <path d="M -5 5 Q 0 8 5 5" stroke="#000" stroke-width="2" fill="none"/>
+        <path d="M -20 -15 L -25 -30 L -15 -20 Z" fill="#FFA500"/>
+        <path d="M 20 -15 L 25 -30 L 15 -20 Z" fill="#FFA500"/>
+      </g>
+      
+      <!-- Dog passenger -->
+      <g transform="translate(290, 50)">
+        <circle cx="0" cy="0" r="28" fill="#8B4513"/>
+        <ellipse cx="-12" cy="-10" rx="8" ry="15" fill="#8B4513"/>
+        <ellipse cx="12" cy="-10" rx="8" ry="15" fill="#8B4513"/>
+        <circle cx="-8" cy="-2" r="3" fill="#000"/>
+        <circle cx="8" cy="-2" r="3" fill="#000"/>
+        <circle cx="0" cy="8" r="5" fill="#000"/>
+        <path d="M -5 12 Q 0 15 5 12" stroke="#000" stroke-width="2" fill="none"/>
+      </g>
+      
+      <!-- Driver (steering wheel visible) -->
+      <g transform="translate(100, 50)">
+        <circle cx="0" cy="0" r="20" fill="#FFE4C4"/>
+        <circle cx="-5" cy="-3" r="2" fill="#000"/>
+        <circle cx="5" cy="-3" r="2" fill="#000"/>
+        <path d="M -3 5 Q 0 7 3 5" stroke="#000" stroke-width="1.5" fill="none"/>
+        <!-- Steering wheel -->
+        <circle cx="0" cy="25" r="15" fill="#8B4513" fill-opacity="0.5"/>
+      </g>
+    </g>
+  </g>
+</svg>
+

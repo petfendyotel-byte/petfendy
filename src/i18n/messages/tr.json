@@ -1,0 +1,247 @@
+{
+  "common": {
+    "appName": "Petfendy",
+    "appFullName": "Petfendy Evcil Hayvan Oteli Ve Köpek Eğitim Merkezi",
+    "appTagline": "Ankara'nın kedi, köpek ve evcil hayvan oteli",
+    "welcome": "Hoş geldiniz",
+    "logout": "Çıkış Yap",
+    "login": "Giriş Yap",
+    "register": "Kayıt Ol",
+    "submit": "Gönder",
+    "cancel": "İptal",
+    "save": "Kaydet",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "back": "Geri",
+    "next": "İleri",
+    "loading": "Yükleniyor...",
+    "error": "Hata",
+    "success": "Başarılı",
+    "selectLanguage": "Dil Seçin",
+    "turkish": "Türkçe",
+    "english": "English"
+  },
+  "auth": {
+    "loginTitle": "Giriş Yapın",
+    "registerTitle": "Kayıt Olun",
+    "email": "E-posta",
+    "password": "Şifre",
+    "confirmPassword": "Şifre Tekrar",
+    "name": "Ad Soyad",
+    "phone": "Telefon",
+    "forgotPassword": "Şifremi Unuttum",
+    "noAccount": "Hesabınız yok mu?",
+    "hasAccount": "Zaten hesabınız var mı?",
+    "emailVerification": "E-posta Doğrulama",
+    "verificationSent": "Doğrulama e-postası gönderildi. Lütfen e-postanızı kontrol edin.",
+    "verificationCode": "Doğrulama Kodu",
+    "verify": "Doğrula",
+    "resendCode": "Kodu Tekrar Gönder",
+    "emailVerified": "E-posta adresiniz doğrulandı!",
+    "invalidCode": "Geçersiz doğrulama kodu",
+    "platformSubtitle": "Evcil Hayvan Hizmetleri Platformu"
+  },
+  "home": {
+    "welcomeMessage": "Hoş geldiniz, {name}"
+  },
+  "tabs": {
+    "hotel": "Pet Otel",
+    "taxi": "Hayvan Taksi",
+    "pets": "Evcil Hayvanlar",
+    "cart": "Sepet",
+    "invoices": "Faturalar",
+    "reports": "Raporlar",
+    "profile": "Profil",
+    "admin": "Admin"
+  },
+  "hotel": {
+    "title": "Pet Otel Rezervasyonu",
+    "selectRoom": "Oda Seçin",
+    "roomDetails": "{roomName} - Rezervasyon Detayları",
+    "capacity": "Kapasite",
+    "price": "Fiyat",
+    "perNight": "/gece",
+    "amenities": "Olanaklar",
+    "checkIn": "Giriş Tarihi",
+    "checkOut": "Çıkış Tarihi",
+    "specialRequests": "Özel İstekler",
+    "specialRequestsPlaceholder": "Örn: Hypoallergenic mama, ek oyuncak vb.",
+    "nights": "Gece Sayısı",
+    "nightPrice": "Gece Fiyatı",
+    "total": "Toplam",
+    "addToCart": "Sepete Ekle",
+    "addedToCart": "{roomName} sepete eklendi!",
+    "selectRoomError": "Lütfen bir oda seçin",
+    "selectDatesError": "Lütfen giriş ve çıkış tarihlerini seçin",
+    "dateValidationError": "Çıkış tarihi giriş tarihinden sonra olmalıdır",
+    "pets": "evcil hayvan",
+    "roomTypes": {
+      "standard": "Standart",
+      "deluxe": "Deluxe",
+      "suite": "Suit"
+    }
+  },
+  "profile": {
+    "title": "Profilim",
+    "personalInfo": "Kişisel Bilgiler",
+    "myReservations": "Rezervasyonlarım",
+    "noReservations": "Henüz rezervasyonunuz bulunmuyor.",
+    "reservationType": "Rezervasyon Tipi",
+    "status": "Durum",
+    "totalPrice": "Toplam Fiyat",
+    "createdAt": "Oluşturulma Tarihi",
+    "viewDetails": "Detayları Gör",
+    "cancelReservation": "Rezervasyonu İptal Et",
+    "hotelReservation": "Otel Rezervasyonu",
+    "taxiReservation": "Taksi Rezervasyonu",
+    "statusTypes": {
+      "pending": "Beklemede",
+      "confirmed": "Onaylandı",
+      "completed": "Tamamlandı",
+      "cancelled": "İptal Edildi"
+    },
+    "reservationDetails": {
+      "room": "Oda",
+      "checkIn": "Giriş",
+      "checkOut": "Çıkış",
+      "nights": "Gece",
+      "pickupLocation": "Kalkış Noktası",
+      "dropoffLocation": "Varış Noktası",
+      "scheduledDate": "Tarih",
+      "distance": "Mesafe",
+      "roundTrip": "Gidiş-Dönüş"
+    }
+  },
+  "payment": {
+    "title": "Ödeme",
+    "cardNumber": "Kart Numarası",
+    "cardHolder": "Kart Sahibi",
+    "expiryDate": "Son Kullanma Tarihi",
+    "cvv": "CVV",
+    "payNow": "Şimdi Öde",
+    "paymentSuccess": "Ödeme başarılı! Rezervasyonunuz oluşturuldu.",
+    "paymentFailed": "Ödeme başarısız oldu. Lütfen tekrar deneyin.",
+    "totalAmount": "Toplam Tutar",
+    "processing": "İşleniyor..."
+  },
+  "cart": {
+    "title": "Sepetim",
+    "empty": "Sepetiniz boş",
+    "removeItem": "Kaldır",
+    "checkout": "Ödemeye Geç",
+    "total": "Toplam",
+    "continueAsGuest": "Misafir Olarak Devam Et",
+    "loginToContinue": "Devam etmek için giriş yapın veya kayıt olun"
+  },
+  "homepage": {
+    "trustBadge": "Ankara'nın En Güvenilir Oteli",
+    "heroTitle": "Petfendy",
+    "heroSubtitle": "Evcil Hayvan Oteli",
+    "heroDescription": "Köpek eğitimi, kafessiz konaklama ve pet taksi hizmetleriyle minik dostlarınız güvende",
+    "makeReservation": "Rezervasyon Yap",
+    "cart": "Sepet",
+    "stats": {
+      "guestPets": "Misafir Edilen Dostlar",
+      "trainedDogs": "Eğitim Verilen Köpek",
+      "daycare": "Kreş ve Sosyalleşme"
+    },
+    "whyPetfendy": "Neden Petfendy?",
+    "features": {
+      "cageFree": {
+        "title": "Kafessiz Konaklama",
+        "description": "7/24 açık, konforlu ve geniş alanlar"
+      },
+      "training": {
+        "title": "Profesyonel Eğitim",
+        "description": "Temel ve ileri seviye köpek eğitimi"
+      },
+      "care": {
+        "title": "Özenli Bakım",
+        "description": "Pet kuaför ve özel bakım hizmetleri"
+      },
+      "security": {
+        "title": "Güvenli Ortam",
+        "description": "24 saat veteriner desteği ve güvenlik"
+      }
+    },
+    "reservation": {
+      "title": "Rezervasyon Yapın",
+      "hotel": "Otel Rezervasyonu",
+      "taxi": "Taksi Rezervasyonu",
+      "dateSelection": "Tarih Seçimi",
+      "dateSelectionDesc": "Önce konaklama tarihlerinizi seçin, uygun odaları görelim",
+      "availableRooms": "{count} oda seçilen tarihler için müsait",
+      "noRoomsAvailable": "Seçilen tarihler için uygun oda bulunamadı.",
+      "changeDates": "Tarihleri Değiştir",
+      "makeReservation": "Rezervasyon Yap",
+      "continueToCheckout": "Devam ederek rezervasyon ve ödeme sayfasına yönlendirileceksiniz"
+    },
+    "cta": {
+      "title": "Evcil Dostunuz İçin En İyisini Seçin",
+      "description": "Kafessiz konaklama, profesyonel eğitim ve özenli bakım hizmetlerimiz ile evcil dostlarınız güvende",
+      "button": "Hemen Rezervasyon Yap"
+    },
+    "footer": {
+      "contact": "İletişim",
+      "address": "Şehit Hikmet Özer Cd. No:101\nEtimesgut/Ankara",
+      "phone": "Tel: +90 532 307 3264",
+      "email": "Email: petfendyotel@gmail.com",
+      "workingHours": "Çalışma Saatleri",
+      "hours": "Pazartesi - Pazar\n08:00 - 20:00",
+      "services": "Hizmetler",
+      "dogTraining": "Köpek Eğitimi",
+      "petHotel": "Kedi - Köpek Oteli",
+      "petGrooming": "Pet Kuaför",
+      "daycare": "Kreş ve Sosyalleşme",
+      "copyright": "© 2025 Petfendy Evcil Hayvan Oteli. Tüm hakları saklıdır."
+    },
+    "newHome": {
+      "heroTitle": "Pet Otel & Pet Taksi",
+      "heroSubtitle": "Evcil dostlarınız için güvenli otel ve şehirler arası taksi hizmeti",
+      "hotelButton": "Otel Rezervasyonu",
+      "taxiButton": "Taksi Rezervasyonu",
+      "petHotelTitle": "Pet Otel",
+      "petHotelDesc": "Evcil dostlarınız için konforlu ve güvenli konaklama. Profesyonel bakım ekibimizle huzurlu tatil.",
+      "petTaxiTitle": "Pet Taksi",
+      "petTaxiDesc": "Şehirler arası güvenli pet taksi hizmeti. Mesafe bazlı şeffaf fiyatlandırma ile sevdiklerinizi güvenle taşıyoruz.",
+      "hotelSecurityTitle": "Pet Otel Güvenliği",
+      "hotelSecurityDesc": "24/7 gözetim, konforlu odalar ve uzman bakım ekibi ile evcil hayvanlarınız güvende",
+      "taxiSecurityTitle": "Pet Taksi Güvenliği",
+      "taxiSecurityDesc": "Düzenli bakımlı, temiz araçlar ve deneyimli şoförler ile güvenli taşıma",
+      "howItWorksTitle": "Nasıl Çalışır?",
+      "howItWorksSubtitle": "Güvenle dostunu teslim et, tatilinin tadını çıkar",
+      "step1Title": "Profil Oluştur",
+      "step1Desc": "Evcil hayvanının bilgilerini gir: isim, ırk, yaş, aşı durumu",
+      "step2Title": "Hizmet Seç",
+      "step2Desc": "Konuma göre otellere göz at, tarih ve oda seçimini yap",
+      "step3Title": "Ödeme Yap",
+      "step3Desc": "Güvenli ödeme ile rezervasyonunu tamamla",
+      "step4Title": "Takip Et",
+      "step4Desc": "Tüm süreci sana özel ekrandan güvenle takip et",
+      "whyPetfendyTitle": "Neden Petfendy?",
+      "feature1": "Güvenli Ödeme",
+      "feature2": "SMS Bildirimi",
+      "feature3": "7/24 Destek",
+      "feature4": "Profesyonel Bakım",
+      "feature5": "Mesafe Takibi",
+      "feature6": "Güvenli Taşıma",
+      "instagramTitle": "Instagram'dan Takip Edin",
+      "instagramButton": "Instagram'ı Ziyaret Edin",
+      "safetyBannerTitle": "Minik Dostlarınız Bizimle Güvende",
+      "safetyBannerDesc": "Petfendy, evcil hayvanınız için özenle seçilmiş, denetlenen ve lisanslı pet otellerini bir araya getirir. Rezervasyonunuzu hemen yapın, dostunuzun konforunu garanti altına alın!",
+      "safetyBannerButton1": "Hemen Rezervasyon Yap",
+      "safetyBannerButton2": "Daha Fazla Bilgi",
+      "safetyBannerAlt": "Pet Otel ve Pet Taksi Hizmetleri",
+      "footerSlogan": "Evcil dostlarınız için güvenilir hizmet",
+      "quickLinks": "Hızlı Linkler",
+      "help": "Yardım",
+      "faq": "Sık Sorulan Sorular",
+      "contact": "İletişim",
+      "support": "Destek",
+      "blog": "Blog",
+      "privacy": "Gizlilik",
+      "cookies": "Çerezler"
+    }
+  }
+}
+
