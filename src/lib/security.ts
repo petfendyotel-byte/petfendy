@@ -118,23 +118,9 @@ export function validatePassword(password: string): { valid: boolean; errors: st
 
 const isServer = typeof window === 'undefined'
 
-// Note: Password hashing should ONLY be done on the server
-// These functions will throw an error if called on the client
-export async function hashPassword(password: string): Promise<string> {
-  if (!isServer) {
-    throw new Error('hashPassword can only be called on the server side')
-  }
-  const { hashPasswordServer } = await import('./security-server')
-  return hashPasswordServer(password)
-}
-
-export async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  if (!isServer) {
-    throw new Error('verifyPassword can only be called on the server side')
-  }
-  const { verifyPasswordServer } = await import('./security-server')
-  return verifyPasswordServer(password, hash)
-}
+// IMPORTANT: Password hashing MUST only be done on the server
+// These functions are removed to prevent bundling issues with native modules
+// Use security-server.ts directly in API routes or server components
 
 // Generate secure JWT token
 export function generateToken(userId: string, email: string, role: string = 'user'): string {
