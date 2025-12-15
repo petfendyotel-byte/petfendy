@@ -50,42 +50,34 @@ export default async function LocaleLayout({
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
-  // Await params in Next.js 16+
   const resolvedParams = await params;
   const locale = resolvedParams?.locale || 'tr';
   
-  // Validate that the incoming `locale` parameter is valid
   if (!locales.includes(locale as any)) {
     notFound();
   }
 
-  // Load messages dynamically with error handling
   let messages;
   try {
     messages = (await import(`../../i18n/messages/${locale}.json`)).default;
   } catch (error) {
     console.error(`Failed to load messages for locale: ${locale}`, error);
-    // Fallback to Turkish
     messages = (await import(`../../i18n/messages/tr.json`)).default;
   }
 
   return (
-    <html lang={locale} suppressHydrationWarning>
-      <body className={`font-sans antialiased`} suppressHydrationWarning>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <NextIntlClientProvider messages={messages} locale={locale}>
-            <AuthProvider>{children}</AuthProvider>
-            <Toaster />
-            <WhatsAppButton />
-          </NextIntlClientProvider>
-        </ThemeProvider>
-        <Analytics />
-      </body>
-    </html>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="light"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <NextIntlClientProvider messages={messages} locale={locale}>
+        <AuthProvider>{children}</AuthProvider>
+        <Toaster />
+        <WhatsAppButton />
+      </NextIntlClientProvider>
+      <Analytics />
+    </ThemeProvider>
   )
 }
