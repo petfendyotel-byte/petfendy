@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 import path from "node:path";
 const loaderPath = require.resolve('orchids-visual-edits/loader.js');
+
+const withNextIntl = createNextIntlPlugin("./next-intl.config.ts");
 
 const nextConfig: NextConfig = {
   images: {
@@ -49,5 +52,5 @@ const nextConfig: NextConfig = {
   }
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);
 // Orchids restart: 1765827419912
