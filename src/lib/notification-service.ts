@@ -378,3 +378,27 @@ export class NotificationService {
 
 export const notificationService = new NotificationService()
 
+notificationService.addTemplate({
+  id: 'payment_success_sms_tr',
+  type: 'payment_success',
+  channel: 'sms',
+  language: 'tr',
+  body: 'Sayın {{customerName}}, Petfendy rezervasyonunuz onaylandı! {{bookingDetails}} - Toplam: ₺{{totalAmount}}. Rezervasyon tarihi: {{reservationDate}}. İyi günler dileriz!',
+  variables: ['customerName', 'bookingDetails', 'totalAmount', 'reservationDate'],
+  enabled: true,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+})
+
+notificationService.addTemplate({
+  id: 'payment_success_sms_en',
+  type: 'payment_success',
+  channel: 'sms',
+  language: 'en',
+  body: 'Dear {{customerName}}, Your Petfendy reservation is confirmed! {{bookingDetails}} - Total: ₺{{totalAmount}}. Reservation date: {{reservationDate}}. Have a great day!',
+  variables: ['customerName', 'bookingDetails', 'totalAmount', 'reservationDate'],
+  enabled: true,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+})
+
