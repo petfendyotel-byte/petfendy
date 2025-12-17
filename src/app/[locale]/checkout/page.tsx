@@ -213,13 +213,17 @@ export default function CheckoutPage() {
     return ""
   }
 
-  // If already authenticated, skip to payment
+  // If reservation has guest info, use it
   useEffect(() => {
-    if (isAuthenticated && checkoutStep === "select") {
+    if (reservation?.guestInfo) {
+      setGuestInfo(reservation.guestInfo)
+      setCheckoutStep("payment")
+      setShowPaymentModal(true)
+    } else if (isAuthenticated && checkoutStep === "select") {
       setCheckoutStep("payment")
       setShowPaymentModal(true)
     }
-  }, [isAuthenticated, checkoutStep])
+  }, [isAuthenticated, checkoutStep, reservation])
 
   if (!reservation) {
     return null // Will redirect in useEffect
