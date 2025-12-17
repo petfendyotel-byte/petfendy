@@ -147,43 +147,67 @@ export default function CheckoutPage() {
         localStorage.setItem("petfendy_guest_orders", JSON.stringify(guestOrders))
       }
 
-      // Send confirmation email and invoice
-      const customerEmail = isAuthenticated ? user?.email || "" : guestInfo.email
-      const customerName = isAuthenticated ? user?.name || "" : guestInfo.name
+        const customerEmail = isAuthenticated ? user?.email || "" : guestInfo.email
+        const customerName = isAuthenticated ? user?.name || "" : guestInfo.name
+        const customerPhone = isAuthenticated ? user?.phone || "" : guestInfo.phone
 
-      if (customerEmail && customerName) {
-        // Send booking confirmation email
-        await emailService.sendBookingConfirmationEmail({
-          customerEmail,
-          customerName,
-          bookingType: "hotel",
-          bookingDetails: `${reservation.roomName} (${reservation.nights} gece, ${reservation.petCount} hayvan)`,
-          bookingDate: new Date(),
-          totalAmount: calculateTotal()
-        })
+        if (customerEmail && customerName) {
+          try {
+            // Send booking confirmation email
+            await emailService.sendBookingConfirmationEmail({
+              customerEmail,
+              customerName,
+              bookingType: "hotel",
+              bookingDetails: `${reservation.roomName} (${reservation.nights} gece, ${reservation.petCount} hayvan)`,
+              bookingDate: new Date(),
+              totalAmount: calculateTotal()
+            })
 
-        // Send invoice email
-        const invoiceItems = [
-          {
-            name: reservation.roomName,
-            quantity: reservation.nights,
-            price: reservation.basePrice
-          },
-          ...reservation.additionalServices.map(service => ({
-            name: service.name,
-            quantity: 1,
-            price: service.price
-          }))
-        ]
+            // Send invoice email
+            const invoiceItems = [
+              {
+                name: reservation.roomName,
+                quantity: reservation.nights,
+                price: reservation.basePrice
+              },
+              ...reservation.additionalServices.map(service => ({
+                name: service.name,
+                quantity: 1,
+                price: service.price
+              }))
+            ]
 
-        await emailService.sendInvoiceEmail({
-          customerName,
-          customerEmail,
-          invoiceNumber: order.invoiceNumber,
-          totalAmount: calculateTotal(),
-          items: invoiceItems
-        })
-      }
+            await emailService.sendInvoiceEmail({
+              customerName,
+              customerEmail,
+              invoiceNumber: order.invoiceNumber,
+              totalAmount: calculateTotal(),
+              items: invoiceItems
+            })
+          } catch (error) {
+            console.error("Email notification error:", error)
+          }
+        }
+        
+        if (customerPhone) {
+          try {
+            const { notificationService } = await import("@/lib/notification-service")
+            await notificationService.sendNotification({
+              type: "payment_success",
+              channel: "sms",
+              recipient: customerPhone,
+              language: locale as 'tr' | 'en',
+              variables: {
+                customerName,
+                bookingDetails: `${reservation.roomName} - ${reservation.nights} gece`,
+                totalAmount: calculateTotal().toFixed(2),
+                reservationDate: new Date().toLocaleDateString('tr-TR')
+              }
+            })
+          } catch (error) {
+            console.error("SMS notification error:", error)
+          }
+        }
 
       clearTempReservation()
       setShowPaymentModal(false)
