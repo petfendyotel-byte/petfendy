@@ -26,6 +26,16 @@ export function HotelBooking() {
   const [specialRequests, setSpecialRequests] = useState("")
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+  
+  const [guestInfo, setGuestInfo] = useState({
+    name: "",
+    email: "",
+    phone: "",
+  })
+  
+  const [petInfo, setPetInfo] = useState<Array<{ name: string; type: string; age: number }>>([
+    { name: "", type: "dog", age: 0 }
+  ])
 
   const calculateNights = (): number => {
     if (!checkInDate || !checkOutDate) return 0
