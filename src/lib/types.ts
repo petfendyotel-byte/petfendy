@@ -25,6 +25,21 @@ export interface Pet {
   specialNeeds: string
 }
 
+export interface GuestInfo {
+  name: string
+  email: string
+  phone: string
+  address?: string
+}
+
+export interface PetInfo {
+  name: string
+  type: string
+  age: number
+  breed?: string
+  weight?: number
+}
+
 export interface HotelRoom {
   id: string
   name: string
