@@ -457,9 +457,9 @@ export default function HomePage() {
 
             {/* Image */}
             <div className="relative">
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-orange-50 to-yellow-50">
                 <Image
-                  src="/images/pet-services-hero.svg"
+                  src="/images/hero-pets.png"
                   alt={tNew('safetyBannerAlt')}
                   width={600}
                   height={600}
@@ -469,7 +469,7 @@ export default function HomePage() {
               </div>
               {/* Decorative elements */}
               <div className="absolute -top-4 -right-4 w-24 h-24 bg-orange-200 rounded-full opacity-50 blur-xl"></div>
-              <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-purple-200 rounded-full opacity-50 blur-xl"></div>
+              <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-yellow-200 rounded-full opacity-50 blur-xl"></div>
             </div>
           </div>
         </div>
