@@ -197,8 +197,6 @@ export function HotelBookingGuest() {
                 <SelectContent>
                   <SelectItem value="dog">Köpek</SelectItem>
                   <SelectItem value="cat">Kedi</SelectItem>
-                  <SelectItem value="bird">Kuş</SelectItem>
-                  <SelectItem value="rabbit">Tavşan</SelectItem>
                   <SelectItem value="other">Diğer</SelectItem>
                 </SelectContent>
               </Select>
