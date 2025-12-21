@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
 import type { TaxiService, TaxiVehicle, CityPricing } from "@/lib/types"
 import { mockTaxiServices, mockCityPricings, mockTurkishCities } from "@/lib/mock-data"
+import { setTempTaxiReservation } from "@/lib/storage"
 import { Button } from "@/components/ui/button"
 import { toast } from "@/components/ui/use-toast"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -134,7 +135,7 @@ export function TaxiBooking() {
     const price = calculatePrice()
     const cityPricing = getCityPricing()
 
-    // Store taxi reservation temporarily
+    // Store taxi reservation using storage utility
     const taxiReservation = {
       serviceName: selectedService.name,
       vehicleId: selectedVehicle.id,
@@ -152,9 +153,7 @@ export function TaxiBooking() {
       totalPrice: price,
     }
 
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('petfendy_temp_taxi_reservation', JSON.stringify(taxiReservation))
-    }
+    setTempTaxiReservation(taxiReservation)
 
     toast({
       title: "✅ Rezervasyon Hazır!",

@@ -5,6 +5,7 @@ const STORAGE_PREFIX = "petfendy_"
 const TOKEN_KEY = `${STORAGE_PREFIX}auth_token`
 const USER_KEY = `${STORAGE_PREFIX}user`
 const TEMP_RESERVATION_KEY = `${STORAGE_PREFIX}temp_reservation`
+const TEMP_TAXI_RESERVATION_KEY = `${STORAGE_PREFIX}temp_taxi_reservation`
 const PENDING_USER_KEY = `${STORAGE_PREFIX}pending_user`
 const PAGES_KEY = `${STORAGE_PREFIX}pages`
 const BLOG_POSTS_KEY = `${STORAGE_PREFIX}blog_posts`
@@ -77,6 +78,44 @@ export function getTempReservation(): HotelReservationData | null {
 export function clearTempReservation(): void {
   if (typeof window !== "undefined") {
     localStorage.removeItem(TEMP_RESERVATION_KEY)
+  }
+}
+
+// Temporary taxi reservation storage
+export interface TaxiReservationData {
+  serviceName: string
+  vehicleId: string
+  vehicleName: string
+  vehicleType: string
+  pickupCity: string
+  dropoffCity: string
+  distance: number
+  scheduledDate: string
+  isRoundTrip: boolean
+  basePrice: number
+  pricePerKm: number
+  additionalFee: number
+  discount: number
+  totalPrice: number
+}
+
+export function setTempTaxiReservation(reservation: TaxiReservationData): void {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(TEMP_TAXI_RESERVATION_KEY, JSON.stringify(reservation))
+  }
+}
+
+export function getTempTaxiReservation(): TaxiReservationData | null {
+  if (typeof window !== "undefined") {
+    const reservation = localStorage.getItem(TEMP_TAXI_RESERVATION_KEY)
+    return reservation ? JSON.parse(reservation) : null
+  }
+  return null
+}
+
+export function clearTempTaxiReservation(): void {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem(TEMP_TAXI_RESERVATION_KEY)
   }
 }
 

@@ -10,19 +10,23 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
-import { getTempReservation, clearTempReservation } from "@/lib/storage"
+import { getTempReservation, clearTempReservation, getTempTaxiReservation, clearTempTaxiReservation, type TaxiReservationData } from "@/lib/storage"
 import { useAuth } from "@/components/auth-context"
 import { PaymentModal } from "@/components/payment-modal"
 import { toast } from "@/components/ui/use-toast"
 import { emailService } from "@/lib/email-service"
 import type { HotelReservationData, Order } from "@/lib/types"
-import { ShoppingBag, User, CreditCard, CheckCircle2 } from "lucide-react"
+import { ShoppingBag, User, CreditCard, Car, Hotel } from "lucide-react"
+
+type ReservationType = "hotel" | "taxi"
 
 export default function CheckoutPage() {
   const router = useRouter()
   const { user, isAuthenticated } = useAuth()
 
-  const [reservation, setReservation] = useState<HotelReservationData | null>(null)
+  const [reservationType, setReservationType] = useState<ReservationType | null>(null)
+  const [hotelReservation, setHotelReservation] = useState<HotelReservationData | null>(null)
+  const [taxiReservation, setTaxiReservation] = useState<TaxiReservationData | null>(null)
   const [checkoutStep, setCheckoutStep] = useState<"select" | "guest-info" | "payment">("select")
   const [isLoading, setIsLoading] = useState(false)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
@@ -35,20 +39,32 @@ export default function CheckoutPage() {
   })
 
   useEffect(() => {
-    const tempReservation = getTempReservation()
-    if (!tempReservation) {
+    const tempHotelReservation = getTempReservation()
+    const tempTaxiReservation = getTempTaxiReservation()
+    
+    if (tempHotelReservation) {
+      setHotelReservation(tempHotelReservation)
+      setReservationType("hotel")
+    } else if (tempTaxiReservation) {
+      setTaxiReservation(tempTaxiReservation)
+      setReservationType("taxi")
+    } else {
       router.push('/tr/home')
       return
     }
-    setReservation(tempReservation)
   }, [router])
 
   const calculateTotal = (): number => {
-    return reservation?.totalPrice || 0
+    if (reservationType === "hotel" && hotelReservation) {
+      return hotelReservation.totalPrice || 0
+    }
+    if (reservationType === "taxi" && taxiReservation) {
+      return taxiReservation.totalPrice || 0
+    }
+    return 0
   }
 
   const handleMemberLogin = () => {
-    // Store current cart and redirect to login
     router.push('/tr')
   }
 
@@ -66,7 +82,6 @@ export default function CheckoutPage() {
       return
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(guestInfo.email)) {
       toast({
@@ -82,113 +97,155 @@ export default function CheckoutPage() {
   }
 
   const handlePaymentSuccess = async () => {
-    if (!reservation) return
-    
     setIsLoading(true)
     try {
-      const order: Order = {
-        id: `order-${Date.now()}`,
-        userId: isAuthenticated ? user?.id || "guest" : `guest-${Date.now()}`,
-        items: [{
-          id: `hotel-${Date.now()}`,
-          type: "hotel",
-          itemId: reservation.roomId,
-          quantity: reservation.nights,
-          price: reservation.totalPrice,
-          details: {
-            roomName: reservation.roomName,
-            checkInDate: reservation.checkInDate,
-            checkOutDate: reservation.checkOutDate,
-            petCount: reservation.petCount,
-            specialRequests: reservation.specialRequests,
-            additionalServices: reservation.additionalServices,
-          }
-        }],
-        totalPrice: calculateTotal(),
-        status: "paid",
-        paymentMethod: "credit_card",
-        invoiceNumber: `INV-${Date.now()}`,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+      const customerEmail = isAuthenticated ? user?.email || "" : guestInfo.email
+      const customerName = isAuthenticated ? user?.name || "" : guestInfo.name
+
+      if (reservationType === "hotel" && hotelReservation) {
+        const order: Order = {
+          id: `order-${Date.now()}`,
+          userId: isAuthenticated ? user?.id || "guest" : `guest-${Date.now()}`,
+          items: [{
+            id: `hotel-${Date.now()}`,
+            type: "hotel",
+            itemId: hotelReservation.roomId,
+            quantity: hotelReservation.nights,
+            price: hotelReservation.totalPrice,
+            details: {
+              roomName: hotelReservation.roomName,
+              checkInDate: hotelReservation.checkInDate,
+              checkOutDate: hotelReservation.checkOutDate,
+              petCount: hotelReservation.petCount,
+              specialRequests: hotelReservation.specialRequests,
+              additionalServices: hotelReservation.additionalServices,
+            }
+          }],
+          totalPrice: calculateTotal(),
+          status: "paid",
+          paymentMethod: "credit_card",
+          invoiceNumber: `INV-${Date.now()}`,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
+
+        const orders = JSON.parse(localStorage.getItem("petfendy_orders") || "[]")
+        orders.push(order)
+        localStorage.setItem("petfendy_orders", JSON.stringify(orders))
+
+        const booking = {
+          id: `booking-${Date.now()}`,
+          userId: isAuthenticated ? user?.id || null : null,
+          guestInfo: !isAuthenticated ? guestInfo : null,
+          type: "hotel" as const,
+          roomId: hotelReservation.roomId,
+          roomName: hotelReservation.roomName,
+          checkInDate: hotelReservation.checkInDate,
+          checkOutDate: hotelReservation.checkOutDate,
+          petCount: hotelReservation.petCount,
+          specialRequests: hotelReservation.specialRequests,
+          additionalServices: hotelReservation.additionalServices,
+          totalPrice: hotelReservation.totalPrice,
+          status: "confirmed" as const,
+          createdAt: new Date(),
+        }
+
+        const existingBookings = JSON.parse(localStorage.getItem("petfendy_bookings") || "[]")
+        localStorage.setItem("petfendy_bookings", JSON.stringify([...existingBookings, booking]))
+
+        if (customerEmail && customerName) {
+          await emailService.sendBookingConfirmationEmail({
+            customerEmail,
+            customerName,
+            bookingType: "hotel",
+            bookingDetails: `${hotelReservation.roomName} (${hotelReservation.nights} gece, ${hotelReservation.petCount} hayvan)`,
+            bookingDate: new Date(),
+            totalAmount: calculateTotal()
+          })
+        }
+
+        clearTempReservation()
       }
 
-      // Store order in localStorage
-      const orders = JSON.parse(localStorage.getItem("petfendy_orders") || "[]")
-      orders.push(order)
-      localStorage.setItem("petfendy_orders", JSON.stringify(orders))
+      if (reservationType === "taxi" && taxiReservation) {
+        const order: Order = {
+          id: `order-${Date.now()}`,
+          userId: isAuthenticated ? user?.id || "guest" : `guest-${Date.now()}`,
+          items: [{
+            id: `taxi-${Date.now()}`,
+            type: "taxi",
+            itemId: taxiReservation.vehicleId,
+            quantity: 1,
+            price: taxiReservation.totalPrice,
+            details: {
+              serviceName: taxiReservation.serviceName,
+              vehicleName: taxiReservation.vehicleName,
+              pickupCity: taxiReservation.pickupCity,
+              dropoffCity: taxiReservation.dropoffCity,
+              distance: taxiReservation.distance,
+              scheduledDate: taxiReservation.scheduledDate,
+              isRoundTrip: taxiReservation.isRoundTrip,
+            }
+          }],
+          totalPrice: calculateTotal(),
+          status: "paid",
+          paymentMethod: "credit_card",
+          invoiceNumber: `INV-${Date.now()}`,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
 
-      // Create booking
-      const booking = {
-        id: `booking-${Date.now()}`,
-        userId: isAuthenticated ? user?.id || null : null,
-        type: "hotel" as const,
-        roomId: reservation.roomId,
-        checkInDate: reservation.checkInDate,
-        checkOutDate: reservation.checkOutDate,
-        petCount: reservation.petCount,
-        specialRequests: reservation.specialRequests,
-        additionalServices: reservation.additionalServices,
-        totalPrice: reservation.totalPrice,
-        status: "confirmed" as const,
-        createdAt: new Date(),
+        const orders = JSON.parse(localStorage.getItem("petfendy_orders") || "[]")
+        orders.push(order)
+        localStorage.setItem("petfendy_orders", JSON.stringify(orders))
+
+        const booking = {
+          id: `booking-${Date.now()}`,
+          userId: isAuthenticated ? user?.id || null : null,
+          guestInfo: !isAuthenticated ? guestInfo : null,
+          type: "taxi" as const,
+          serviceName: taxiReservation.serviceName,
+          vehicleId: taxiReservation.vehicleId,
+          vehicleName: taxiReservation.vehicleName,
+          pickupCity: taxiReservation.pickupCity,
+          dropoffCity: taxiReservation.dropoffCity,
+          distance: taxiReservation.distance,
+          scheduledDate: taxiReservation.scheduledDate,
+          isRoundTrip: taxiReservation.isRoundTrip,
+          totalPrice: taxiReservation.totalPrice,
+          status: "confirmed" as const,
+          createdAt: new Date(),
+        }
+
+        const existingBookings = JSON.parse(localStorage.getItem("petfendy_bookings") || "[]")
+        localStorage.setItem("petfendy_bookings", JSON.stringify([...existingBookings, booking]))
+
+        if (customerEmail && customerName) {
+          await emailService.sendBookingConfirmationEmail({
+            customerEmail,
+            customerName,
+            bookingType: "taxi",
+            bookingDetails: `${taxiReservation.vehicleName} - ${taxiReservation.pickupCity} → ${taxiReservation.dropoffCity} (${taxiReservation.distance} km)`,
+            bookingDate: new Date(),
+            totalAmount: calculateTotal()
+          })
+        }
+
+        clearTempTaxiReservation()
       }
 
-      // Store booking
-      const existingBookings = JSON.parse(localStorage.getItem("petfendy_bookings") || "[]")
-      localStorage.setItem("petfendy_bookings", JSON.stringify([...existingBookings, booking]))
-
-      // Store guest info if guest checkout
       if (!isAuthenticated) {
         const guestOrders = JSON.parse(localStorage.getItem("petfendy_guest_orders") || "[]")
         guestOrders.push({
-          order,
+          type: reservationType,
           guestInfo,
+          totalPrice: calculateTotal(),
+          createdAt: new Date(),
         })
         localStorage.setItem("petfendy_guest_orders", JSON.stringify(guestOrders))
       }
 
-      // Send confirmation email and invoice
-      const customerEmail = isAuthenticated ? user?.email || "" : guestInfo.email
-      const customerName = isAuthenticated ? user?.name || "" : guestInfo.name
-
-      if (customerEmail && customerName) {
-        // Send booking confirmation email
-        await emailService.sendBookingConfirmationEmail({
-          customerEmail,
-          customerName,
-          bookingType: "hotel",
-          bookingDetails: `${reservation.roomName} (${reservation.nights} gece, ${reservation.petCount} hayvan)`,
-          bookingDate: new Date(),
-          totalAmount: calculateTotal()
-        })
-
-        // Send invoice email
-        const invoiceItems = [
-          {
-            name: reservation.roomName,
-            quantity: reservation.nights,
-            price: reservation.basePrice
-          },
-          ...reservation.additionalServices.map(service => ({
-            name: service.name,
-            quantity: 1,
-            price: service.price
-          }))
-        ]
-
-        await emailService.sendInvoiceEmail({
-          customerName,
-          customerEmail,
-          invoiceNumber: order.invoiceNumber,
-          totalAmount: calculateTotal(),
-          items: invoiceItems
-        })
-      }
-
-      clearTempReservation()
       setShowPaymentModal(false)
-
-      // Show success page
       router.push('/tr/checkout/success')
     } catch (error) {
       console.error("Payment error:", error)
@@ -213,7 +270,6 @@ export default function CheckoutPage() {
     return ""
   }
 
-  // If already authenticated, skip to payment
   useEffect(() => {
     if (isAuthenticated && checkoutStep === "select") {
       setCheckoutStep("payment")
@@ -221,13 +277,44 @@ export default function CheckoutPage() {
     }
   }, [isAuthenticated, checkoutStep])
 
-  if (!reservation) {
-    return null // Will redirect in useEffect
+  if (!reservationType) {
+    return null
+  }
+
+  const getCartItems = () => {
+    if (reservationType === "hotel" && hotelReservation) {
+      return [{
+        id: `hotel-${Date.now()}`,
+        type: "hotel" as const,
+        itemId: hotelReservation.roomId,
+        quantity: hotelReservation.nights,
+        price: hotelReservation.totalPrice,
+        details: {
+          roomName: hotelReservation.roomName,
+          checkInDate: hotelReservation.checkInDate,
+          checkOutDate: hotelReservation.checkOutDate,
+        }
+      }]
+    }
+    if (reservationType === "taxi" && taxiReservation) {
+      return [{
+        id: `taxi-${Date.now()}`,
+        type: "taxi" as const,
+        itemId: taxiReservation.vehicleId,
+        quantity: 1,
+        price: taxiReservation.totalPrice,
+        details: {
+          vehicleName: taxiReservation.vehicleName,
+          pickupCity: taxiReservation.pickupCity,
+          dropoffCity: taxiReservation.dropoffCity,
+        }
+      }]
+    }
+    return []
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <header className="sticky top-0 z-50 bg-white border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
@@ -249,16 +336,12 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          <Button
-            variant="outline"
-            onClick={() => router.push('/tr/home')}
-          >
+          <Button variant="outline" onClick={() => router.push('/tr/home')}>
             Geri Dön
           </Button>
         </div>
       </header>
 
-      {/* Progress Steps */}
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="flex items-center justify-center gap-4 mb-8">
           <div className={`flex items-center gap-2 ${checkoutStep === "select" ? "text-primary" : "text-gray-400"}`}>
@@ -287,53 +370,92 @@ export default function CheckoutPage() {
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <ShoppingBag className="w-5 h-5" />
-              Rezervasyon Özeti
+              {reservationType === "hotel" ? <Hotel className="w-5 h-5" /> : <Car className="w-5 h-5" />}
+              {reservationType === "hotel" ? "Otel Rezervasyonu" : "Taksi Rezervasyonu"}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="p-4 bg-gray-50 rounded-lg space-y-3">
-              <div>
-                <p className="font-semibold text-lg">{reservation.roomName}</p>
-                <p className="text-sm text-muted-foreground">
-                  {reservation.checkInDate} - {reservation.checkOutDate} ({reservation.nights} gece)
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                  {reservation.petCount} hayvan
-                </p>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Oda Ücreti:</span>
-                  <span className="font-medium">₺{reservation.basePrice.toFixed(2)}</span>
-                </div>
-
-                {reservation.additionalServices.length > 0 && (
-                  <>
-                    <div className="text-sm font-medium pt-2">Ek Hizmetler:</div>
-                    {reservation.additionalServices.map((service) => (
-                      <div key={service.id} className="flex justify-between text-sm pl-4">
-                        <span className="text-muted-foreground">
-                          {service.name}
-                          {service.duration && (
-                            <Badge variant="secondary" className="ml-2 text-xs">
-                              {service.duration}
-                            </Badge>
-                          )}
-                        </span>
-                        <span>₺{service.price.toFixed(2)}</span>
-                      </div>
-                    ))}
-                    <div className="flex justify-between text-sm font-medium pt-1">
-                      <span>Hizmetler Toplamı:</span>
-                      <span>₺{reservation.servicesTotal.toFixed(2)}</span>
+              {reservationType === "hotel" && hotelReservation && (
+                <>
+                  <div>
+                    <p className="font-semibold text-lg">{hotelReservation.roomName}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {hotelReservation.checkInDate} - {hotelReservation.checkOutDate} ({hotelReservation.nights} gece)
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {hotelReservation.petCount} hayvan
+                    </p>
+                  </div>
+                  <Separator />
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Oda Ücreti:</span>
+                      <span className="font-medium">₺{hotelReservation.basePrice.toFixed(2)}</span>
                     </div>
-                  </>
-                )}
-              </div>
+                    {hotelReservation.additionalServices && hotelReservation.additionalServices.length > 0 && (
+                      <>
+                        <div className="text-sm font-medium pt-2">Ek Hizmetler:</div>
+                        {hotelReservation.additionalServices.map((service: { id: string; name: string; price: number }) => (
+                          <div key={service.id} className="flex justify-between text-sm pl-4">
+                            <span className="text-muted-foreground">{service.name}</span>
+                            <span>₺{service.price.toFixed(2)}</span>
+                          </div>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {reservationType === "taxi" && taxiReservation && (
+                <>
+                  <div>
+                    <p className="font-semibold text-lg">{taxiReservation.vehicleName}</p>
+                    <Badge variant="secondary" className="mb-2">
+                      {taxiReservation.vehicleType === "vip" ? "VIP Taksi" : "Paylaşımlı Taksi"}
+                    </Badge>
+                    <p className="text-sm text-muted-foreground">
+                      {taxiReservation.pickupCity} → {taxiReservation.dropoffCity}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {taxiReservation.distance} km {taxiReservation.isRoundTrip && "(Gidiş-Dönüş)"}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Tarih: {new Date(taxiReservation.scheduledDate).toLocaleString('tr-TR')}
+                    </p>
+                  </div>
+                  <Separator />
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Başlangıç Ücreti:</span>
+                      <span className="font-medium">₺{taxiReservation.basePrice.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Mesafe Ücreti ({taxiReservation.distance} km):</span>
+                      <span className="font-medium">₺{(taxiReservation.pricePerKm * taxiReservation.distance).toFixed(2)}</span>
+                    </div>
+                    {taxiReservation.isRoundTrip && (
+                      <div className="flex justify-between text-sm text-blue-600">
+                        <span>Gidiş-Dönüş:</span>
+                        <span className="font-medium">x2</span>
+                      </div>
+                    )}
+                    {taxiReservation.additionalFee > 0 && (
+                      <div className="flex justify-between text-sm text-amber-600">
+                        <span>Ek Ücret:</span>
+                        <span className="font-medium">₺{taxiReservation.additionalFee.toFixed(2)}</span>
+                      </div>
+                    )}
+                    {taxiReservation.discount > 0 && (
+                      <div className="flex justify-between text-sm text-green-600">
+                        <span>İndirim ({taxiReservation.discount}%):</span>
+                        <span className="font-medium">-₺{((taxiReservation.totalPrice / (1 - taxiReservation.discount / 100)) * taxiReservation.discount / 100).toFixed(2)}</span>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
 
             <Separator />
@@ -471,18 +593,7 @@ export default function CheckoutPage() {
             }
           }}
           onSuccess={handlePaymentSuccess}
-          cartItems={[{
-            id: `hotel-${Date.now()}`,
-            type: "hotel",
-            itemId: reservation.roomId,
-            quantity: reservation.nights,
-            price: reservation.totalPrice,
-            details: {
-              roomName: reservation.roomName,
-              checkInDate: reservation.checkInDate,
-              checkOutDate: reservation.checkOutDate,
-            }
-          }]}
+          cartItems={getCartItems()}
           totalAmount={calculateTotal()}
           userEmail={getUserEmail()}
         />
