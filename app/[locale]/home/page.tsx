@@ -114,10 +114,10 @@ export default function HomePage() {
               <Sparkles className="w-8 h-8 text-pink-500 -ml-4 animate-pulse" />
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-gradient mb-4">
-              Hizmetlerimiz
+              {locale === 'en' ? 'Our Services' : 'Hizmetlerimiz'}
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Evcil dostlarınız için en iyi hizmetleri sunuyoruz
+              {locale === 'en' ? 'We offer the best services for your pet friends' : 'Evcil dostlarınız için en iyi hizmetleri sunuyoruz'}
             </p>
           </div>
           
