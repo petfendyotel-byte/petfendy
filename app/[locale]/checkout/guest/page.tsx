@@ -22,15 +22,16 @@ export default function GuestCheckoutPage() {
   const [showPaymentModal, setShowPaymentModal] = useState(false)
 
   useEffect(() => {
-    const hotelRes = getTempReservation()
+    // Önce taksi rezervasyonunu kontrol et (daha yeni eklenen)
     const taxiRes = getTempTaxiReservation()
+    const hotelRes = getTempReservation()
     
-    if (hotelRes) {
-      setReservation(hotelRes)
-      setReservationType("hotel")
-    } else if (taxiRes) {
+    if (taxiRes) {
       setReservation(taxiRes)
       setReservationType("taxi")
+    } else if (hotelRes) {
+      setReservation(hotelRes)
+      setReservationType("hotel")
     } else {
       router.push('/tr/home')
     }

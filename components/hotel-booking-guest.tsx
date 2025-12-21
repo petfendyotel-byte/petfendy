@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter, useParams } from "next/navigation"
 import type { HotelRoom } from "@/lib/types"
 import { mockHotelRooms } from "@/lib/mock-data"
-import { setTempReservation } from "@/lib/storage"
+import { setTempReservation, clearTempTaxiReservation } from "@/lib/storage"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -140,6 +140,9 @@ export function HotelBookingGuest() {
       totalPrice,
     }
 
+    // Eski taksi rezervasyonunu temizle
+    clearTempTaxiReservation()
+    // Yeni otel rezervasyonunu kaydet
     setTempReservation(reservationData)
 
     toast({
