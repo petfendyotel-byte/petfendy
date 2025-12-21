@@ -83,20 +83,30 @@ export function clearTempReservation(): void {
 
 // Temporary taxi reservation storage
 export interface TaxiReservationData {
-  serviceName: string
-  vehicleId: string
+  vehicleType: "vip" | "shared"
   vehicleName: string
-  vehicleType: string
-  pickupCity: string
-  dropoffCity: string
+  pickupProvince: string
+  pickupDistrict: string
+  pickupAddress?: string
+  dropoffProvince: string
+  dropoffDistrict: string
+  dropoffAddress?: string
   distance: number
-  scheduledDate: string
-  isRoundTrip: boolean
-  basePrice: number
   pricePerKm: number
-  additionalFee: number
-  discount: number
+  scheduledDate: string
   totalPrice: number
+  petInfo?: {
+    name: string
+    type: string
+    breed: string
+    weight?: number | null
+  }
+  guestInfo?: {
+    name: string
+    phone: string
+    email: string
+  }
+  specialNotes?: string
 }
 
 export function setTempTaxiReservation(reservation: TaxiReservationData): void {

@@ -133,6 +133,12 @@ export function AdminDashboard() {
     pricePerNight: 0,
   })
 
+  // Taksi km fiyat ayarları
+  const [taxiPrices, setTaxiPrices] = useState({
+    vipPricePerKm: 15,
+    sharedPricePerKm: 8
+  })
+
   const [newGateway, setNewGateway] = useState<{
     provider: "paytr" | "paratika"
     name: string
@@ -180,6 +186,12 @@ export function AdminDashboard() {
     setRoomPricings(storedRoomPricings)
     setPaymentGateways(storedGateways)
 
+    // Taksi fiyatlarını yükle
+    const storedTaxiPrices = localStorage.getItem("petfendy_taxi_prices")
+    if (storedTaxiPrices) {
+      setTaxiPrices(JSON.parse(storedTaxiPrices))
+    }
+
     if (storedAbout) {
       setAboutPage(JSON.parse(storedAbout))
     } else {
@@ -219,6 +231,15 @@ export function AdminDashboard() {
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new Event('taxiVehiclesUpdated'))
     }
+  }
+
+  // Taksi km fiyatlarını kaydet
+  const saveTaxiPrices = () => {
+    localStorage.setItem("petfendy_taxi_prices", JSON.stringify(taxiPrices))
+    toast({
+      title: "✅ Fiyatlar Güncellendi",
+      description: `VIP: ₺${taxiPrices.vipPricePerKm}/km, Paylaşımlı: ₺${taxiPrices.sharedPricePerKm}/km`,
+    })
   }
 
   const saveRoomPricings = (updatedPricings: RoomPricing[]) => {
@@ -1703,6 +1724,50 @@ export function AdminDashboard() {
 
         {/* Vehicles Tab */}
         <TabsContent value="vehicles" className="space-y-4">
+          {/* Taksi KM Fiyat Ayarları */}
+          <Card className="border-2 border-blue-200 bg-blue-50/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="w-5 h-5 text-blue-600" />
+                Taksi Kilometre Fiyatları
+              </CardTitle>
+              <CardDescription>
+                Tüm taksi rezervasyonlarında kullanılacak km başı fiyatları belirleyin
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <Car className="w-4 h-4 text-orange-500" />
+                    VIP Taksi (₺/km)
+                  </label>
+                  <Input
+                    type="number"
+                    value={taxiPrices.vipPricePerKm}
+                    onChange={(e) => setTaxiPrices({ ...taxiPrices, vipPricePerKm: parseFloat(e.target.value) || 0 })}
+                    placeholder="15"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <Car className="w-4 h-4 text-blue-500" />
+                    Paylaşımlı Taksi (₺/km)
+                  </label>
+                  <Input
+                    type="number"
+                    value={taxiPrices.sharedPricePerKm}
+                    onChange={(e) => setTaxiPrices({ ...taxiPrices, sharedPricePerKm: parseFloat(e.target.value) || 0 })}
+                    placeholder="8"
+                  />
+                </div>
+              </div>
+              <Button onClick={saveTaxiPrices} className="mt-4 w-full">
+                Fiyatları Kaydet
+              </Button>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <div className="flex justify-between items-center">

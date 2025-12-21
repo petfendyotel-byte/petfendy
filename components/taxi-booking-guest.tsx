@@ -2,41 +2,92 @@
 
 import { useState, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
-import type { TaxiService, TaxiVehicle, CityPricing } from "@/lib/types"
-import { mockTaxiServices, mockCityPricings, mockTurkishCities } from "@/lib/mock-data"
 import { setTempTaxiReservation } from "@/lib/storage"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Badge } from "@/components/ui/badge"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { toast } from "@/components/ui/use-toast"
-import { Car, MapPin, Calendar, User, ArrowLeft, Home } from "lucide-react"
+import { Car, MapPin, Navigation, User, Home, Clock, Calculator } from "lucide-react"
+
+// Türkiye illeri ve ilçeleri
+const turkeyProvinces: Record<string, string[]> = {
+  "Ankara": ["Çankaya", "Keçiören", "Mamak", "Etimesgut", "Yenimahalle", "Sincan", "Altındağ", "Pursaklar", "Gölbaşı", "Polatlı"],
+  "İstanbul": ["Kadıköy", "Beşiktaş", "Şişli", "Üsküdar", "Fatih", "Beyoğlu", "Bakırköy", "Ataşehir", "Maltepe", "Pendik", "Kartal", "Sarıyer", "Beykoz"],
+  "İzmir": ["Konak", "Karşıyaka", "Bornova", "Buca", "Çiğli", "Bayraklı", "Gaziemir", "Balçova", "Narlıdere"],
+  "Antalya": ["Muratpaşa", "Konyaaltı", "Kepez", "Aksu", "Döşemealtı", "Alanya", "Manavgat", "Serik"],
+  "Bursa": ["Osmangazi", "Nilüfer", "Yıldırım", "Gemlik", "Mudanya", "İnegöl"],
+  "Adana": ["Seyhan", "Çukurova", "Yüreğir", "Sarıçam", "Ceyhan"],
+  "Konya": ["Selçuklu", "Meram", "Karatay", "Ereğli", "Akşehir"],
+  "Gaziantep": ["Şahinbey", "Şehitkamil", "Oğuzeli", "Nizip"],
+  "Mersin": ["Yenişehir", "Mezitli", "Akdeniz", "Toroslar", "Tarsus"],
+  "Kayseri": ["Melikgazi", "Kocasinan", "Talas", "Develi"],
+  "Eskişehir": ["Odunpazarı", "Tepebaşı", "Sivrihisar"],
+  "Samsun": ["İlkadım", "Atakum", "Canik", "Tekkeköy"],
+  "Denizli": ["Merkezefendi", "Pamukkale", "Çivril"],
+  "Muğla": ["Bodrum", "Marmaris", "Fethiye", "Milas", "Dalaman"],
+  "Aydın": ["Efeler", "Nazilli", "Söke", "Kuşadası", "Didim"],
+  "Trabzon": ["Ortahisar", "Akçaabat", "Yomra", "Araklı"],
+  "Diyarbakır": ["Bağlar", "Kayapınar", "Yenişehir", "Sur"],
+  "Erzurum": ["Yakutiye", "Palandöken", "Aziziye"],
+  "Malatya": ["Battalgazi", "Yeşilyurt"],
+  "Van": ["İpekyolu", "Tuşba", "Edremit"],
+}
+
+// Ankara'dan diğer illere yaklaşık mesafeler (km)
+const distancesFromAnkara: Record<string, number> = {
+  "Ankara": 0,
+  "İstanbul": 450,
+  "İzmir": 580,
+  "Antalya": 480,
+  "Bursa": 380,
+  "Adana": 490,
+  "Konya": 260,
+  "Gaziantep": 670,
+  "Mersin": 480,
+  "Kayseri": 320,
+  "Eskişehir": 230,
+  "Samsun": 420,
+  "Denizli": 480,
+  "Muğla": 600,
+  "Aydın": 550,
+  "Trabzon": 760,
+  "Diyarbakır": 920,
+  "Erzurum": 880,
+  "Malatya": 680,
+  "Van": 1200,
+}
 
 export function TaxiBookingGuest() {
   const router = useRouter()
   const params = useParams()
   const locale = (params?.locale as string) || 'tr'
   
-  const [services] = useState<TaxiService[]>(mockTaxiServices)
-  const [cityPricings] = useState<CityPricing[]>(mockCityPricings)
-  const [taxiVehicles, setTaxiVehicles] = useState<TaxiVehicle[]>([])
+  // Güzergah bilgileri
+  const [pickupProvince, setPickupProvince] = useState("")
+  const [pickupDistrict, setPickupDistrict] = useState("")
+  const [pickupAddress, setPickupAddress] = useState("")
+  const [dropoffProvince, setDropoffProvince] = useState("")
+  const [dropoffDistrict, setDropoffDistrict] = useState("")
+  const [dropoffAddress, setDropoffAddress] = useState("")
   
-  const [selectedService, setSelectedService] = useState<TaxiService | null>(null)
-  const [selectedVehicle, setSelectedVehicle] = useState<TaxiVehicle | null>(null)
-  const [fromCity, setFromCity] = useState("")
-  const [toCity, setToCity] = useState("")
-  const [isRoundTrip, setIsRoundTrip] = useState(false)
-  const [scheduledDate, setScheduledDate] = useState("")
+  // Mesafe ve fiyat
+  const [calculatedDistance, setCalculatedDistance] = useState<number | null>(null)
+  const [pricePerKm, setPricePerKm] = useState({ vip: 15, shared: 8 }) // Varsayılan fiyatlar
+  const [selectedTaxiType, setSelectedTaxiType] = useState<"vip" | "shared">("shared")
   
   // Pet bilgileri
   const [petName, setPetName] = useState("")
   const [petType, setPetType] = useState("dog")
+  const [petBreed, setPetBreed] = useState("")
+  const [petWeight, setPetWeight] = useState("")
+  
+  // Tarih ve saat
+  const [scheduledDate, setScheduledDate] = useState("")
+  const [scheduledTime, setScheduledTime] = useState("")
   
   // İletişim bilgileri
   const [guestName, setGuestName] = useState("")
@@ -44,71 +95,84 @@ export function TaxiBookingGuest() {
   const [guestEmail, setGuestEmail] = useState("")
   const [specialNotes, setSpecialNotes] = useState("")
 
+  // Yönetim panelinden fiyatları yükle
   useEffect(() => {
-    const storedVehicles = JSON.parse(localStorage.getItem("petfendy_taxi_vehicles") || "[]")
-    if (storedVehicles.length > 0) {
-      setTaxiVehicles(storedVehicles)
-    } else {
-      // Default vehicles
-      const defaultVehicles: TaxiVehicle[] = [
-        { id: "v1", name: "Ekonomik Araç", type: "shared", pricePerKm: 5, capacity: 2, isAvailable: true, description: "Küçük hayvanlar için uygun", features: ["Klima", "Su"], createdAt: new Date(), updatedAt: new Date() },
-        { id: "v2", name: "VIP Araç", type: "vip", pricePerKm: 10, capacity: 4, isAvailable: true, description: "Konforlu yolculuk", features: ["Klima", "Su", "Mama", "Özel Kafes"], createdAt: new Date(), updatedAt: new Date() },
-      ]
-      setTaxiVehicles(defaultVehicles)
+    const storedPrices = localStorage.getItem("petfendy_taxi_prices")
+    if (storedPrices) {
+      const prices = JSON.parse(storedPrices)
+      setPricePerKm({
+        vip: prices.vipPricePerKm || 15,
+        shared: prices.sharedPricePerKm || 8
+      })
     }
   }, [])
 
-  const getDistance = (): number => {
-    if (!fromCity || !toCity) return 0
-    const cityPricing = cityPricings.find(
-      (cp) => (cp.fromCity === fromCity && cp.toCity === toCity) || (cp.fromCity === toCity && cp.toCity === fromCity)
-    )
-    if (cityPricing) return cityPricing.distanceKm
-    if (fromCity === toCity) return 20
-    return 100
-  }
+  // İlçe listesini sıfırla
+  useEffect(() => {
+    setPickupDistrict("")
+  }, [pickupProvince])
 
-  const getCityPricing = (): CityPricing | null => {
-    if (!fromCity || !toCity) return null
-    return cityPricings.find(
-      (cp) => (cp.fromCity === fromCity && cp.toCity === toCity) || (cp.fromCity === toCity && cp.toCity === fromCity)
-    ) || null
+  useEffect(() => {
+    setDropoffDistrict("")
+  }, [dropoffProvince])
+
+  // Mesafe hesaplama
+  const calculateDistance = () => {
+    if (!pickupProvince || !dropoffProvince) {
+      toast({ title: "Hata", description: "Lütfen kalkış ve varış illerini seçin", variant: "destructive" })
+      return
+    }
+
+    // Ankara merkez noktası olarak hesaplama
+    // Ankara -> Alış ili + Alış ili -> Bırakış ili mesafesi
+    const pickupFromAnkara = distancesFromAnkara[pickupProvince] || 100
+    const dropoffFromAnkara = distancesFromAnkara[dropoffProvince] || 100
+    
+    let totalDistance: number
+    
+    if (pickupProvince === dropoffProvince) {
+      // Aynı il içi taşıma (ilçeler arası)
+      totalDistance = 30 // Varsayılan şehir içi mesafe
+    } else {
+      // Farklı iller arası
+      // Ankara'dan alış noktasına + alış noktasından bırakış noktasına
+      totalDistance = pickupFromAnkara + Math.abs(dropoffFromAnkara - pickupFromAnkara) + 20 // +20 ilçe içi
+    }
+
+    setCalculatedDistance(totalDistance)
+    toast({ 
+      title: "✅ Mesafe Hesaplandı", 
+      description: `Toplam mesafe: ${totalDistance} km`,
+      duration: 3000 
+    })
   }
 
   const calculatePrice = (): number => {
-    if (!selectedService || !selectedVehicle || !fromCity || !toCity) return 0
-    const distance = getDistance()
-    const cityPricing = getCityPricing()
-    let totalPrice = selectedService.basePrice + (selectedVehicle.pricePerKm * distance)
-    if (isRoundTrip) totalPrice *= 2
-    if (cityPricing) {
-      totalPrice += cityPricing.additionalFee
-      if (cityPricing.discount > 0) {
-        totalPrice -= (totalPrice * cityPricing.discount) / 100
-      }
-    }
-    return totalPrice
+    if (!calculatedDistance) return 0
+    const kmPrice = selectedTaxiType === "vip" ? pricePerKm.vip : pricePerKm.shared
+    return calculatedDistance * kmPrice
   }
 
   const handleSubmit = () => {
-    if (!selectedService) {
-      toast({ title: "Hata", description: "Lütfen bir hizmet seçin", variant: "destructive" })
+    // Validasyonlar
+    if (!pickupProvince || !pickupDistrict) {
+      toast({ title: "Hata", description: "Lütfen kalkış ili ve ilçesini seçin", variant: "destructive" })
       return
     }
-    if (!selectedVehicle) {
-      toast({ title: "Hata", description: "Lütfen bir araç seçin", variant: "destructive" })
+    if (!dropoffProvince || !dropoffDistrict) {
+      toast({ title: "Hata", description: "Lütfen varış ili ve ilçesini seçin", variant: "destructive" })
       return
     }
-    if (!fromCity || !toCity) {
-      toast({ title: "Hata", description: "Lütfen kalkış ve varış şehirlerini seçin", variant: "destructive" })
+    if (!calculatedDistance) {
+      toast({ title: "Hata", description: "Lütfen önce mesafe hesaplayın", variant: "destructive" })
       return
     }
-    if (!scheduledDate) {
-      toast({ title: "Hata", description: "Lütfen tarih seçin", variant: "destructive" })
+    if (!petName || !petBreed) {
+      toast({ title: "Hata", description: "Lütfen hayvan bilgilerini doldurun", variant: "destructive" })
       return
     }
-    if (!petName) {
-      toast({ title: "Hata", description: "Lütfen hayvan adını girin", variant: "destructive" })
+    if (!scheduledDate || !scheduledTime) {
+      toast({ title: "Hata", description: "Lütfen tarih ve saat seçin", variant: "destructive" })
       return
     }
     if (!guestName || !guestPhone || !guestEmail) {
@@ -122,26 +186,27 @@ export function TaxiBookingGuest() {
       return
     }
 
-    const distance = getDistance()
-    const price = calculatePrice()
-    const cityPricing = getCityPricing()
+    const totalPrice = calculatePrice()
 
     const taxiReservation = {
-      serviceName: selectedService.name,
-      vehicleId: selectedVehicle.id,
-      vehicleName: selectedVehicle.name,
-      vehicleType: selectedVehicle.type,
-      pickupCity: fromCity,
-      dropoffCity: toCity,
-      distance,
-      scheduledDate,
-      isRoundTrip,
-      basePrice: selectedService.basePrice,
-      pricePerKm: selectedVehicle.pricePerKm,
-      additionalFee: cityPricing?.additionalFee || 0,
-      discount: cityPricing?.discount || 0,
-      totalPrice: price,
-      petInfo: { name: petName, type: petType },
+      vehicleType: selectedTaxiType,
+      vehicleName: selectedTaxiType === "vip" ? "VIP Taksi" : "Paylaşımlı Taksi",
+      pickupProvince,
+      pickupDistrict,
+      pickupAddress,
+      dropoffProvince,
+      dropoffDistrict,
+      dropoffAddress,
+      distance: calculatedDistance,
+      pricePerKm: selectedTaxiType === "vip" ? pricePerKm.vip : pricePerKm.shared,
+      scheduledDate: `${scheduledDate}T${scheduledTime}`,
+      totalPrice,
+      petInfo: { 
+        name: petName, 
+        type: petType,
+        breed: petBreed,
+        weight: petWeight ? parseFloat(petWeight) : null
+      },
       guestInfo: { name: guestName, phone: guestPhone, email: guestEmail },
       specialNotes,
     }
@@ -159,8 +224,10 @@ export function TaxiBookingGuest() {
     }, 500)
   }
 
+  const provinces = Object.keys(turkeyProvinces).sort()
+
   return (
-    <div className="max-w-4xl mx-auto p-4 space-y-6">
+    <div className="max-w-3xl mx-auto p-4 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
@@ -168,8 +235,7 @@ export function TaxiBookingGuest() {
             <Car className="w-6 h-6 text-blue-500" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">Pet Taksi Rezervasyonu</h1>
-            <p className="text-sm text-muted-foreground">Güvenli hayvan taşımacılığı</p>
+            <h1 className="text-2xl font-bold">Pet Taksi Hizmeti</h1>
           </div>
         </div>
         <Button 
@@ -182,13 +248,154 @@ export function TaxiBookingGuest() {
         </Button>
       </div>
 
-      {/* Pet Bilgileri */}
-      <Card className="border-0 shadow-sm bg-white">
+      {/* Taksi Tipi Seçimi */}
+      <Card className="border-0 shadow-sm">
+        <CardContent className="pt-6">
+          <Label className="text-base font-semibold mb-4 block">Taksi Tipi</Label>
+          <RadioGroup 
+            value={selectedTaxiType} 
+            onValueChange={(v) => setSelectedTaxiType(v as "vip" | "shared")}
+            className="grid grid-cols-2 gap-4"
+          >
+            <div className="relative">
+              <RadioGroupItem value="shared" id="shared" className="peer sr-only" />
+              <Label
+                htmlFor="shared"
+                className="flex flex-col items-center p-4 border-2 rounded-xl cursor-pointer peer-data-[state=checked]:border-blue-500 peer-data-[state=checked]:bg-blue-50 hover:bg-gray-50 transition-colors"
+              >
+                <Car className="w-8 h-8 text-blue-500 mb-2" />
+                <span className="font-semibold">Paylaşımlı Taksi</span>
+                <span className="text-sm text-muted-foreground">₺{pricePerKm.shared}/km</span>
+              </Label>
+            </div>
+            <div className="relative">
+              <RadioGroupItem value="vip" id="vip" className="peer sr-only" />
+              <Label
+                htmlFor="vip"
+                className="flex flex-col items-center p-4 border-2 rounded-xl cursor-pointer peer-data-[state=checked]:border-orange-500 peer-data-[state=checked]:bg-orange-50 hover:bg-gray-50 transition-colors"
+              >
+                <Car className="w-8 h-8 text-orange-500 mb-2" />
+                <span className="font-semibold">VIP Taksi</span>
+                <span className="text-sm text-muted-foreground">₺{pricePerKm.vip}/km</span>
+              </Label>
+            </div>
+          </RadioGroup>
+        </CardContent>
+      </Card>
+
+      {/* Güzergah Bilgileri */}
+      <Card className="border-0 shadow-sm">
+        <CardContent className="pt-6 space-y-6">
+          <h3 className="font-semibold text-lg">Güzergah Bilgileri</h3>
+          
+          {/* Kalkış */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-green-600">
+              <MapPin className="w-4 h-4" />
+              <Label className="font-medium">Kalkış İli</Label>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Select value={pickupProvince} onValueChange={setPickupProvince}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seçiniz" />
+                </SelectTrigger>
+                <SelectContent>
+                  {provinces.map((province) => (
+                    <SelectItem key={province} value={province}>{province}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={pickupDistrict} onValueChange={setPickupDistrict} disabled={!pickupProvince}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Kalkış İlçesi" />
+                </SelectTrigger>
+                <SelectContent>
+                  {pickupProvince && turkeyProvinces[pickupProvince]?.map((district) => (
+                    <SelectItem key={district} value={district}>{district}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Input 
+              placeholder="Kalkış Adresi" 
+              value={pickupAddress}
+              onChange={(e) => setPickupAddress(e.target.value)}
+            />
+          </div>
+
+          {/* Varış */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-red-600">
+              <Navigation className="w-4 h-4" />
+              <Label className="font-medium">Varış İli</Label>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Select value={dropoffProvince} onValueChange={setDropoffProvince}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seçiniz" />
+                </SelectTrigger>
+                <SelectContent>
+                  {provinces.map((province) => (
+                    <SelectItem key={province} value={province}>{province}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={dropoffDistrict} onValueChange={setDropoffDistrict} disabled={!dropoffProvince}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Varış İlçesi" />
+                </SelectTrigger>
+                <SelectContent>
+                  {dropoffProvince && turkeyProvinces[dropoffProvince]?.map((district) => (
+                    <SelectItem key={district} value={district}>{district}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Input 
+              placeholder="Varış Adresi" 
+              value={dropoffAddress}
+              onChange={(e) => setDropoffAddress(e.target.value)}
+            />
+          </div>
+
+          {/* Mesafe Hesapla Butonu */}
+          <Button 
+            onClick={calculateDistance}
+            className="w-full bg-blue-600 hover:bg-blue-700"
+            disabled={!pickupProvince || !dropoffProvince}
+          >
+            <Calculator className="w-4 h-4 mr-2" />
+            Mesafe Hesapla
+          </Button>
+
+          {/* Hesaplanan Mesafe */}
+          {calculatedDistance && (
+            <div className="p-4 bg-green-50 rounded-xl border border-green-200">
+              <div className="flex justify-between items-center">
+                <span className="text-green-700 font-medium">Toplam Mesafe:</span>
+                <span className="text-2xl font-bold text-green-700">{calculatedDistance} km</span>
+              </div>
+              <div className="flex justify-between items-center mt-2">
+                <span className="text-green-700 font-medium">Tahmini Ücret:</span>
+                <span className="text-2xl font-bold text-green-700">₺{calculatePrice().toFixed(2)}</span>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Evcil Hayvan Bilgileri */}
+      <Card className="border-0 shadow-sm">
         <CardContent className="pt-6 space-y-4">
+          <h3 className="font-semibold text-lg">Evcil Hayvan Bilgileri</h3>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Evcil Hayvan Adı</Label>
-              <Input placeholder="Hayvan adı" value={petName} onChange={(e) => setPetName(e.target.value)} />
+              <Input 
+                placeholder="Hayvan adı" 
+                value={petName} 
+                onChange={(e) => setPetName(e.target.value)} 
+              />
             </div>
             <div className="space-y-2">
               <Label>Hayvan Türü</Label>
@@ -202,191 +409,121 @@ export function TaxiBookingGuest() {
               </Select>
             </div>
           </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Cins</Label>
+              <Input 
+                placeholder="Cins" 
+                value={petBreed} 
+                onChange={(e) => setPetBreed(e.target.value)} 
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Ağırlık (kg)</Label>
+              <Input 
+                type="number" 
+                placeholder="Ağırlık" 
+                value={petWeight} 
+                onChange={(e) => setPetWeight(e.target.value)} 
+              />
+            </div>
+          </div>
         </CardContent>
       </Card>
 
-      {/* Güzergah */}
-      <Card className="border-0 shadow-sm bg-blue-50/50">
-        <CardContent className="pt-6">
-          <div className="flex items-center gap-2 mb-4">
-            <MapPin className="w-5 h-5 text-blue-600" />
-            <span className="font-semibold">Güzergah</span>
+      {/* Tarih ve Saat */}
+      <Card className="border-0 shadow-sm">
+        <CardContent className="pt-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <Clock className="w-5 h-5 text-purple-600" />
+            <h3 className="font-semibold text-lg">Tarih ve Saat</h3>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Kalkış Şehri</Label>
-              <Select value={fromCity} onValueChange={setFromCity}>
-                <SelectTrigger><SelectValue placeholder="Şehir seçin" /></SelectTrigger>
-                <SelectContent>
-                  {mockTurkishCities.map((city) => (
-                    <SelectItem key={city} value={city}>{city}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label>Tarih</Label>
+              <Input 
+                type="date" 
+                value={scheduledDate} 
+                onChange={(e) => setScheduledDate(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
+              />
             </div>
             <div className="space-y-2">
-              <Label>Varış Şehri</Label>
-              <Select value={toCity} onValueChange={setToCity}>
-                <SelectTrigger><SelectValue placeholder="Şehir seçin" /></SelectTrigger>
-                <SelectContent>
-                  {mockTurkishCities.map((city) => (
-                    <SelectItem key={city} value={city}>{city}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label>Saat</Label>
+              <Input 
+                type="time" 
+                value={scheduledTime} 
+                onChange={(e) => setScheduledTime(e.target.value)}
+              />
             </div>
           </div>
-          <div className="flex items-center gap-3 mt-4 p-3 bg-white rounded-lg">
-            <Switch id="roundtrip" checked={isRoundTrip} onCheckedChange={setIsRoundTrip} />
-            <Label htmlFor="roundtrip" className="cursor-pointer">Gidiş-Dönüş (2x fiyat)</Label>
-          </div>
         </CardContent>
       </Card>
-
-      {/* Tarih */}
-      <Card className="border-0 shadow-sm bg-purple-50/30">
-        <CardContent className="pt-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Calendar className="w-5 h-5 text-purple-600" />
-            <span className="font-semibold">Tarih ve Saat</span>
-          </div>
-          <Input 
-            type="datetime-local" 
-            value={scheduledDate} 
-            onChange={(e) => setScheduledDate(e.target.value)}
-            min={new Date().toISOString().slice(0, 16)}
-          />
-        </CardContent>
-      </Card>
-
-      {/* Hizmet Seçimi */}
-      <Card className="border-0 shadow-sm bg-green-50/50">
-        <CardContent className="pt-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Car className="w-5 h-5 text-green-600" />
-            <span className="font-semibold">Hizmet Tipi</span>
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            {services.map((service) => (
-              <div
-                key={service.id}
-                onClick={() => setSelectedService(service)}
-                className={`p-4 rounded-xl cursor-pointer text-center transition-all ${
-                  selectedService?.id === service.id 
-                    ? "bg-green-100 border-2 border-green-400" 
-                    : "bg-white border-2 border-transparent hover:border-gray-200"
-                }`}
-              >
-                <p className="font-medium text-sm">{service.name}</p>
-                <p className="text-lg font-bold text-green-600 mt-1">₺{service.basePrice}</p>
-                <p className="text-xs text-muted-foreground">başlangıç</p>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Araç Seçimi */}
-      {selectedService && fromCity && toCity && (
-        <Card className="border-0 shadow-sm bg-orange-50/50">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="font-semibold">Araç Seçimi</span>
-            </div>
-            {taxiVehicles.filter(v => v.isAvailable).length === 0 ? (
-              <Alert><AlertDescription>Şu anda müsait araç bulunmamaktadır.</AlertDescription></Alert>
-            ) : (
-              <RadioGroup value={selectedVehicle?.id || ""} onValueChange={(value) => {
-                const vehicle = taxiVehicles.find(v => v.id === value)
-                setSelectedVehicle(vehicle || null)
-              }}>
-                <div className="space-y-3">
-                  {taxiVehicles.filter(v => v.isAvailable).map((vehicle) => (
-                    <div key={vehicle.id} className="relative">
-                      <RadioGroupItem value={vehicle.id} id={vehicle.id} className="peer sr-only" />
-                      <Label
-                        htmlFor={vehicle.id}
-                        className="flex items-center justify-between p-4 border-2 rounded-xl cursor-pointer peer-data-[state=checked]:border-orange-400 peer-data-[state=checked]:bg-orange-50 hover:bg-gray-50 transition-colors"
-                      >
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold">{vehicle.name}</span>
-                            <Badge variant={vehicle.type === "vip" ? "default" : "secondary"}>
-                              {vehicle.type === "vip" ? "VIP" : "Paylaşımlı"}
-                            </Badge>
-                          </div>
-                          {vehicle.description && <p className="text-sm text-muted-foreground">{vehicle.description}</p>}
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold text-orange-500">₺{vehicle.pricePerKm}/km</p>
-                          <p className="text-xs text-muted-foreground">{vehicle.capacity} hayvan</p>
-                        </div>
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </RadioGroup>
-            )}
-          </CardContent>
-        </Card>
-      )}
 
       {/* İletişim Bilgileri */}
-      <Card className="border-0 shadow-sm bg-gray-50/50">
-        <CardContent className="pt-6">
-          <div className="flex items-center gap-2 mb-4">
+      <Card className="border-0 shadow-sm">
+        <CardContent className="pt-6 space-y-4">
+          <div className="flex items-center gap-2">
             <User className="w-5 h-5 text-gray-600" />
-            <span className="font-semibold">İletişim Bilgileri</span>
+            <h3 className="font-semibold text-lg">İletişim Bilgileri</h3>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Ad Soyad</Label>
-              <Input placeholder="Ad Soyad" value={guestName} onChange={(e) => setGuestName(e.target.value)} />
+              <Input 
+                placeholder="Ad Soyad" 
+                value={guestName} 
+                onChange={(e) => setGuestName(e.target.value)} 
+              />
             </div>
             <div className="space-y-2">
               <Label>Telefon</Label>
-              <Input type="tel" placeholder="05XX XXX XX XX" value={guestPhone} onChange={(e) => setGuestPhone(e.target.value)} />
+              <Input 
+                type="tel" 
+                placeholder="05XX XXX XX XX" 
+                value={guestPhone} 
+                onChange={(e) => setGuestPhone(e.target.value)} 
+              />
             </div>
           </div>
-          <div className="mt-4 space-y-2">
+          <div className="space-y-2">
             <Label>E-posta</Label>
-            <Input type="email" placeholder="ornek@email.com" value={guestEmail} onChange={(e) => setGuestEmail(e.target.value)} />
+            <Input 
+              type="email" 
+              placeholder="ornek@email.com" 
+              value={guestEmail} 
+              onChange={(e) => setGuestEmail(e.target.value)} 
+            />
           </div>
-          <div className="mt-4 space-y-2">
+          <div className="space-y-2">
             <Label>Özel Notlar</Label>
-            <Textarea placeholder="Özel isteklerinizi yazın..." value={specialNotes} onChange={(e) => setSpecialNotes(e.target.value)} rows={3} />
+            <Textarea 
+              placeholder="Özel isteklerinizi yazın..." 
+              value={specialNotes} 
+              onChange={(e) => setSpecialNotes(e.target.value)}
+              rows={3}
+            />
           </div>
         </CardContent>
       </Card>
 
-      {/* Özet ve Butonlar */}
-      {selectedService && selectedVehicle && fromCity && toCity && (
-        <Card className="border-0 shadow-lg bg-white sticky bottom-4">
-          <CardContent className="pt-4">
-            <div className="flex justify-between items-center mb-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Toplam Tutar</p>
-                <p className="text-3xl font-bold text-primary">₺{calculatePrice().toFixed(2)}</p>
-                <p className="text-xs text-muted-foreground">
-                  {getDistance()} km {isRoundTrip && "(Gidiş-Dönüş)"}
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <Button variant="outline" className="flex-1" onClick={() => router.back()}>
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Geri
-              </Button>
-              <Button 
-                className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
-                onClick={handleSubmit}
-              >
-                Üye Olmadan Devam Et 🎉
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Butonlar */}
+      <div className="flex gap-3 sticky bottom-4">
+        <Button 
+          variant="outline" 
+          className="flex-1"
+          onClick={() => router.back()}
+        >
+          Geri
+        </Button>
+        <Button 
+          className="flex-1 bg-blue-600 hover:bg-blue-700"
+          onClick={handleSubmit}
+          disabled={!calculatedDistance}
+        >
+          Üye Olmadan Devam Et
+        </Button>
+      </div>
     </div>
   )
 }

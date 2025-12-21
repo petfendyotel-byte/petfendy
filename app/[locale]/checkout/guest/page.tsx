@@ -103,7 +103,7 @@ export default function GuestCheckoutPage() {
             bookingType: reservationType!,
             bookingDetails: reservationType === "hotel" 
               ? `${reservation.roomName} (${reservation.nights} gece)`
-              : `${reservation.vehicleName} - ${reservation.pickupCity} → ${reservation.dropoffCity}`,
+              : `${reservation.vehicleName} - ${reservation.pickupProvince}/${reservation.pickupDistrict} → ${reservation.dropoffProvince}/${reservation.dropoffDistrict}`,
             bookingDate: new Date(),
             totalAmount: reservation.totalPrice
           })
@@ -232,21 +232,33 @@ export default function GuestCheckoutPage() {
                   <Badge variant="secondary" className="mb-2">
                     {reservation.vehicleType === "vip" ? "VIP Taksi" : "Paylaşımlı Taksi"}
                   </Badge>
-                  <p className="text-sm text-muted-foreground">
-                    {reservation.pickupCity} → {reservation.dropoffCity}
+                  <div className="text-sm text-muted-foreground space-y-1">
+                    <p>📍 Kalkış: {reservation.pickupProvince}/{reservation.pickupDistrict}</p>
+                    {reservation.pickupAddress && <p className="pl-5 text-xs">{reservation.pickupAddress}</p>}
+                    <p>🎯 Varış: {reservation.dropoffProvince}/{reservation.dropoffDistrict}</p>
+                    {reservation.dropoffAddress && <p className="pl-5 text-xs">{reservation.dropoffAddress}</p>}
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    🚗 {reservation.distance} km
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    {reservation.distance} km {reservation.isRoundTrip && "(Gidiş-Dönüş)"}
-                  </p>
+                  {reservation.petInfo && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      🐾 {reservation.petInfo.name} ({reservation.petInfo.breed})
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span>Başlangıç Ücreti:</span>
-                    <span className="font-medium">₺{reservation.basePrice?.toFixed(2)}</span>
+                    <span>Mesafe:</span>
+                    <span className="font-medium">{reservation.distance} km</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span>Mesafe Ücreti:</span>
+                    <span>Km Başı Ücret:</span>
+                    <span className="font-medium">₺{reservation.pricePerKm}/km</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Toplam Mesafe Ücreti:</span>
                     <span className="font-medium">₺{(reservation.pricePerKm * reservation.distance).toFixed(2)}</span>
                   </div>
                 </div>
