@@ -17,17 +17,37 @@ interface NavbarProps {
 export function Navbar({ locale }: NavbarProps) {
   const router = useRouter()
   const tCommon = useTranslations('common')
+  const tNav = useTranslations('nav')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const navLinks = [
-    { href: `/${locale}/home`, label: 'Ana Sayfa' },
-    { href: `/${locale}/hakkimda`, label: 'Hakkımızda' },
-    { href: `/${locale}/hizmetler`, label: 'Hizmetler' },
-    { href: `/${locale}/blog`, label: 'Blog' },
-    { href: `/${locale}/galeri`, label: 'Galeri' },
-    { href: `/${locale}/iletisim`, label: 'Bize Ulaşın' },
-    { href: `/${locale}/sss`, label: 'SSS' },
+    { href: `/${locale}/home`, labelKey: 'home' },
+    { href: `/${locale}/hakkimda`, labelKey: 'about' },
+    { href: `/${locale}/hizmetler`, labelKey: 'services' },
+    { href: `/${locale}/blog`, labelKey: 'blog' },
+    { href: `/${locale}/galeri`, labelKey: 'gallery' },
+    { href: `/${locale}/iletisim`, labelKey: 'contact' },
+    { href: `/${locale}/sss`, labelKey: 'faq' },
   ]
+
+  // Fallback labels if translations not found
+  const fallbackLabels: Record<string, string> = {
+    home: locale === 'en' ? 'Home' : 'Ana Sayfa',
+    about: locale === 'en' ? 'About Us' : 'Hakkımızda',
+    services: locale === 'en' ? 'Services' : 'Hizmetler',
+    blog: 'Blog',
+    gallery: locale === 'en' ? 'Gallery' : 'Galeri',
+    contact: locale === 'en' ? 'Contact' : 'Bize Ulaşın',
+    faq: locale === 'en' ? 'FAQ' : 'SSS',
+  }
+
+  const getLabel = (key: string) => {
+    try {
+      return tNav(key)
+    } catch {
+      return fallbackLabels[key] || key
+    }
+  }
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg border-b-2 border-orange-200/50 dark:border-gray-800 shadow-lg">
@@ -65,7 +85,7 @@ export function Navbar({ locale }: NavbarProps) {
                 href={link.href}
                 className="text-sm font-semibold px-4 py-2 rounded-xl hover:bg-gradient-to-r hover:from-orange-50 hover:to-pink-50 hover:text-orange-600 dark:hover:from-orange-900/20 dark:hover:to-pink-900/20 dark:hover:text-orange-400 transition-all duration-300 relative group"
               >
-                {link.label}
+                {getLabel(link.labelKey)}
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-orange-500 to-pink-500 group-hover:w-full transition-all duration-300"></span>
               </Link>
             ))}
@@ -105,7 +125,7 @@ export function Navbar({ locale }: NavbarProps) {
                   className="text-sm font-semibold hover:bg-gradient-to-r hover:from-orange-50 hover:to-pink-50 hover:text-orange-600 dark:hover:from-orange-900/20 dark:hover:to-pink-900/20 dark:hover:text-orange-400 transition-all duration-300 py-3 px-4 rounded-xl"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  {link.label}
+                  {getLabel(link.labelKey)}
                 </Link>
               ))}
               <Button

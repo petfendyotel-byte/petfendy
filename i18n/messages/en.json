@@ -1,4 +1,13 @@
 {
+  "nav": {
+    "home": "Home",
+    "about": "About Us",
+    "services": "Services",
+    "blog": "Blog",
+    "gallery": "Gallery",
+    "contact": "Contact",
+    "faq": "FAQ"
+  },
   "common": {
     "appName": "Petfendy",
     "appFullName": "Petfendy Pet Hotel And Dog Training Center",

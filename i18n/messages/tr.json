@@ -1,4 +1,13 @@
 {
+  "nav": {
+    "home": "Ana Sayfa",
+    "about": "Hakkımızda",
+    "services": "Hizmetler",
+    "blog": "Blog",
+    "gallery": "Galeri",
+    "contact": "Bize Ulaşın",
+    "faq": "SSS"
+  },
   "common": {
     "appName": "Petfendy",
     "appFullName": "Petfendy Evcil Hayvan Oteli Ve Köpek Eğitim Merkezi",
