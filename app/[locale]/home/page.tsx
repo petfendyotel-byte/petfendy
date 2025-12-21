@@ -33,10 +33,6 @@ export default function HomePage() {
   const params = useParams()
   const locale = (params?.locale as string) || 'tr'
 
-  const scrollToReservation = () => {
-    document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })
-  }
-
   return (
     <div className="min-h-screen bg-white">
       {/* Navbar */}
@@ -92,7 +88,7 @@ export default function HomePage() {
             <Button
               size="lg"
               className="bg-white text-gray-900 hover:bg-gray-50 gap-3 px-8 py-6 text-lg rounded-2xl hover-scale shadow-2xl font-semibold"
-              onClick={scrollToReservation}
+              onClick={() => router.push(`/${locale}/booking/hotel`)}
             >
               <HomeIcon className="w-6 h-6" />
               {tNew('hotelButton')}
@@ -100,7 +96,7 @@ export default function HomePage() {
             <Button
               size="lg"
               className="gradient-orange-pink hover:opacity-90 gap-3 px-8 py-6 text-lg rounded-2xl hover-scale shadow-2xl font-semibold text-white border-2 border-white/30"
-              onClick={scrollToReservation}
+              onClick={() => router.push(`/${locale}/booking/taxi`)}
             >
               <Car className="w-6 h-6" />
               {tNew('taxiButton')}
@@ -148,7 +144,7 @@ export default function HomePage() {
               <CardContent className="p-8 bg-white">
                 <Button 
                   className="w-full gradient-orange-pink hover:opacity-90 text-white py-6 text-lg rounded-2xl font-semibold hover-scale shadow-lg"
-                  onClick={() => router.push(`/${locale}`)}
+                  onClick={() => router.push(`/${locale}/booking/hotel`)}
                 >
                   <HomeIcon className="w-5 h-5 mr-2" />
                   {tNew('hotelButton')}
@@ -178,7 +174,7 @@ export default function HomePage() {
               <CardContent className="p-8 bg-white">
                 <Button 
                   className="w-full gradient-warm hover:opacity-90 text-white py-6 text-lg rounded-2xl font-semibold hover-scale shadow-lg"
-                  onClick={() => router.push(`/${locale}`)}
+                  onClick={() => router.push(`/${locale}/booking/taxi`)}
                 >
                   <Car className="w-5 h-5 mr-2" />
                   {tNew('taxiButton')}
@@ -444,7 +440,7 @@ export default function HomePage() {
                 <Button
                   size="lg"
                   className="gradient-warm hover:opacity-90 text-white font-semibold shadow-lg hover-scale rounded-2xl px-8 py-6 text-lg"
-                  onClick={scrollToReservation}
+                  onClick={() => router.push(`/${locale}/booking/hotel`)}
                 >
                   {tNew('safetyBannerButton1')}
                 </Button>
