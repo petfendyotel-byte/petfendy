@@ -9,6 +9,11 @@ import { sanitizeInput, validateEmail, validatePassword, validatePhone } from "@
 import { hashPassword } from "@/lib/security"
 import { setPendingUser } from "@/lib/storage"
 import { emailService } from "@/lib/email-service"
+import { smsService } from "@/lib/sms-service"
+
+// İşletme sahibi bilgileri (env'den veya varsayılan)
+const OWNER_EMAIL = process.env.NEXT_PUBLIC_OWNER_EMAIL || "petfendyotel@gmail.com"
+const OWNER_PHONE = process.env.NEXT_PUBLIC_OWNER_PHONE || "+905551234567"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -110,6 +115,45 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
       // Complete registration with verified user
       if (verifiedUser.email && verifiedUser.name && verifiedUser.phone && formData.password) {
         await register(verifiedUser.email, formData.password, verifiedUser.name, verifiedUser.phone)
+        
+        // Kullanıcıya hoş geldin e-postası gönder
+        try {
+          await emailService.sendWelcomeEmail(verifiedUser.email, verifiedUser.name)
+        } catch (e) {
+          console.error("Welcome email error:", e)
+        }
+
+        // Kullanıcıya hoş geldin SMS gönder
+        try {
+          await smsService.sendWelcomeSMS(verifiedUser.phone, verifiedUser.name)
+        } catch (e) {
+          console.error("Welcome SMS error:", e)
+        }
+
+        // İşletme sahibine e-posta bildirimi gönder
+        try {
+          await emailService.sendNewUserNotificationToOwner(
+            OWNER_EMAIL,
+            verifiedUser.name,
+            verifiedUser.email,
+            verifiedUser.phone
+          )
+        } catch (e) {
+          console.error("Owner email notification error:", e)
+        }
+
+        // İşletme sahibine SMS bildirimi gönder
+        try {
+          await smsService.sendNewUserNotificationSMS(
+            OWNER_PHONE,
+            verifiedUser.name,
+            verifiedUser.email,
+            verifiedUser.phone
+          )
+        } catch (e) {
+          console.error("Owner SMS notification error:", e)
+        }
+
         onSuccess?.()
       }
     } catch (err) {

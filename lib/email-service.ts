@@ -415,6 +415,186 @@ Bu mesaj ${new Date().toLocaleString('tr-TR')} tarihinde gönderildi.
   }
 }
 
+  // Yeni üyelik bildirimi - Kullanıcıya hoş geldin e-postası
+  async sendWelcomeEmail(email: string, name: string): Promise<boolean> {
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #F97316 0%, #EC4899 100%); color: white; padding: 30px; text-align: center; border-radius: 12px 12px 0 0; }
+          .content { padding: 30px; background: #f9fafb; }
+          .welcome-box { background: white; padding: 25px; border-radius: 12px; text-align: center; margin: 20px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+          .features { display: flex; flex-wrap: wrap; gap: 15px; margin: 20px 0; }
+          .feature { background: white; padding: 15px; border-radius: 8px; flex: 1; min-width: 150px; text-align: center; }
+          .feature-icon { font-size: 32px; margin-bottom: 10px; }
+          .cta-button { display: inline-block; background: linear-gradient(135deg, #F97316 0%, #EC4899 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
+          .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🐾 Petfendy'ye Hoş Geldiniz!</h1>
+            <p>Evcil dostlarınız için en iyi hizmet</p>
+          </div>
+          <div class="content">
+            <div class="welcome-box">
+              <h2>Merhaba ${name}! 👋</h2>
+              <p>Petfendy ailesine katıldığınız için çok mutluyuz!</p>
+              <p>Artık evcil hayvanlarınız için en kaliteli otel ve taksi hizmetlerine erişebilirsiniz.</p>
+            </div>
+            
+            <h3>Hizmetlerimiz:</h3>
+            <div class="features">
+              <div class="feature">
+                <div class="feature-icon">🏨</div>
+                <strong>Pet Otel</strong>
+                <p>Konforlu konaklama</p>
+              </div>
+              <div class="feature">
+                <div class="feature-icon">🚕</div>
+                <strong>Pet Taksi</strong>
+                <p>Güvenli ulaşım</p>
+              </div>
+              <div class="feature">
+                <div class="feature-icon">✂️</div>
+                <strong>Bakım</strong>
+                <p>Profesyonel bakım</p>
+              </div>
+            </div>
+            
+            <div style="text-align: center;">
+              <a href="https://petfendy.46.62.236.59.sslip.io/tr/home" class="cta-button">Hemen Rezervasyon Yap</a>
+            </div>
+            
+            <p style="margin-top: 30px;">Herhangi bir sorunuz olursa bizimle iletişime geçmekten çekinmeyin.</p>
+            <p>Sevgilerle,<br><strong>Petfendy Ekibi</strong> 🐕🐈</p>
+          </div>
+          <div class="footer">
+            <p>© 2025 Petfendy. Tüm hakları saklıdır.</p>
+            <p>İletişim: petfendyotel@gmail.com | +90 555 123 4567</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+
+    const textContent = `
+Merhaba ${name}!
+
+Petfendy ailesine hoş geldiniz! 🐾
+
+Artık evcil hayvanlarınız için en kaliteli otel ve taksi hizmetlerine erişebilirsiniz.
+
+Hizmetlerimiz:
+- Pet Otel: Konforlu konaklama
+- Pet Taksi: Güvenli ulaşım
+- Bakım: Profesyonel bakım hizmetleri
+
+Hemen rezervasyon yapmak için: https://petfendy.46.62.236.59.sslip.io/tr/home
+
+Herhangi bir sorunuz olursa bizimle iletişime geçmekten çekinmeyin.
+
+Sevgilerle,
+Petfendy Ekibi
+    `
+
+    return this.sendEmail({
+      to: email,
+      subject: "🐾 Petfendy'ye Hoş Geldiniz!",
+      html: htmlContent,
+      text: textContent,
+    })
+  }
+
+  // Yeni üyelik bildirimi - İşletme sahibine
+  async sendNewUserNotificationToOwner(
+    ownerEmail: string,
+    userName: string,
+    userEmail: string,
+    userPhone: string
+  ): Promise<boolean> {
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: #10B981; color: white; padding: 20px; text-align: center; border-radius: 12px 12px 0 0; }
+          .content { padding: 30px; background: #f9fafb; }
+          .user-card { background: white; padding: 20px; border-radius: 12px; border-left: 4px solid #10B981; margin: 20px 0; }
+          .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+          .info-label { color: #666; }
+          .info-value { font-weight: bold; }
+          .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🆕 Yeni Üye Kaydı!</h1>
+            <p>Petfendy'ye yeni bir kullanıcı katıldı</p>
+          </div>
+          <div class="content">
+            <p>Merhaba,</p>
+            <p>Sisteme yeni bir kullanıcı kaydoldu. Detaylar aşağıdadır:</p>
+            
+            <div class="user-card">
+              <div class="info-row">
+                <span class="info-label">👤 Ad Soyad:</span>
+                <span class="info-value">${userName}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">📧 E-posta:</span>
+                <span class="info-value">${userEmail}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">📱 Telefon:</span>
+                <span class="info-value">${userPhone}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">📅 Kayıt Tarihi:</span>
+                <span class="info-value">${new Date().toLocaleString('tr-TR')}</span>
+              </div>
+            </div>
+            
+            <p>Admin panelinden kullanıcı detaylarını görüntüleyebilirsiniz.</p>
+          </div>
+          <div class="footer">
+            <p>Bu bildirim otomatik olarak gönderilmiştir.</p>
+            <p>© 2025 Petfendy</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+
+    const textContent = `
+Yeni Üye Kaydı - Petfendy
+
+Sisteme yeni bir kullanıcı kaydoldu:
+
+Ad Soyad: ${userName}
+E-posta: ${userEmail}
+Telefon: ${userPhone}
+Kayıt Tarihi: ${new Date().toLocaleString('tr-TR')}
+
+Admin panelinden kullanıcı detaylarını görüntüleyebilirsiniz.
+    `
+
+    return this.sendEmail({
+      to: ownerEmail,
+      subject: `🆕 Yeni Üye: ${userName} - Petfendy`,
+      html: htmlContent,
+      text: textContent,
+    })
+  }
+}
+
 export const emailService = new EmailService()
 
 
