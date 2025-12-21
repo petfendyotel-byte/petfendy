@@ -197,6 +197,15 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
           </DialogDescription>
         </DialogHeader>
 
+        {/* Test Card Info */}
+        <Alert className="border-blue-200 bg-blue-50">
+          <AlertDescription className="text-blue-800 text-sm">
+            <strong>Test Kartı (PayTR):</strong><br />
+            Kart: 4242 4242 4242 4242<br />
+            Tarih: 12/25 | CVV: 123
+          </AlertDescription>
+        </Alert>
+
         {success ? (
           <Alert className="border-green-200 bg-green-50">
             <AlertDescription className="text-green-800">

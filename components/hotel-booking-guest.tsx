@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
-import { Hotel, Sparkles, Calendar, User, PawPrint, ArrowLeft, Info } from "lucide-react"
+import { Hotel, Sparkles, Calendar, User, PawPrint, ArrowLeft, Info, Home } from "lucide-react"
 
 // Ek hizmetler
 const additionalServices = [
@@ -156,14 +156,24 @@ export function HotelBookingGuest() {
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-          <PawPrint className="w-6 h-6 text-orange-500" />
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+            <PawPrint className="w-6 h-6 text-orange-500" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold">Pet Otel Rezervasyonu</h1>
+            <p className="text-sm text-muted-foreground">hotel.pet.info</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-bold">Pet Otel Rezervasyonu</h1>
-          <p className="text-sm text-muted-foreground">hotel.pet.info</p>
-        </div>
+        <Button 
+          variant="outline" 
+          onClick={() => router.push(`/${locale}/home`)}
+          className="gap-2"
+        >
+          <Home className="w-4 h-4" />
+          Ana Sayfa
+        </Button>
       </div>
 
       {/* Pet Bilgileri */}

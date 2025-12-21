@@ -16,7 +16,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { toast } from "@/components/ui/use-toast"
-import { Car, MapPin, Calendar, User, ArrowLeft } from "lucide-react"
+import { Car, MapPin, Calendar, User, ArrowLeft, Home } from "lucide-react"
 
 export function TaxiBookingGuest() {
   const router = useRouter()
@@ -162,14 +162,24 @@ export function TaxiBookingGuest() {
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-          <Car className="w-6 h-6 text-blue-500" />
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+            <Car className="w-6 h-6 text-blue-500" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold">Pet Taksi Rezervasyonu</h1>
+            <p className="text-sm text-muted-foreground">Güvenli hayvan taşımacılığı</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-bold">Pet Taksi Rezervasyonu</h1>
-          <p className="text-sm text-muted-foreground">Güvenli hayvan taşımacılığı</p>
-        </div>
+        <Button 
+          variant="outline" 
+          onClick={() => router.push(`/${locale}/home`)}
+          className="gap-2"
+        >
+          <Home className="w-4 h-4" />
+          Ana Sayfa
+        </Button>
       </div>
 
       {/* Pet Bilgileri */}
