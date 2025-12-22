@@ -150,26 +150,26 @@ export function Footer({ locale }: FooterProps) {
             </div>
 
             {/* Payment Icons */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {/* Visa */}
-              <div className="bg-[#1A1F71] rounded-lg shadow-sm flex items-center justify-center w-16 h-10">
-                <span className="text-white font-bold text-lg italic tracking-tight">VISA</span>
+              <div className="bg-[#1A1F71] rounded-md shadow-sm flex items-center justify-center w-14 h-9">
+                <span className="text-white font-bold text-sm italic tracking-tight">VISA</span>
               </div>
               {/* Mastercard */}
-              <div className="bg-white rounded-lg shadow-sm flex items-center justify-center w-16 h-10">
-                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="22" viewBox="0 0 152 100">
+              <div className="bg-white rounded-md shadow-sm flex items-center justify-center w-14 h-9">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="20" viewBox="0 0 152 100">
                   <circle cx="52" cy="50" r="32" fill="#EB001B"/>
                   <circle cx="100" cy="50" r="32" fill="#F79E1B"/>
                   <path fill="#FF5F00" d="M76 26c8 6.5 13 16.5 13 24s-5 17.5-13 24c-8-6.5-13-16.5-13-24s5-17.5 13-24z"/>
                 </svg>
               </div>
               {/* Troy */}
-              <div className="bg-[#004B93] rounded-lg shadow-sm flex items-center justify-center w-16 h-10">
-                <span className="text-white font-bold text-xs tracking-wider">TROY</span>
+              <div className="bg-[#004B93] rounded-md shadow-sm flex items-center justify-center w-14 h-9">
+                <span className="text-white font-bold text-[10px] tracking-wider">TROY</span>
               </div>
               {/* PayTR */}
-              <div className="bg-[#00A859] rounded-lg shadow-sm flex items-center justify-center w-16 h-10">
-                <span className="text-white font-bold text-xs tracking-wide">PayTR</span>
+              <div className="bg-[#00A859] rounded-md shadow-sm flex items-center justify-center w-14 h-9">
+                <span className="text-white font-bold text-[10px] tracking-wide">PayTR</span>
               </div>
             </div>
 
