@@ -198,7 +198,7 @@ export function Footer({ locale }: FooterProps) {
               <span className="hidden sm:inline">·</span>
               <a href={`/${locale}/gizlilik-politikasi`} className="hover:text-orange-400 transition-colors">Gizlilik ve Kişisel Verilerin Korunması Politikası</a>
               <span className="hidden sm:inline">·</span>
-              <a href={`/${locale}/iptal-iade`} className="hover:text-orange-400 transition-colors">İptal ve İade Politikası</a>
+              <a href={`/${locale}/iptal-iade-politikasi`} className="hover:text-orange-400 transition-colors">İptal ve İade Politikası</a>
               <span className="hidden sm:inline">·</span>
               <a href={`/${locale}/mesafeli-satis`} className="hover:text-orange-400 transition-colors">Mesafeli Satış Politikası</a>
               <span className="hidden sm:inline">·</span>
