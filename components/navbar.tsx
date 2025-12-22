@@ -53,13 +53,13 @@ export function Navbar({ locale }: NavbarProps) {
         <div className="flex justify-between items-center">
           {/* Logo */}
           <Link href={`/${locale}/home`} className="flex items-center group hover:opacity-90 transition-all duration-300">
-            <div className="relative shrink-0 w-32 h-14 sm:w-40 sm:h-16 group-hover:scale-105 transition-transform duration-300">
+            <div className="relative shrink-0 h-14 sm:h-16 md:h-18 group-hover:scale-105 transition-transform duration-300">
               <Image
-                src="/petfendy-logo.svg"
-                alt="Petfendy Logo"
-                width={160}
-                height={64}
-                className="w-full h-full object-contain"
+                src="/petfendy-main-logo.png"
+                alt="Petfendy"
+                width={180}
+                height={72}
+                className="h-full w-auto object-contain"
                 priority
               />
             </div>
