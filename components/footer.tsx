@@ -204,7 +204,7 @@ export function Footer({ locale }: FooterProps) {
               <span className="hidden sm:inline">·</span>
               <a href={`/${locale}/on-bilgilendirme-formu`} className="hover:text-orange-400 transition-colors">Ön Bilgilendirme Formu</a>
               <span className="hidden sm:inline">·</span>
-              <a href={`/${locale}/cerez-politikasi`} className="hover:text-orange-400 transition-colors">Çerez Politikası</a>
+              <a href={`/${locale}/cerez`} className="hover:text-orange-400 transition-colors">Çerez Politikası</a>
             </div>
           </div>
         </div>

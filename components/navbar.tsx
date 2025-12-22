@@ -7,7 +7,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { LanguageToggle } from "@/components/language-toggle"
-import { Menu, X, PawPrint } from "lucide-react"
+import { Menu, X } from "lucide-react"
 import { useTranslations } from 'next-intl'
 
 interface NavbarProps {
@@ -52,26 +52,16 @@ export function Navbar({ locale }: NavbarProps) {
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
-          <Link href={`/${locale}/home`} className="flex items-center gap-3 group hover:opacity-80 transition-all duration-300">
-            <div className="relative shrink-0 w-16 h-12 group-hover:scale-110 transition-transform duration-300">
+          <Link href={`/${locale}/home`} className="flex items-center group hover:opacity-90 transition-all duration-300">
+            <div className="relative shrink-0 w-32 h-14 sm:w-40 sm:h-16 group-hover:scale-105 transition-transform duration-300">
               <Image
                 src="/petfendy-logo.svg"
                 alt="Petfendy Logo"
-                width={64}
-                height={48}
-                className="w-full h-full object-contain drop-shadow-md"
+                width={160}
+                height={64}
+                className="w-full h-full object-contain"
                 priority
               />
-              {/* Decorative Paw Print */}
-              <PawPrint className="absolute -bottom-1 -right-1 w-4 h-4 text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </div>
-            <div className="flex flex-col leading-none">
-              <h1 className="text-xl font-bold text-gradient bg-gradient-to-r from-orange-500 via-pink-500 to-orange-600 bg-clip-text text-transparent group-hover:from-orange-600 group-hover:via-pink-600 group-hover:to-orange-700 transition-all duration-300">
-                PETFENDY
-              </h1>
-              <p className="text-xs text-muted-foreground hidden sm:block mt-0.5 font-medium">
-                Evcil Hayvan Oteli
-              </p>
             </div>
           </Link>
 
