@@ -21,7 +21,6 @@ export function Navbar({ locale }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const navLinks = [
-    { href: `/${locale}/home`, labelKey: 'home' },
     { href: `/${locale}/hakkimda`, labelKey: 'about' },
     { href: `/${locale}/hizmetler`, labelKey: 'services' },
     { href: `/${locale}/blog`, labelKey: 'blog' },
@@ -32,7 +31,6 @@ export function Navbar({ locale }: NavbarProps) {
 
   // Fallback labels if translations not found
   const fallbackLabels: Record<string, string> = {
-    home: locale === 'en' ? 'Home' : 'Ana Sayfa',
     about: locale === 'en' ? 'About Us' : 'Hakkımızda',
     services: locale === 'en' ? 'Services' : 'Hizmetler',
     blog: 'Blog',
