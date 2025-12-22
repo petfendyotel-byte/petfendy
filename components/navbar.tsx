@@ -55,7 +55,7 @@ export function Navbar({ locale }: NavbarProps) {
           <Link href={`/${locale}/home`} className="flex items-center group hover:opacity-90 transition-all duration-300">
             <div className="relative shrink-0 h-14 sm:h-16 md:h-18 group-hover:scale-105 transition-transform duration-300">
               <Image
-                src="/petfendy-main-logo.png"
+                src="/images/petfendy-main-logo.png"
                 alt="Petfendy"
                 width={180}
                 height={72}
