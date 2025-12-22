@@ -152,34 +152,23 @@ export function Footer({ locale }: FooterProps) {
             {/* Payment Icons */}
             <div className="flex items-center gap-3">
               {/* Visa */}
-              <div className="bg-white rounded-md px-2 py-1">
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="24" viewBox="0 0 750 471">
-                  <g fill="none" fillRule="evenodd">
-                    <rect width="750" height="471" fill="#0E4595" rx="40"/>
-                    <path fill="#fff" d="M278.198 334.228l33.36-195.763h53.358l-33.384 195.763h-53.334zm246.11-191.54c-10.57-3.966-27.135-8.222-47.822-8.222-52.725 0-89.863 26.551-90.18 64.604-.297 28.129 26.514 43.821 46.754 53.185 20.77 9.597 27.752 15.716 27.652 24.283-.133 13.123-16.586 19.116-31.924 19.116-21.355 0-32.701-2.967-50.225-10.274l-6.878-3.111-7.487 43.822c12.463 5.467 35.508 10.199 59.438 10.445 56.09 0 92.502-26.248 92.916-66.884.199-22.27-14.016-39.216-44.801-53.188-18.65-9.056-30.072-15.099-29.951-24.269 0-8.137 9.668-16.838 30.56-16.838 17.446-.271 30.089 3.527 39.936 7.496l4.781 2.26 7.231-42.425zm137.31-4.223h-41.23c-12.773 0-22.332 3.486-27.941 16.234l-79.244 179.402h56.031s9.16-24.121 11.232-29.418c6.123 0 60.555.084 68.336.084 1.596 6.854 6.492 29.334 6.492 29.334h49.512l-43.188-195.636zm-65.418 126.408c4.414-11.279 21.26-54.724 21.26-54.724-.314.521 4.381-11.334 7.074-18.684l3.607 16.878s10.217 46.729 12.352 56.53h-44.293zM209.394 138.465l-52.24 133.496-5.565-27.129c-9.726-31.274-40.025-65.157-73.898-82.12l47.767 171.204 56.455-.064 84.004-195.387h-56.523"/>
-                  </g>
+              <div className="bg-white rounded-lg px-3 py-2 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="50" height="16" viewBox="0 0 1000 324">
+                  <path fill="#1A1F71" d="M651.185 0.5L406.31 323.5H303.31L195.31 68.5C188.31 52.5 182.31 46.5 168.31 39.5C145.31 27.5 105.31 16.5 70.31 9.5L73.31 0.5H238.31C259.31 0.5 278.31 14.5 283.31 38.5L321.31 234.5L417.31 0.5H519.31L519.31 0.5H651.185ZM696.31 0.5L617.31 323.5H520.31L599.31 0.5H696.31ZM893.31 218.5L941.31 88.5L969.31 218.5H893.31ZM1000.31 323.5H908.31L897.31 275.5H783.31L766.31 323.5H664.31L800.31 24.5C808.31 5.5 824.31 0.5 844.31 0.5H925.31L1000.31 323.5ZM444.31 323.5L527.31 0.5H424.31L341.31 323.5H444.31Z"/>
                 </svg>
               </div>
               {/* Mastercard */}
-              <div className="bg-white rounded-md px-2 py-1">
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="24" viewBox="0 0 750 471">
-                  <g fill="none" fillRule="evenodd">
-                    <rect width="750" height="471" fill="#000" rx="40"/>
-                    <circle cx="250" cy="235" r="150" fill="#EB001B"/>
-                    <circle cx="500" cy="235" r="150" fill="#F79E1B"/>
-                    <path fill="#FF5F00" d="M375 119.5c38.5 31.5 63 79.5 63 133.5s-24.5 102-63 133.5c-38.5-31.5-63-79.5-63-133.5s24.5-102 63-133.5z"/>
-                  </g>
+              <div className="bg-white rounded-lg px-3 py-2 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="50" height="30" viewBox="0 0 152 100">
+                  <rect width="152" height="100" fill="white" rx="8"/>
+                  <circle cx="52" cy="50" r="32" fill="#EB001B"/>
+                  <circle cx="100" cy="50" r="32" fill="#F79E1B"/>
+                  <path fill="#FF5F00" d="M76 26c8 6.5 13 16.5 13 24s-5 17.5-13 24c-8-6.5-13-16.5-13-24s5-17.5 13-24z"/>
                 </svg>
               </div>
               {/* Troy */}
-              <div className="bg-white rounded-md px-2 py-1">
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="24" viewBox="0 0 750 471">
-                  <g fill="none" fillRule="evenodd">
-                    <rect width="750" height="471" fill="#004B93" rx="40"/>
-                    <path fill="#fff" d="M200 180h50v110h-50zM280 180h120l-35 110h-50zM430 180h70l50 55-50 55h-70zM530 180h70v110h-70z"/>
-                    <text fill="#fff" fontFamily="Arial" fontSize="60" fontWeight="bold" x="375" y="300" textAnchor="middle">TROY</text>
-                  </g>
-                </svg>
+              <div className="bg-[#004B93] rounded-lg px-3 py-2 shadow-sm flex items-center justify-center">
+                <span className="text-white font-bold text-sm tracking-wider">TROY</span>
               </div>
             </div>
 
