@@ -154,10 +154,17 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
           console.error("Owner SMS notification error:", e)
         }
 
-        onSuccess?.()
+        // Kayıt başarılı - callback'i çağır ve sayfa yenilenecek
+        if (onSuccess) {
+          onSuccess()
+        }
+        
+        // Sayfayı yenile - kullanıcı artık giriş yapmış olacak
+        window.location.reload()
       }
     } catch (err) {
       setErrors({ submit: "Kayıt tamamlanamadı. Lütfen giriş yapmayı deneyin." })
+      setShowVerification(false)
     }
   }
 
