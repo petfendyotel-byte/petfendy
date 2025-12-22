@@ -152,27 +152,26 @@ export function Footer({ locale }: FooterProps) {
             {/* Payment Icons */}
             <div className="flex items-center gap-3">
               {/* Visa */}
-              <div className="bg-white rounded-lg px-3 py-2 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="50" height="16" viewBox="0 0 1000 324">
+              <div className="bg-white rounded-lg shadow-sm flex items-center justify-center w-16 h-10">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="13" viewBox="0 0 1000 324">
                   <path fill="#1A1F71" d="M651.185 0.5L406.31 323.5H303.31L195.31 68.5C188.31 52.5 182.31 46.5 168.31 39.5C145.31 27.5 105.31 16.5 70.31 9.5L73.31 0.5H238.31C259.31 0.5 278.31 14.5 283.31 38.5L321.31 234.5L417.31 0.5H519.31L519.31 0.5H651.185ZM696.31 0.5L617.31 323.5H520.31L599.31 0.5H696.31ZM893.31 218.5L941.31 88.5L969.31 218.5H893.31ZM1000.31 323.5H908.31L897.31 275.5H783.31L766.31 323.5H664.31L800.31 24.5C808.31 5.5 824.31 0.5 844.31 0.5H925.31L1000.31 323.5ZM444.31 323.5L527.31 0.5H424.31L341.31 323.5H444.31Z"/>
                 </svg>
               </div>
               {/* Mastercard */}
-              <div className="bg-white rounded-lg px-3 py-2 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="50" height="30" viewBox="0 0 152 100">
-                  <rect width="152" height="100" fill="white" rx="8"/>
+              <div className="bg-white rounded-lg shadow-sm flex items-center justify-center w-16 h-10">
+                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="22" viewBox="0 0 152 100">
                   <circle cx="52" cy="50" r="32" fill="#EB001B"/>
                   <circle cx="100" cy="50" r="32" fill="#F79E1B"/>
                   <path fill="#FF5F00" d="M76 26c8 6.5 13 16.5 13 24s-5 17.5-13 24c-8-6.5-13-16.5-13-24s5-17.5 13-24z"/>
                 </svg>
               </div>
               {/* Troy */}
-              <div className="bg-[#004B93] rounded-lg px-3 py-2 shadow-sm flex items-center justify-center">
-                <span className="text-white font-bold text-sm tracking-wider">TROY</span>
+              <div className="bg-[#004B93] rounded-lg shadow-sm flex items-center justify-center w-16 h-10">
+                <span className="text-white font-bold text-xs tracking-wider">TROY</span>
               </div>
               {/* PayTR */}
-              <div className="bg-[#00A859] rounded-lg px-3 py-2 shadow-sm flex items-center justify-center">
-                <span className="text-white font-bold text-sm tracking-wide">PayTR</span>
+              <div className="bg-[#00A859] rounded-lg shadow-sm flex items-center justify-center w-16 h-10">
+                <span className="text-white font-bold text-xs tracking-wide">PayTR</span>
               </div>
             </div>
 
