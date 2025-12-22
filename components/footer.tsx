@@ -170,6 +170,10 @@ export function Footer({ locale }: FooterProps) {
               <div className="bg-[#004B93] rounded-lg px-3 py-2 shadow-sm flex items-center justify-center">
                 <span className="text-white font-bold text-sm tracking-wider">TROY</span>
               </div>
+              {/* PayTR */}
+              <div className="bg-[#00A859] rounded-lg px-3 py-2 shadow-sm flex items-center justify-center">
+                <span className="text-white font-bold text-sm tracking-wide">PayTR</span>
+              </div>
             </div>
 
             {/* Social Media Icons */}
