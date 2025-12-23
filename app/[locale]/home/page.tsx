@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
 import Image from "next/image"
 import { useTranslations } from 'next-intl'
@@ -24,7 +25,25 @@ import {
   Instagram,
   PawPrint,
   Sparkles,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react"
+
+// Slider images
+const sliderImages = [
+  {
+    src: "/images/slider-hotel.jpg",
+    alt: "Petfendy Luxury Pet Hotel",
+    title: "Lüks Pet Otel",
+    subtitle: "Evcil dostlarınız için 5 yıldızlı konaklama"
+  },
+  {
+    src: "/images/slider-taxi.jpg", 
+    alt: "Petfendy Pet Taksi",
+    title: "Pet Taksi",
+    subtitle: "Konforlu & Güvenli Yolculuk"
+  }
+]
 
 export default function HomePage() {
   const tHome = useTranslations('homepage')
@@ -32,36 +51,83 @@ export default function HomePage() {
   const router = useRouter()
   const params = useParams()
   const locale = (params?.locale as string) || 'tr'
+  
+  // Slider state
+  const [currentSlide, setCurrentSlide] = useState(0)
+
+  // Auto-slide every 5 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % sliderImages.length)
+    }, 5000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % sliderImages.length)
+  }
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + sliderImages.length) % sliderImages.length)
+  }
 
   return (
     <div className="min-h-screen bg-white">
       {/* Navbar */}
       <Navbar locale={locale} />
 
-      {/* Hero Section */}
+      {/* Hero Section with Slider */}
       <section className="relative h-[700px] md:h-[800px] flex items-center justify-center overflow-hidden">
-        {/* Gradient Background Overlay */}
-        <div className="absolute inset-0 z-0 gradient-primary opacity-90"></div>
-        
-        {/* Background Image with Overlay */}
-        <div className="absolute inset-0 z-0">
-          <Image
-            src="https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=1920&h=800&fit=crop"
-            alt="Pet Hotel & Taxi"
-            fill
-            className="object-cover mix-blend-overlay"
-            priority
-          />
-        </div>
+        {/* Slider Images */}
+        {sliderImages.map((slide, index) => (
+          <div
+            key={index}
+            className={`absolute inset-0 transition-opacity duration-1000 ${
+              index === currentSlide ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            <Image
+              src={slide.src}
+              alt={slide.alt}
+              fill
+              className="object-cover"
+              priority={index === 0}
+            />
+            {/* Dark overlay for better text readability */}
+            <div className="absolute inset-0 bg-black/30"></div>
+          </div>
+        ))}
 
-        {/* Decorative Pet Icons */}
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          <PawPrint className="absolute top-20 left-10 w-16 h-16 text-white/20 animate-float" style={{ animationDelay: '0s' }} />
-          <PawPrint className="absolute top-40 right-20 w-12 h-12 text-white/15 animate-float" style={{ animationDelay: '1s' }} />
-          <PawPrint className="absolute bottom-32 left-1/4 w-14 h-14 text-white/20 animate-float" style={{ animationDelay: '2s' }} />
-          <PawPrint className="absolute bottom-20 right-1/3 w-10 h-10 text-white/15 animate-float" style={{ animationDelay: '1.5s' }} />
-          <Sparkles className="absolute top-1/4 right-1/4 w-20 h-20 text-yellow-300/30 animate-bounce-slow" style={{ animationDelay: '0.5s' }} />
-          <Sparkles className="absolute bottom-1/3 left-1/3 w-16 h-16 text-pink-300/30 animate-bounce-slow" style={{ animationDelay: '1.2s' }} />
+        {/* Slider Navigation Arrows */}
+        <button
+          onClick={prevSlide}
+          className="absolute left-4 md:left-8 z-20 p-3 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/40 transition-all"
+          aria-label="Previous slide"
+        >
+          <ChevronLeft className="w-6 h-6 md:w-8 md:h-8 text-white" />
+        </button>
+        <button
+          onClick={nextSlide}
+          className="absolute right-4 md:right-8 z-20 p-3 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/40 transition-all"
+          aria-label="Next slide"
+        >
+          <ChevronRight className="w-6 h-6 md:w-8 md:h-8 text-white" />
+        </button>
+
+        {/* Slider Dots */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex gap-3">
+          {sliderImages.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentSlide(index)}
+              className={`w-3 h-3 rounded-full transition-all ${
+                index === currentSlide 
+                  ? 'bg-white w-8' 
+                  : 'bg-white/50 hover:bg-white/70'
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
         </div>
 
         {/* Content */}
