@@ -48,8 +48,10 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
           console.log('User has items in cart, will be redirected to cart')
         }
       }
-    } catch (err) {
-      setError("Giriş başarısız. Lütfen bilgilerinizi kontrol edin.")
+    } catch (err: any) {
+      // Show the actual error message from auth context
+      const errorMessage = err?.message || "Giriş başarısız. Lütfen bilgilerinizi kontrol edin."
+      setError(errorMessage)
     } finally {
       setIsLoading(false)
     }

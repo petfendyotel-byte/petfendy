@@ -103,8 +103,9 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
 
       // Show verification screen
       setShowVerification(true)
-    } catch (err) {
-      setErrors({ submit: "Kayıt başarısız. Lütfen tekrar deneyin." })
+    } catch (err: any) {
+      const errorMessage = err?.message || "Kayıt başarısız. Lütfen tekrar deneyin."
+      setErrors({ submit: errorMessage })
     } finally {
       setIsLoading(false)
     }
@@ -162,8 +163,9 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
         // Sayfayı yenile - kullanıcı artık giriş yapmış olacak
         window.location.reload()
       }
-    } catch (err) {
-      setErrors({ submit: "Kayıt tamamlanamadı. Lütfen giriş yapmayı deneyin." })
+    } catch (err: any) {
+      const errorMessage = err?.message || "Kayıt tamamlanamadı. Lütfen giriş yapmayı deneyin."
+      setErrors({ submit: errorMessage })
       setShowVerification(false)
     }
   }
