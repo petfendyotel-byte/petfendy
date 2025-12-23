@@ -37,24 +37,50 @@ class SMSService {
   }
 
   private async sendWithNetGSM(to: string, message: string): Promise<boolean> {
-    // NetGSM API integration placeholder
-    console.log(`📱 [NetGSM] Sending SMS to ${to}`)
-    console.log(`Message: ${message}`)
+    const { username, password, sender } = this.config
     
-    // In production, use actual NetGSM API:
-    // const response = await fetch('https://api.netgsm.com.tr/sms/send/get', {
-    //   method: 'POST',
-    //   body: new URLSearchParams({
-    //     usercode: this.config.username!,
-    //     password: this.config.password!,
-    //     gsmno: to,
-    //     message: message,
-    //     msgheader: this.config.sender || 'PETFENDY'
-    //   })
-    // })
-    
-    await new Promise(resolve => setTimeout(resolve, 300))
-    return true
+    if (!username || !password) {
+      console.error('[NetGSM] Missing credentials')
+      return false
+    }
+
+    try {
+      // NetGSM XML API - daha güvenilir
+      const xmlBody = `<?xml version="1.0" encoding="UTF-8"?>
+        <mainbody>
+          <header>
+            <company dession="1"/>
+            <usercode>${username}</usercode>
+            <password>${password}</password>
+            <type>1:n</type>
+            <msgheader>${sender || 'PETFENDY'}</msgheader>
+          </header>
+          <body>
+            <msg><![CDATA[${message}]]></msg>
+            <no>${to}</no>
+          </body>
+        </mainbody>`
+
+      const response = await fetch('https://api.netgsm.com.tr/sms/send/xml', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/xml' },
+        body: xmlBody
+      })
+
+      const result = await response.text()
+      
+      // NetGSM başarı kodları: 00, 01, 02
+      if (result.startsWith('00') || result.startsWith('01') || result.startsWith('02')) {
+        console.log(`✅ [NetGSM] SMS sent to ${to}`)
+        return true
+      } else {
+        console.error(`❌ [NetGSM] Error: ${result}`)
+        return false
+      }
+    } catch (error) {
+      console.error('[NetGSM] API Error:', error)
+      return false
+    }
   }
 
   private async sendWithTwilio(to: string, message: string): Promise<boolean> {
@@ -138,6 +164,110 @@ class SMSService {
     const message = `🔔 Yeni ${typeText} Rezervasyonu! Müşteri: ${customerName} (${customerPhone}). ${details}`
     return this.sendSMS({ to: ownerPhone, message })
   }
+
+  // =============================================
+  // ÖDEME BİLDİRİMLERİ
+  // =============================================
+
+  // Ödeme başarılı - Müşteriye
+  async sendPaymentSuccessSMS(
+    phone: string,
+    amount: string,
+    bookingType: 'hotel' | 'taxi',
+    bookingRef: string
+  ): Promise<boolean> {
+    const typeText = bookingType === 'hotel' ? 'Pet Otel' : 'Pet Taksi'
+    const message = `✅ Ödemeniz alındı! ${typeText} - ${amount} TL. Ref: ${bookingRef}. Detaylar için: petfendy.com - Petfendy`
+    return this.sendSMS({ to: phone, message })
+  }
+
+  // Ödeme başarılı - İşletme sahibine
+  async sendPaymentReceivedNotificationSMS(
+    ownerPhone: string,
+    customerName: string,
+    amount: string,
+    bookingType: 'hotel' | 'taxi',
+    bookingRef: string
+  ): Promise<boolean> {
+    const typeText = bookingType === 'hotel' ? 'Otel' : 'Taksi'
+    const message = `💰 Ödeme Alındı! ${typeText} - ${amount} TL. Müşteri: ${customerName}. Ref: ${bookingRef}`
+    return this.sendSMS({ to: ownerPhone, message })
+  }
+
+  // Ödeme başarısız - Müşteriye
+  async sendPaymentFailedSMS(
+    phone: string,
+    bookingType: 'hotel' | 'taxi'
+  ): Promise<boolean> {
+    const typeText = bookingType === 'hotel' ? 'Pet Otel' : 'Pet Taksi'
+    const message = `❌ ${typeText} ödemeniz başarısız oldu. Lütfen tekrar deneyin veya farklı bir kart kullanın. Destek: 0532 307 32 64 - Petfendy`
+    return this.sendSMS({ to: phone, message })
+  }
+
+  // Rezervasyon hatırlatma - Müşteriye
+  async sendBookingReminderSMS(
+    phone: string,
+    bookingType: 'hotel' | 'taxi',
+    date: string,
+    time: string
+  ): Promise<boolean> {
+    const typeText = bookingType === 'hotel' ? 'Pet Otel' : 'Pet Taksi'
+    const message = `⏰ Hatırlatma: ${typeText} rezervasyonunuz yarın ${date} saat ${time}'de. Sorularınız için: 0532 307 32 64 - Petfendy`
+    return this.sendSMS({ to: phone, message })
+  }
+
+  // İptal bildirimi - Müşteriye
+  async sendBookingCancelledSMS(
+    phone: string,
+    bookingType: 'hotel' | 'taxi',
+    refundAmount?: string
+  ): Promise<boolean> {
+    const typeText = bookingType === 'hotel' ? 'Pet Otel' : 'Pet Taksi'
+    const refundText = refundAmount ? ` ${refundAmount} TL iade edilecektir.` : ''
+    const message = `🚫 ${typeText} rezervasyonunuz iptal edildi.${refundText} Sorularınız için: 0532 307 32 64 - Petfendy`
+    return this.sendSMS({ to: phone, message })
+  }
+
+  // İade bildirimi - Müşteriye
+  async sendRefundProcessedSMS(
+    phone: string,
+    amount: string,
+    bookingRef: string
+  ): Promise<boolean> {
+    const message = `💳 İadeniz işleme alındı! ${amount} TL, 7-14 iş günü içinde kartınıza yansıyacaktır. Ref: ${bookingRef} - Petfendy`
+    return this.sendSMS({ to: phone, message })
+  }
 }
 
 export const smsService = new SMSService()
+
+// Environment'tan otomatik yapılandırma
+export function initSMSService(): void {
+  const provider = process.env.SMS_PROVIDER as 'netgsm' | 'twilio' | 'mock' || 'mock'
+  
+  if (provider === 'netgsm') {
+    smsService.configure({
+      provider: 'netgsm',
+      username: process.env.NETGSM_USERNAME,
+      password: process.env.NETGSM_PASSWORD,
+      sender: process.env.NETGSM_SENDER || 'PETFENDY'
+    })
+    console.log('📱 SMS Service: NetGSM configured')
+  } else if (provider === 'twilio') {
+    smsService.configure({
+      provider: 'twilio',
+      apiKey: process.env.TWILIO_ACCOUNT_SID,
+      apiSecret: process.env.TWILIO_AUTH_TOKEN,
+      sender: process.env.TWILIO_PHONE_NUMBER
+    })
+    console.log('📱 SMS Service: Twilio configured')
+  } else {
+    smsService.configure({ provider: 'mock' })
+    console.log('📱 SMS Service: Mock mode (no real SMS will be sent)')
+  }
+}
+
+// Server-side'da otomatik başlat
+if (typeof window === 'undefined') {
+  initSMSService()
+}

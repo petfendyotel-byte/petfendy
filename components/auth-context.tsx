@@ -21,23 +21,20 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 // WARNING: This is for DEVELOPMENT/TEST environment only
 const TEST_USERS_DB: Map<string, { passwordHash: string; user: Partial<User> }> = new Map()
 
-// Initialize test admin user only in development
-if (process.env.NODE_ENV === 'development') {
-  // Admin credentials from environment variables (set in .env.local)
-  const testAdminEmail = process.env.NEXT_PUBLIC_TEST_ADMIN_EMAIL
-  const testAdminPasswordHash = process.env.NEXT_PUBLIC_TEST_ADMIN_PASSWORD_HASH
+// Initialize test admin user (works in both dev and production for demo purposes)
+const testAdminEmail = process.env.NEXT_PUBLIC_TEST_ADMIN_EMAIL
+const testAdminPasswordHash = process.env.NEXT_PUBLIC_TEST_ADMIN_PASSWORD_HASH
 
-  if (testAdminEmail && testAdminPasswordHash) {
-    TEST_USERS_DB.set(testAdminEmail, {
-      passwordHash: testAdminPasswordHash,
-      user: {
-        id: 'admin-1',
-        email: testAdminEmail,
-        name: 'Admin User',
-        role: 'admin'
-      }
-    })
-  }
+if (testAdminEmail && testAdminPasswordHash) {
+  TEST_USERS_DB.set(testAdminEmail, {
+    passwordHash: testAdminPasswordHash,
+    user: {
+      id: 'admin-1',
+      email: testAdminEmail,
+      name: 'Admin User',
+      role: 'admin'
+    }
+  })
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -65,11 +62,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     setIsLoading(true)
     try {
-      // Check if running in production without proper backend
-      if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_API_URL) {
-        throw new Error('Authentication backend not configured for production')
-      }
-
       // Look up user in test database
       const userRecord = TEST_USERS_DB.get(email)
 
@@ -107,11 +99,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (email: string, password: string, name: string, phone: string) => {
     setIsLoading(true)
     try {
-      // Check if running in production without proper backend
-      if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_API_URL) {
-        throw new Error('Registration backend not configured for production')
-      }
-
       // Check if user already exists
       if (TEST_USERS_DB.has(email)) {
         throw new Error('Bu email adresi zaten kayıtlı')
@@ -125,16 +112,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         email,
         name,
+        phone,
         role: "user",
       }
 
-      // Store in test database (development only)
-      if (process.env.NODE_ENV === 'development') {
-        TEST_USERS_DB.set(email, {
-          passwordHash,
-          user: newUser
-        })
-      }
+      // Store in test database
+      TEST_USERS_DB.set(email, {
+        passwordHash,
+        user: newUser
+      })
 
       // Generate secure JWT token
       const token = generateToken(newUser.id!, email, 'user')
