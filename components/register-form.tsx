@@ -192,8 +192,10 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           {errors.submit && (
-            <Alert variant="destructive">
-              <AlertDescription>{errors.submit}</AlertDescription>
+            <Alert variant="destructive" className="border-red-500 bg-red-50 dark:bg-red-950">
+              <AlertDescription className="text-red-700 dark:text-red-300 font-medium">
+                {errors.submit}
+              </AlertDescription>
             </Alert>
           )}
 

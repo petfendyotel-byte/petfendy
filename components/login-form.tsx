@@ -66,8 +66,10 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
+            <Alert variant="destructive" className="border-red-500 bg-red-50 dark:bg-red-950">
+              <AlertDescription className="text-red-700 dark:text-red-300 font-medium">
+                {error}
+              </AlertDescription>
             </Alert>
           )}
 
