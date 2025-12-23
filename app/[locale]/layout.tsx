@@ -1,7 +1,6 @@
 import type React from "react"
 import { NextIntlClientProvider } from 'next-intl';
 import { notFound } from 'next/navigation';
-import { Analytics } from "@vercel/analytics/next"
 import { Geist, Geist_Mono } from "next/font/google"
 import "../globals.css"
 import { AuthProvider } from "@/components/auth-context"
@@ -84,7 +83,6 @@ export default async function LocaleLayout({
             <WhatsAppButton />
           </NextIntlClientProvider>
         </ThemeProvider>
-        <Analytics />
       </body>
     </html>
   )
