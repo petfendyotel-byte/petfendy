@@ -42,6 +42,12 @@ const sliderImages = [
     alt: "Petfendy Pet Taksi",
     title: "Pet Taksi",
     subtitle: "Konforlu & Güvenli Yolculuk"
+  },
+  {
+    src: "https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=1920&h=800&fit=crop",
+    alt: "Pet Hotel & Taxi",
+    title: "Petfendy",
+    subtitle: "Evcil dostlarınız için en iyi hizmet"
   }
 ]
 
