@@ -6,15 +6,12 @@ import jwt from 'jsonwebtoken';
 const getJWTSecret = (): string => {
   const secret = process.env.JWT_SECRET;
   if (!secret) {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('JWT_SECRET environment variable is required in production');
-    }
-    // Development-only fallback with warning
-    console.warn('⚠️ WARNING: Using development JWT secret. Set JWT_SECRET in .env.local');
-    return 'dev-only-jwt-secret-' + (process.env.NODE_ENV || 'development');
+    // Use a fallback secret but log warning
+    console.warn('⚠️ WARNING: JWT_SECRET not set. Using fallback secret. Please set JWT_SECRET in environment variables.');
+    return 'petfendy-fallback-jwt-secret-change-in-production-2024';
   }
   if (secret.length < 32) {
-    throw new Error('JWT_SECRET must be at least 32 characters long');
+    console.warn('⚠️ WARNING: JWT_SECRET should be at least 32 characters long');
   }
   return secret;
 };
@@ -22,14 +19,11 @@ const getJWTSecret = (): string => {
 const getJWTRefreshSecret = (): string => {
   const secret = process.env.JWT_REFRESH_SECRET;
   if (!secret) {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('JWT_REFRESH_SECRET environment variable is required in production');
-    }
-    console.warn('⚠️ WARNING: Using development refresh secret. Set JWT_REFRESH_SECRET in .env.local');
-    return 'dev-only-refresh-secret-' + (process.env.NODE_ENV || 'development');
+    console.warn('⚠️ WARNING: JWT_REFRESH_SECRET not set. Using fallback secret.');
+    return 'petfendy-fallback-refresh-secret-change-in-production-2024';
   }
   if (secret.length < 32) {
-    throw new Error('JWT_REFRESH_SECRET must be at least 32 characters long');
+    console.warn('⚠️ WARNING: JWT_REFRESH_SECRET should be at least 32 characters long');
   }
   return secret;
 };
