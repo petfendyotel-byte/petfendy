@@ -1,0 +1,500 @@
+// Prisma Schema for Petfendy
+// PostgreSQL Database
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== KULLANICI ====================
+model User {
+  id                    String    @id @default(cuid())
+  email                 String    @unique
+  name                  String
+  phone                 String?
+  passwordHash          String
+  role                  UserRole  @default(USER)
+  emailVerified         Boolean   @default(false)
+  verificationCode      String?
+  verificationCodeExpiry DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  // Relations
+  pets                  Pet[]
+  bookings              Booking[]
+  orders                Order[]
+  cardTokens            CardToken[]
+  notifications         Notification[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+// ==================== EVCİL HAYVAN ====================
+model Pet {
+  id           String   @id @default(cuid())
+  userId       String
+  name         String
+  type         PetType
+  breed        String?
+  age          Int?
+  weight       Float?
+  specialNeeds String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookings     Booking[]
+
+  @@map("pets")
+}
+
+enum PetType {
+  DOG
+  CAT
+  BIRD
+  RABBIT
+  OTHER
+}
+
+// ==================== OTEL ODASI ====================
+model HotelRoom {
+  id            String    @id @default(cuid())
+  name          String
+  type          RoomType
+  capacity      Int
+  pricePerNight Float
+  available     Boolean   @default(true)
+  description   String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  amenities     RoomAmenity[]
+  features      RoomFeature[]
+  images        RoomImage[]
+  videos        RoomVideo[]
+  bookings      Booking[]
+  pricings      RoomPricing[]
+
+  @@map("hotel_rooms")
+}
+
+enum RoomType {
+  STANDARD
+  DELUXE
+  SUITE
+}
+
+model RoomAmenity {
+  id        String    @id @default(cuid())
+  roomId    String
+  name      String
+  createdAt DateTime  @default(now())
+
+  room      HotelRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@map("room_amenities")
+}
+
+model RoomFeature {
+  id        String    @id @default(cuid())
+  roomId    String
+  name      String
+  createdAt DateTime  @default(now())
+
+  room      HotelRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@map("room_features")
+}
+
+model RoomImage {
+  id        String    @id @default(cuid())
+  roomId    String
+  url       String
+  filename  String?
+  order     Int       @default(0)
+  createdAt DateTime  @default(now())
+
+  room      HotelRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@map("room_images")
+}
+
+model RoomVideo {
+  id        String    @id @default(cuid())
+  roomId    String
+  type      VideoType
+  url       String
+  filename  String?
+  order     Int       @default(0)
+  createdAt DateTime  @default(now())
+
+  room      HotelRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@map("room_videos")
+}
+
+enum VideoType {
+  UPLOAD
+  YOUTUBE
+}
+
+model RoomPricing {
+  id            String    @id @default(cuid())
+  roomId        String
+  date          DateTime
+  pricePerNight Float
+  available     Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+
+  room          HotelRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, date])
+  @@map("room_pricings")
+}
+
+// ==================== TAKSİ ARACI ====================
+model TaxiVehicle {
+  id          String    @id @default(cuid())
+  name        String
+  type        VehicleType
+  pricePerKm  Float
+  capacity    Int
+  isAvailable Boolean   @default(true)
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  features    VehicleFeature[]
+  bookings    Booking[]
+
+  @@map("taxi_vehicles")
+}
+
+enum VehicleType {
+  VIP
+  SHARED
+}
+
+model VehicleFeature {
+  id        String      @id @default(cuid())
+  vehicleId String
+  name      String
+  createdAt DateTime    @default(now())
+
+  vehicle   TaxiVehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@map("vehicle_features")
+}
+
+// ==================== REZERVASYON ====================
+model Booking {
+  id              String        @id @default(cuid())
+  userId          String?
+  roomId          String?
+  vehicleId       String?
+  petId           String?
+  type            BookingType
+  status          BookingStatus @default(PENDING)
+  startDate       DateTime?
+  endDate         DateTime?
+  totalPrice      Float
+  specialRequests String?
+  
+  // Misafir bilgileri (üye olmayan)
+  guestName       String?
+  guestEmail      String?
+  guestPhone      String?
+  
+  // Taksi bilgileri
+  pickupLocation  String?
+  dropoffLocation String?
+  distance        Float?
+  isRoundTrip     Boolean       @default(false)
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  user            User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  room            HotelRoom?    @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  vehicle         TaxiVehicle?  @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  pet             Pet?          @relation(fields: [petId], references: [id], onDelete: SetNull)
+  order           Order?        @relation(fields: [orderId], references: [id])
+  orderId         String?
+  additionalServices BookingService[]
+
+  @@map("bookings")
+}
+
+enum BookingType {
+  HOTEL
+  TAXI
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+model BookingService {
+  id        String   @id @default(cuid())
+  bookingId String
+  name      String
+  price     Float
+  createdAt DateTime @default(now())
+
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@map("booking_services")
+}
+
+// ==================== SİPARİŞ ====================
+model Order {
+  id            String        @id @default(cuid())
+  userId        String?
+  invoiceNumber String        @unique
+  totalPrice    Float
+  status        OrderStatus   @default(PENDING)
+  paymentMethod PaymentMethod?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  user          User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  bookings      Booking[]
+  transactions  Transaction[]
+
+  @@map("orders")
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  BANK_TRANSFER
+  WALLET
+}
+
+// ==================== ÖDEME İŞLEMİ ====================
+model Transaction {
+  id               String            @id @default(cuid())
+  orderId          String
+  transactionId    String            @unique
+  amount           Float
+  currency         Currency          @default(TRY)
+  status           TransactionStatus @default(PENDING)
+  paymentType      PaymentType
+  paymentProvider  PaymentProvider
+  cardToken        String?
+  maskedCard       String?
+  installmentCount Int?
+  is3DSecure       Boolean           @default(true)
+  idempotencyKey   String            @unique
+  errorCode        String?
+  errorMessage     String?
+  metadata         Json?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  completedAt      DateTime?
+
+  // Relations
+  order            Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  refunds          RefundTransaction[]
+
+  @@map("transactions")
+}
+
+enum Currency {
+  TRY
+  USD
+  EUR
+}
+
+enum TransactionStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+  CANCELLED
+  CHARGEBACK
+}
+
+enum PaymentType {
+  THREE_D
+  NON_3D
+  PREAUTH
+  CAPTURE
+  VOID
+}
+
+enum PaymentProvider {
+  PAYTR
+  PARATIKA
+  ZIRAAT
+  PAYTEN
+}
+
+model RefundTransaction {
+  id                    String   @id @default(cuid())
+  originalTransactionId String
+  refundTransactionId   String   @unique
+  amount                Float
+  isPartial             Boolean  @default(false)
+  reason                String?
+  status                RefundStatus @default(PENDING)
+  createdAt             DateTime @default(now())
+  completedAt           DateTime?
+
+  originalTransaction   Transaction @relation(fields: [originalTransactionId], references: [id], onDelete: Cascade)
+
+  @@map("refund_transactions")
+}
+
+enum RefundStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+// ==================== KART TOKEN ====================
+model CardToken {
+  id          String    @id @default(cuid())
+  userId      String
+  token       String
+  maskedCard  String
+  cardType    String?
+  expiryMonth Int?
+  expiryYear  Int?
+  cardHolder  String?
+  isDefault   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  lastUsedAt  DateTime?
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("card_tokens")
+}
+
+// ==================== BİLDİRİM ====================
+model Notification {
+  id           String             @id @default(cuid())
+  userId       String?
+  type         NotificationType
+  channel      NotificationChannel
+  recipient    String
+  subject      String?
+  message      String
+  status       NotificationStatus @default(PENDING)
+  metadata     Json?
+  retryCount   Int                @default(0)
+  maxRetries   Int                @default(3)
+  sentAt       DateTime?
+  deliveredAt  DateTime?
+  failedAt     DateTime?
+  errorMessage String?
+  createdAt    DateTime           @default(now())
+
+  user         User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("notifications")
+}
+
+enum NotificationType {
+  PAYMENT_SUCCESS
+  PAYMENT_FAILED
+  PAYMENT_REFUND
+  BOOKING_CONFIRMED
+  BOOKING_CANCELLED
+  BOOKING_REMINDER
+}
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+  PUSH
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  DELIVERED
+}
+
+// ==================== ÖDEME GATEWAY ====================
+model PaymentGateway {
+  id        String          @id @default(cuid())
+  provider  PaymentProvider
+  name      String
+  isActive  Boolean         @default(true)
+  isDefault Boolean         @default(false)
+  config    Json
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@map("payment_gateways")
+}
+
+// ==================== TAKSİ FİYATLARI ====================
+model TaxiPricing {
+  id              String   @id @default(cuid())
+  vipPricePerKm   Float
+  sharedPricePerKm Float
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("taxi_pricing")
+}
+
+// ==================== DOSYA YÜKLEME ====================
+model UploadedFile {
+  id          String   @id @default(cuid())
+  filename    String
+  originalName String
+  mimeType    String
+  size        Int
+  path        String
+  url         String
+  uploadedBy  String?
+  createdAt   DateTime @default(now())
+
+  @@map("uploaded_files")
+}
+
+// ==================== AUDIT LOG ====================
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String
+  entityType String
+  entityId   String
+  changes    Json?
+  ipAddress  String?
+  userAgent  String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@map("audit_logs")
+}

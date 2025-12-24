@@ -79,6 +79,7 @@ export function AdminDashboard() {
   const [showAddGateway, setShowAddGateway] = useState(false)
   const [editingGateway, setEditingGateway] = useState<PaymentGateway | null>(null)
   const [showCredentials, setShowCredentials] = useState<Record<string, boolean>>({})
+  const [isLoading, setIsLoading] = useState(false)
 
   // UI State
   const [editingRoom, setEditingRoom] = useState<HotelRoom | null>(null)
@@ -167,11 +168,80 @@ export function AdminDashboard() {
     currency: "TL"
   })
 
+  // API Functions for Rooms
+  const fetchRooms = async () => {
+    try {
+      const response = await fetch('/api/rooms')
+      if (response.ok) {
+        const data = await response.json()
+        setRooms(data)
+        // Also update localStorage for offline/fallback
+        localStorage.setItem("petfendy_rooms", JSON.stringify(data))
+      } else {
+        // Fallback to localStorage
+        const storedRooms = JSON.parse(localStorage.getItem("petfendy_rooms") || JSON.stringify(mockHotelRooms))
+        setRooms(storedRooms)
+      }
+    } catch (error) {
+      console.error('Failed to fetch rooms:', error)
+      // Fallback to localStorage
+      const storedRooms = JSON.parse(localStorage.getItem("petfendy_rooms") || JSON.stringify(mockHotelRooms))
+      setRooms(storedRooms)
+    }
+  }
+
+  const createRoomAPI = async (roomData: any): Promise<HotelRoom | null> => {
+    try {
+      const response = await fetch('/api/rooms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(roomData)
+      })
+      if (response.ok) {
+        return await response.json()
+      }
+      return null
+    } catch (error) {
+      console.error('Failed to create room:', error)
+      return null
+    }
+  }
+
+  const updateRoomAPI = async (id: string, roomData: any): Promise<HotelRoom | null> => {
+    try {
+      const response = await fetch(`/api/rooms/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(roomData)
+      })
+      if (response.ok) {
+        return await response.json()
+      }
+      return null
+    } catch (error) {
+      console.error('Failed to update room:', error)
+      return null
+    }
+  }
+
+  const deleteRoomAPI = async (id: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`/api/rooms/${id}`, { method: 'DELETE' })
+      return response.ok
+    } catch (error) {
+      console.error('Failed to delete room:', error)
+      return false
+    }
+  }
+
   // Load data
   useEffect(() => {
+    // Fetch rooms from API
+    fetchRooms()
+
+    // Load other data from localStorage (will be migrated later)
     const storedOrders = JSON.parse(localStorage.getItem("petfendy_orders") || "[]")
     const storedBookings = JSON.parse(localStorage.getItem("petfendy_bookings") || "[]")
-    const storedRooms = JSON.parse(localStorage.getItem("petfendy_rooms") || JSON.stringify(mockHotelRooms))
     const storedServices = JSON.parse(localStorage.getItem("petfendy_services") || JSON.stringify(mockTaxiServices))
     const storedVehicles = JSON.parse(localStorage.getItem("petfendy_taxi_vehicles") || "[]")
     const storedRoomPricings = JSON.parse(localStorage.getItem("petfendy_room_pricings") || "[]")
@@ -180,7 +250,6 @@ export function AdminDashboard() {
 
     setOrders(storedOrders)
     setBookings(storedBookings)
-    setRooms(storedRooms)
     setServices(storedServices)
     setTaxiVehicles(storedVehicles)
     setRoomPricings(storedRoomPricings)
@@ -207,7 +276,7 @@ export function AdminDashboard() {
     }
   }, [])
 
-  // Save to localStorage
+  // Save to localStorage (and API for rooms)
   const saveRooms = (updatedRooms: HotelRoom[]) => {
     localStorage.setItem("petfendy_rooms", JSON.stringify(updatedRooms))
     setRooms(updatedRooms)
@@ -248,7 +317,7 @@ export function AdminDashboard() {
   }
 
   // Room management
-  const handleAddRoom = () => {
+  const handleAddRoom = async () => {
     if (!newRoom.name || newRoom.pricePerNight <= 0) {
       toast({
         title: "Hata",
@@ -289,35 +358,75 @@ export function AdminDashboard() {
       return
     }
 
-    const room: HotelRoom = {
-      id: `room-${Date.now()}`,
+    setIsLoading(true)
+
+    const roomData = {
       name: sanitizedName,
       type: newRoom.type,
-      capacity: Math.floor(newRoom.capacity), // Ensure integer
-      pricePerNight: Math.round(newRoom.pricePerNight * 100) / 100, // Round to 2 decimals
-      available: true,
-      amenities: newRoom.amenities.split(",").map((a) => sanitizeInput(a)).filter(a => a),
+      capacity: Math.floor(newRoom.capacity),
+      pricePerNight: Math.round(newRoom.pricePerNight * 100) / 100,
       description: sanitizedDescription,
+      amenities: newRoom.amenities.split(",").map((a) => sanitizeInput(a)).filter(a => a),
       features: newRoom.features.split(",").map((f) => sanitizeInput(f)).filter(f => f),
       images: newRoomImages,
       videos: newRoomVideos,
     }
 
-    saveRooms([...rooms, room])
+    // Try API first
+    const createdRoom = await createRoomAPI(roomData)
+    
+    if (createdRoom) {
+      // API success - refresh rooms from API
+      await fetchRooms()
+    } else {
+      // Fallback to localStorage
+      const room: HotelRoom = {
+        id: `room-${Date.now()}`,
+        ...roomData,
+        available: true,
+      }
+      saveRooms([...rooms, room])
+    }
+
     setNewRoom({ name: "", type: "standard", capacity: 1, pricePerNight: 0, amenities: "", description: "", features: "" })
     setNewRoomImages([])
     setNewRoomVideos([])
     setShowAddRoom(false)
+    setIsLoading(false)
 
     toast({
       title: "✅ Başarılı",
-      description: `${room.name} eklendi`,
+      description: `${sanitizedName} eklendi`,
     })
   }
 
-  const handleUpdateRoom = (updatedRoom: HotelRoom) => {
-    saveRooms(rooms.map((r) => (r.id === updatedRoom.id ? updatedRoom : r)))
+  const handleUpdateRoom = async (updatedRoom: HotelRoom) => {
+    setIsLoading(true)
+
+    // Try API first
+    const result = await updateRoomAPI(updatedRoom.id, {
+      name: updatedRoom.name,
+      type: updatedRoom.type,
+      capacity: updatedRoom.capacity,
+      pricePerNight: updatedRoom.pricePerNight,
+      available: updatedRoom.available,
+      description: updatedRoom.description,
+      amenities: updatedRoom.amenities,
+      features: updatedRoom.features,
+      images: updatedRoom.images,
+      videos: updatedRoom.videos,
+    })
+
+    if (result) {
+      // API success - refresh rooms from API
+      await fetchRooms()
+    } else {
+      // Fallback to localStorage
+      saveRooms(rooms.map((r) => (r.id === updatedRoom.id ? updatedRoom : r)))
+    }
+
     setEditingRoom(null)
+    setIsLoading(false)
     
     toast({
       title: "✅ Güncellendi",
@@ -325,9 +434,22 @@ export function AdminDashboard() {
     })
   }
 
-  const handleDeleteRoom = (roomId: string) => {
+  const handleDeleteRoom = async (roomId: string) => {
     const room = rooms.find(r => r.id === roomId)
-    saveRooms(rooms.filter((r) => r.id !== roomId))
+    setIsLoading(true)
+
+    // Try API first
+    const success = await deleteRoomAPI(roomId)
+
+    if (success) {
+      // API success - refresh rooms from API
+      await fetchRooms()
+    } else {
+      // Fallback to localStorage
+      saveRooms(rooms.filter((r) => r.id !== roomId))
+    }
+
+    setIsLoading(false)
     
     toast({
       title: "🗑️ Silindi",

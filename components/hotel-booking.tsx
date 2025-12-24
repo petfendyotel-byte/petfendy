@@ -33,22 +33,37 @@ export function HotelBooking() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
 
-  // Load rooms from localStorage (admin tarafından eklenen odalar)
+  // Load rooms from API (or localStorage as fallback)
   useEffect(() => {
-    const storedRooms = localStorage.getItem("petfendy_rooms")
-    if (storedRooms) {
-      const parsedRooms = JSON.parse(storedRooms)
-      if (parsedRooms.length > 0) {
-        setRooms(parsedRooms)
+    const fetchRooms = async () => {
+      try {
+        const response = await fetch('/api/rooms?available=true')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.length > 0) {
+            setRooms(data)
+            return
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch rooms from API:', error)
+      }
+      
+      // Fallback to localStorage
+      const storedRooms = localStorage.getItem("petfendy_rooms")
+      if (storedRooms) {
+        const parsedRooms = JSON.parse(storedRooms)
+        if (parsedRooms.length > 0) {
+          setRooms(parsedRooms)
+        }
       }
     }
 
+    fetchRooms()
+
     // Listen for room updates
     const handleRoomsUpdate = () => {
-      const updatedRooms = localStorage.getItem("petfendy_rooms")
-      if (updatedRooms) {
-        setRooms(JSON.parse(updatedRooms))
-      }
+      fetchRooms()
     }
 
     window.addEventListener('roomsUpdated', handleRoomsUpdate)
