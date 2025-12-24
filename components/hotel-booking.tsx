@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
+import Image from "next/image"
 import type { HotelRoom } from "@/lib/types"
 import { mockHotelRooms } from "@/lib/mock-data"
 import { setTempReservation } from "@/lib/storage"
@@ -9,8 +10,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Badge } from "@/components/ui/badge"
 import { useTranslations } from 'next-intl';
 import { toast } from "@/components/ui/use-toast"
+import { RoomDetailModal } from "@/components/room-detail-modal"
+import { Info, Play } from "lucide-react"
 
 export function HotelBooking() {
   const t = useTranslations('hotel');
@@ -18,14 +22,38 @@ export function HotelBooking() {
   const params = useParams()
   const locale = (params?.locale as string) || 'tr'
   
-  const [rooms] = useState<HotelRoom[]>(mockHotelRooms)
+  const [rooms, setRooms] = useState<HotelRoom[]>(mockHotelRooms)
   const [selectedRoom, setSelectedRoom] = useState<HotelRoom | null>(null)
+  const [detailRoom, setDetailRoom] = useState<HotelRoom | null>(null)
+  const [showDetailModal, setShowDetailModal] = useState(false)
   const [checkInDate, setCheckInDate] = useState("")
   const [checkOutDate, setCheckOutDate] = useState("")
   const [petCount, setPetCount] = useState(1)
   const [specialRequests, setSpecialRequests] = useState("")
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+
+  // Load rooms from localStorage (admin tarafından eklenen odalar)
+  useEffect(() => {
+    const storedRooms = localStorage.getItem("petfendy_rooms")
+    if (storedRooms) {
+      const parsedRooms = JSON.parse(storedRooms)
+      if (parsedRooms.length > 0) {
+        setRooms(parsedRooms)
+      }
+    }
+
+    // Listen for room updates
+    const handleRoomsUpdate = () => {
+      const updatedRooms = localStorage.getItem("petfendy_rooms")
+      if (updatedRooms) {
+        setRooms(JSON.parse(updatedRooms))
+      }
+    }
+
+    window.addEventListener('roomsUpdated', handleRoomsUpdate)
+    return () => window.removeEventListener('roomsUpdated', handleRoomsUpdate)
+  }, [])
 
   const calculateNights = (): number => {
     if (!checkInDate || !checkOutDate) return 0
@@ -116,17 +144,63 @@ export function HotelBooking() {
       <div>
         <h2 className="text-2xl font-bold mb-4">{t('title')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {rooms.map((room) => (
+          {rooms.filter(r => r.available).map((room) => (
             <Card
               key={room.id}
-              className={`cursor-pointer transition-all ${selectedRoom?.id === room.id ? "ring-2 ring-primary" : ""}`}
-              onClick={() => setSelectedRoom(room)}
+              className={`cursor-pointer transition-all overflow-hidden ${selectedRoom?.id === room.id ? "ring-2 ring-primary" : ""}`}
             >
-              <CardHeader>
+              {/* Room Image */}
+              {room.images && room.images.length > 0 ? (
+                <div 
+                  className="relative h-40 w-full"
+                  onClick={() => setSelectedRoom(room)}
+                >
+                  <Image
+                    src={room.images[0]}
+                    alt={room.name}
+                    fill
+                    className="object-cover"
+                  />
+                  {room.images.length > 1 && (
+                    <Badge variant="secondary" className="absolute bottom-2 left-2">
+                      +{room.images.length - 1} resim
+                    </Badge>
+                  )}
+                  {room.videos && room.videos.length > 0 && (
+                    <div className="absolute bottom-2 right-2 bg-red-600 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
+                      <Play className="w-3 h-3" />
+                      Video
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div 
+                  className="h-32 bg-gradient-to-br from-orange-100 to-pink-100 flex items-center justify-center"
+                  onClick={() => setSelectedRoom(room)}
+                >
+                  <span className="text-4xl">
+                    {room.type === "standard" ? "🛏️" : room.type === "deluxe" ? "⭐" : "👑"}
+                  </span>
+                </div>
+              )}
+
+              {/* Detail Button */}
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setDetailRoom(room)
+                  setShowDetailModal(true)
+                }}
+                className="absolute top-2 right-2 w-8 h-8 bg-blue-500 hover:bg-blue-600 rounded-full flex items-center justify-center transition-colors shadow-lg z-10"
+              >
+                <Info className="w-4 h-4 text-white" />
+              </button>
+
+              <CardHeader onClick={() => setSelectedRoom(room)}>
                 <CardTitle className="text-lg">{room.name}</CardTitle>
                 <CardDescription>{t(`roomTypes.${room.type}`)}</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-3" onClick={() => setSelectedRoom(room)}>
                 <div>
                   <p className="text-sm text-muted-foreground">{t('capacity')}</p>
                   <p className="font-semibold">{room.capacity} {t('pets')}</p>
@@ -137,17 +211,36 @@ export function HotelBooking() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground mb-2">{t('amenities')}</p>
-                  <ul className="text-sm space-y-1">
-                    {room.amenities.map((amenity, idx) => (
-                      <li key={idx}>• {amenity}</li>
+                  <div className="flex flex-wrap gap-1">
+                    {room.amenities.slice(0, 3).map((amenity, idx) => (
+                      <Badge key={idx} variant="outline" className="text-xs">
+                        {amenity}
+                      </Badge>
                     ))}
-                  </ul>
+                    {room.amenities.length > 3 && (
+                      <Badge variant="secondary" className="text-xs">
+                        +{room.amenities.length - 3}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
       </div>
+
+      {/* Room Detail Modal */}
+      <RoomDetailModal
+        room={detailRoom}
+        isOpen={showDetailModal}
+        onClose={() => {
+          setShowDetailModal(false)
+          setDetailRoom(null)
+        }}
+        onSelect={(room) => setSelectedRoom(room)}
+        locale={locale}
+      />
 
       {selectedRoom && (
         <Card>

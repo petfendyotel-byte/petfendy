@@ -1,19 +1,21 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
+import Image from "next/image"
 import type { HotelRoom } from "@/lib/types"
 import { mockHotelRooms } from "@/lib/mock-data"
 import { setTempReservation, clearTempTaxiReservation } from "@/lib/storage"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
-import { Hotel, Sparkles, Calendar, User, PawPrint, ArrowLeft, Info, Home } from "lucide-react"
+import { RoomDetailModal } from "@/components/room-detail-modal"
+import { Hotel, Sparkles, Calendar, User, PawPrint, ArrowLeft, Info, Home, Play } from "lucide-react"
 
 // Ek hizmetler
 const additionalServices = [
@@ -27,9 +29,11 @@ export function HotelBookingGuest() {
   const params = useParams()
   const locale = (params?.locale as string) || 'tr'
   
-  const [rooms] = useState<HotelRoom[]>(mockHotelRooms)
+  const [rooms, setRooms] = useState<HotelRoom[]>(mockHotelRooms)
   const [selectedRoom, setSelectedRoom] = useState<HotelRoom | null>(null)
   const [selectedServices, setSelectedServices] = useState<string[]>([])
+  const [detailRoom, setDetailRoom] = useState<HotelRoom | null>(null)
+  const [showDetailModal, setShowDetailModal] = useState(false)
   
   // Pet bilgileri
   const [petName, setPetName] = useState("")
@@ -46,6 +50,28 @@ export function HotelBookingGuest() {
   const [guestPhone, setGuestPhone] = useState("")
   const [guestEmail, setGuestEmail] = useState("")
   const [specialNotes, setSpecialNotes] = useState("")
+
+  // Load rooms from localStorage (admin tarafından eklenen odalar)
+  useEffect(() => {
+    const storedRooms = localStorage.getItem("petfendy_rooms")
+    if (storedRooms) {
+      const parsedRooms = JSON.parse(storedRooms)
+      if (parsedRooms.length > 0) {
+        setRooms(parsedRooms)
+      }
+    }
+
+    // Listen for room updates
+    const handleRoomsUpdate = () => {
+      const updatedRooms = localStorage.getItem("petfendy_rooms")
+      if (updatedRooms) {
+        setRooms(JSON.parse(updatedRooms))
+      }
+    }
+
+    window.addEventListener('roomsUpdated', handleRoomsUpdate)
+    return () => window.removeEventListener('roomsUpdated', handleRoomsUpdate)
+  }, [])
 
   const calculateNights = (): number => {
     if (!checkInDate || !checkOutDate) return 0
@@ -264,33 +290,94 @@ export function HotelBookingGuest() {
             <Hotel className="w-5 h-5 text-green-600" />
             <span className="font-semibold">Oda Tipi</span>
           </div>
-          <div className="grid grid-cols-3 gap-4">
-            {rooms.map((room) => (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {rooms.filter(r => r.available).map((room) => (
               <div
                 key={room.id}
-                onClick={() => setSelectedRoom(room)}
-                className={`relative p-4 rounded-xl cursor-pointer transition-all text-center ${
+                className={`relative rounded-xl cursor-pointer transition-all overflow-hidden ${
                   selectedRoom?.id === room.id 
-                    ? "bg-orange-50 border-2 border-orange-400" 
-                    : "bg-white border-2 border-transparent hover:border-gray-200"
+                    ? "ring-2 ring-orange-400 shadow-lg" 
+                    : "hover:shadow-md"
                 }`}
               >
-                <button className="absolute top-2 right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                  <Info className="w-3 h-3 text-white" />
-                </button>
-                <div className="text-3xl mb-2">
-                  {room.type === "standard" ? "🛏️" : room.type === "deluxe" ? "⭐" : "👑"}
+                {/* Room Image */}
+                {room.images && room.images.length > 0 ? (
+                  <div 
+                    className="relative h-32 w-full"
+                    onClick={() => setSelectedRoom(room)}
+                  >
+                    <Image
+                      src={room.images[0]}
+                      alt={room.name}
+                      fill
+                      className="object-cover"
+                    />
+                    {room.videos && room.videos.length > 0 && (
+                      <div className="absolute bottom-2 left-2 bg-red-600 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
+                        <Play className="w-3 h-3" />
+                        Video
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div 
+                    className="h-32 bg-gradient-to-br from-orange-100 to-pink-100 flex items-center justify-center"
+                    onClick={() => setSelectedRoom(room)}
+                  >
+                    <span className="text-4xl">
+                      {room.type === "standard" ? "🛏️" : room.type === "deluxe" ? "⭐" : "👑"}
+                    </span>
+                  </div>
+                )}
+
+                {/* Room Info */}
+                <div 
+                  className={`p-4 ${selectedRoom?.id === room.id ? "bg-orange-50" : "bg-white"}`}
+                  onClick={() => setSelectedRoom(room)}
+                >
+                  <p className="font-medium text-sm mb-1">{room.name}</p>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    {room.type === "standard" ? "Standart" : room.type === "deluxe" ? "Deluxe" : "Suit"}
+                  </p>
+                  <p className="text-xl font-bold text-orange-500">₺{room.pricePerNight}</p>
+                  <p className="text-xs text-muted-foreground">/gece</p>
                 </div>
-                <p className="font-medium text-sm">
-                  {room.type === "standard" ? "Standart Oda" : room.type === "deluxe" ? "Deluxe Oda" : "Suit Oda"}
-                </p>
-                <p className="text-2xl font-bold text-orange-500 mt-1">₺{room.pricePerNight}</p>
-                <p className="text-xs text-muted-foreground">/gece</p>
+
+                {/* Detail Button */}
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setDetailRoom(room)
+                    setShowDetailModal(true)
+                  }}
+                  className="absolute top-2 right-2 w-8 h-8 bg-blue-500 hover:bg-blue-600 rounded-full flex items-center justify-center transition-colors shadow-lg"
+                >
+                  <Info className="w-4 h-4 text-white" />
+                </button>
+
+                {/* Selected Indicator */}
+                {selectedRoom?.id === room.id && (
+                  <div className="absolute top-2 left-2 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs">✓</span>
+                  </div>
+                )}
               </div>
             ))}
           </div>
         </CardContent>
       </Card>
+
+      {/* Room Detail Modal */}
+      <RoomDetailModal
+        room={detailRoom}
+        isOpen={showDetailModal}
+        onClose={() => {
+          setShowDetailModal(false)
+          setDetailRoom(null)
+        }}
+        onSelect={(room) => setSelectedRoom(room)}
+        locale={locale}
+      />
 
       {/* Ek Hizmetler */}
       <Card className="border-0 shadow-sm bg-purple-50/30">
