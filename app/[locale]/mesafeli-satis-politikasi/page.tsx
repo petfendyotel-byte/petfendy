@@ -4,372 +4,261 @@ import { useParams } from "next/navigation"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { Card, CardContent } from "@/components/ui/card"
-import { 
-  FileText, 
-  Users,
-  BookOpen,
-  Target,
-  CreditCard,
-  RotateCcw,
-  Building2,
-  UserCheck,
-  Clock,
-  Scale,
-  CheckCircle,
-  MapPin
-} from "lucide-react"
+import { FileText, Scale, MapPin } from "lucide-react"
+
+const content = {
+  tr: {
+    title: "MESAFELİ SATIŞ SÖZLEŞMESİ",
+    articles: [
+      {
+        num: 1,
+        title: "Madde 1 - Taraflar",
+        text: "İşbu sözleşme, bir tarafta merkezi Ankara adresinde bulunan Petfendy Limited Şirketi (bundan sonra \"Satıcı\" olarak anılacaktır) ile diğer tarafta, Satıcı'nın hizmetlerini platform üzerinden satın alan tüketici (\"Alıcı\") arasında, aşağıda belirtilen hüküm ve şartlar çerçevesinde akdedilmiştir."
+      },
+      {
+        num: 2,
+        title: "Madde 2 - Tanımlar",
+        definitions: [
+          { term: "Bakanlık", desc: "Ticaret Bakanlığı" },
+          { term: "Kanun", desc: "6502 sayılı Tüketicinin Korunması Hakkında Kanun" },
+          { term: "Yönetmelik", desc: "Mesafeli Sözleşmeler Yönetmeliği" },
+          { term: "Satıcı", desc: "Petfendy Limited Şirketi, platform aracılığıyla pet sahipleri ve hizmet sağlayıcıları arasında aracılık hizmeti sunmaktadır." },
+          { term: "Alıcı", desc: "Satıcı'nın platformu üzerinden hizmet talep eden ve bu hizmetlerin bedelini ödeyen tüketici." },
+          { term: "Platform", desc: "Satıcı tarafından işletilen ve Alıcıların hizmet sağlayıcılarından hizmet satın almasını sağlayan dijital platform." },
+        ]
+      },
+      {
+        num: 3,
+        title: "Madde 3 - Konu",
+        text: "İşbu sözleşme, Alıcı'nın Satıcı'ya ait platform üzerinden hizmet sağlayıcılardan satın alabileceği hizmetlere ilişkin tarafların hak ve yükümlülüklerini düzenler."
+      },
+      {
+        num: 4,
+        title: "Madde 4 - Sözleşme Konusu Hizmetin Özellikleri ve Bedeli",
+        text: "Alıcı, platform üzerinden seçmiş olduğu hizmetin detayları, fiyatı, koşulları ve hizmet sağlayıcısına ilişkin bilgileri satın alma işleminden önce incelemekle yükümlüdür."
+      },
+      {
+        num: 5,
+        title: "Madde 5 - Ödeme ve İade Koşulları",
+        items: [
+          "Alıcı, platformda belirtilen hizmet bedelini online ödeme yöntemleriyle gerçekleştirecektir.",
+          "Alıcı'nın cayma hakkını kullanması durumunda, ödeme iade süreci 14 iş günü içinde tamamlanacaktır.",
+          "Hizmetin sağlayıcı tarafından ifa edilmemesi durumunda, iade süreci Satıcı'nın değerlendirmesi sonrasında yürütülecektir."
+        ]
+      },
+      {
+        num: 6,
+        title: "Madde 6 - Cayma Hakkı",
+        items: [
+          "Alıcı, hizmet alımını gerçekleştirdikten sonra 14 gün içinde hiçbir gerekçe göstermeksizin cayma hakkını kullanabilir.",
+          "Cayma hakkının kullanılması durumunda, cayma bildirimi Satıcı'ya yazılı olarak veya platformdaki ilgili bölümden yapılabilir.",
+          "Cayma hakkının kullanılması halinde, hizmet bedeli Alıcı'ya aynı ödeme yöntemi ile iade edilecektir."
+        ]
+      },
+      {
+        num: 7,
+        title: "Madde 7 - Satıcı'nın Yükümlülükleri",
+        items: [
+          "Satıcı, platformda yer alan bilgilerin doğru, eksiksiz ve güncel olmasını sağlamakla yükümlüdür.",
+          "Satıcı, hizmet sağlayıcılar ile Alıcılar arasında aracılık yapmaktadır."
+        ]
+      },
+      {
+        num: 8,
+        title: "Madde 8 - Alıcı'nın Yükümlülükleri",
+        items: [
+          "Alıcı, platform üzerinden seçtiği hizmete ilişkin tüm bilgileri dikkatle incelemekle yükümlüdür.",
+          "Alıcı, hizmet sağlayıcıdan aldığı hizmet sırasında oluşabilecek sorunlarda Satıcı ile iletişime geçebilecektir."
+        ]
+      },
+      {
+        num: 9,
+        title: "Madde 9 - Sözleşmenin Süresi ve Feshi",
+        text: "İşbu sözleşme, Alıcı'nın platform üzerinden hizmet satın alması ile yürürlüğe girer. Taraflar, karşılıklı mutabakat ile sözleşmeyi feshedebilir."
+      },
+      {
+        num: 10,
+        title: "Madde 10 - Uyuşmazlıkların Çözümü",
+        text: "İşbu sözleşmeden doğabilecek uyuşmazlıkların çözümünde, Ankara Tüketici Hakem Heyetleri ve Ankara Tüketici Mahkemeleri yetkilidir."
+      },
+      {
+        num: 11,
+        title: "Madde 11 - Yürürlük",
+        text: "Alıcı, platform üzerinden hizmet satın alırken işbu sözleşmenin tüm koşullarını okuduğunu, anladığını ve kabul ettiğini beyan eder. Sözleşme, Alıcı tarafından elektronik ortamda onaylandığı ve hizmet bedeli ödendiği anda yürürlüğe girer."
+      }
+    ],
+    parties: "Taraflar:",
+    seller: "Satıcı:",
+    sellerInfo: "Petfendy Limited Şirketi\nBağlıca, Şehit Hikmet Özer Cd. No:101 Etimesgut/Ankara",
+    buyer: "Alıcı:",
+    buyerInfo: "[Ad-Soyad / Ticari Unvan]"
+  },
+  en: {
+    title: "DISTANCE SALES AGREEMENT",
+    articles: [
+      {
+        num: 1,
+        title: "Article 1 - Parties",
+        text: "This agreement has been concluded between Petfendy Limited Company (hereinafter referred to as \"Seller\") headquartered in Ankara and the consumer (\"Buyer\") who purchases the Seller's services through the platform, within the framework of the terms and conditions specified below."
+      },
+      {
+        num: 2,
+        title: "Article 2 - Definitions",
+        definitions: [
+          { term: "Ministry", desc: "Ministry of Trade" },
+          { term: "Law", desc: "Consumer Protection Law No. 6502" },
+          { term: "Regulation", desc: "Distance Contracts Regulation" },
+          { term: "Seller", desc: "Petfendy Limited Company provides intermediary services between pet owners and service providers through the platform." },
+          { term: "Buyer", desc: "The consumer who requests services through the Seller's platform and pays for these services." },
+          { term: "Platform", desc: "The digital platform operated by the Seller that enables Buyers to purchase services from service providers." },
+        ]
+      },
+      {
+        num: 3,
+        title: "Article 3 - Subject",
+        text: "This agreement regulates the rights and obligations of the parties regarding the services that the Buyer can purchase from service providers through the Seller's platform."
+      },
+      {
+        num: 4,
+        title: "Article 4 - Features and Price of the Service",
+        text: "The Buyer is obliged to review the details, price, conditions and information about the service provider of the service selected through the platform before making a purchase."
+      },
+      {
+        num: 5,
+        title: "Article 5 - Payment and Refund Conditions",
+        items: [
+          "The Buyer will pay the service fee specified on the platform through online payment methods.",
+          "If the Buyer exercises the right of withdrawal, the refund process will be completed within 14 business days.",
+          "If the service is not provided by the provider, the refund process will be carried out after the Seller's evaluation."
+        ]
+      },
+      {
+        num: 6,
+        title: "Article 6 - Right of Withdrawal",
+        items: [
+          "The Buyer may exercise the right of withdrawal within 14 days after purchasing the service without giving any reason.",
+          "If the right of withdrawal is exercised, the withdrawal notification can be made to the Seller in writing or through the relevant section on the platform.",
+          "If the right of withdrawal is exercised, the service fee will be refunded to the Buyer using the same payment method."
+        ]
+      },
+      {
+        num: 7,
+        title: "Article 7 - Seller's Obligations",
+        items: [
+          "The Seller is obliged to ensure that the information on the platform is accurate, complete and up-to-date.",
+          "The Seller acts as an intermediary between service providers and Buyers."
+        ]
+      },
+      {
+        num: 8,
+        title: "Article 8 - Buyer's Obligations",
+        items: [
+          "The Buyer is obliged to carefully review all information regarding the service selected through the platform.",
+          "The Buyer may contact the Seller in case of problems during the service received from the service provider."
+        ]
+      },
+      {
+        num: 9,
+        title: "Article 9 - Duration and Termination",
+        text: "This agreement enters into force when the Buyer purchases a service through the platform. The parties may terminate the agreement by mutual consent."
+      },
+      {
+        num: 10,
+        title: "Article 10 - Dispute Resolution",
+        text: "Ankara Consumer Arbitration Committees and Ankara Consumer Courts are authorized to resolve disputes arising from this agreement."
+      },
+      {
+        num: 11,
+        title: "Article 11 - Effectiveness",
+        text: "The Buyer declares that they have read, understood and accepted all terms of this agreement when purchasing services through the platform. The agreement enters into force when it is approved electronically by the Buyer and the service fee is paid."
+      }
+    ],
+    parties: "Parties:",
+    seller: "Seller:",
+    sellerInfo: "Petfendy Limited Company\nBağlıca, Şehit Hikmet Özer St. No:101 Etimesgut/Ankara",
+    buyer: "Buyer:",
+    buyerInfo: "[Name-Surname / Trade Name]"
+  }
+}
 
 export default function DistanceSalesPage() {
   const params = useParams()
   const locale = (params?.locale as string) || 'tr'
-
-  const definitions = [
-    { term: "Bakanlık", desc: "Ticaret Bakanlığı" },
-    { term: "Kanun", desc: "6502 sayılı Tüketicinin Korunması Hakkında Kanun" },
-    { term: "Yönetmelik", desc: "Mesafeli Sözleşmeler Yönetmeliği" },
-    { term: "Satıcı", desc: "Petfendy Limited Şirketi, platform aracılığıyla pet sahipleri ve hizmet sağlayıcıları (pet hoteli, pet taksi, veterinerler, eğitmenler) arasında aracılık hizmeti sunmaktadır." },
-    { term: "Alıcı", desc: "Satıcı'nın platformu üzerinden hizmet talep eden ve bu hizmetlerin bedelini ödeyen tüketici." },
-    { term: "Hizmet Sağlayıcılar", desc: "Platformda listelenen pet hotelleri, veterinerler, eğitmenler ve diğer hizmet sağlayıcılar." },
-    { term: "Platform", desc: "Satıcı tarafından işletilen ve Alıcıların hizmet sağlayıcılarından hizmet satın almasını sağlayan dijital platform." },
-    { term: "Hizmet ya da ürün", desc: "Platformda listelenen hizmet sağlayıcılarının, pet sahibine sağladığı; pet için barınma, bakım, beslenme, pet aksesuarları, pet teknolojileri, mama gibi olanaklar ve ürünler." },
-  ]
+  const t = content[locale as keyof typeof content] || content.tr
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar locale={locale} />
-
-      {/* Hero Section */}
       <section className="relative py-20 px-4 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600"></div>
-        
-        <div className="absolute top-10 left-10 opacity-20">
-          <FileText className="w-24 h-24 text-white" />
-        </div>
-        <div className="absolute bottom-10 right-10 opacity-20">
-          <Scale className="w-20 h-20 text-white" />
-        </div>
-        
+        <div className="absolute top-10 left-10 opacity-20"><FileText className="w-24 h-24 text-white" /></div>
+        <div className="absolute bottom-10 right-10 opacity-20"><Scale className="w-20 h-20 text-white" /></div>
         <div className="relative z-10 max-w-4xl mx-auto text-center text-white">
           <div className="flex justify-center mb-6">
             <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
               <FileText className="w-10 h-10" />
             </div>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">
-            MESAFELİ SATIŞ SÖZLEŞMESİ
-          </h1>
+          <h1 className="text-3xl md:text-4xl font-bold mb-4">{t.title}</h1>
         </div>
       </section>
 
-      {/* Content Sections */}
       <section className="py-12 px-4">
         <div className="max-w-4xl mx-auto space-y-6">
-          
-          {/* Madde 1 - Taraflar */}
-          <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
-            <CardContent className="p-6 sm:p-8">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-bold shrink-0">
-                  1
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold mb-3">Madde 1 - Taraflar</h2>
-                  <p className="text-gray-600 leading-relaxed text-sm">
-                    İşbu sözleşme, bir tarafta merkezi Ankara adresinde bulunan <strong>Petfendy Limited Şirketi</strong> (bundan sonra "Satıcı" olarak anılacaktır) ile diğer tarafta, Satıcı'nın hizmetlerini platform üzerinden satın alan tüketici ("Alıcı") arasında, aşağıda belirtilen hüküm ve şartlar çerçevesinde akdedilmiştir.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Madde 2 - Tanımlar */}
-          <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
-            <CardContent className="p-6 sm:p-8">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-purple-600 text-white rounded-xl flex items-center justify-center font-bold shrink-0">
-                  2
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold mb-4">Madde 2 - Tanımlar</h2>
-                  <div className="space-y-3">
-                    {definitions.map((item, index) => (
-                      <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-                        <span className="text-sm font-bold text-purple-600 shrink-0">2.{index + 1}.</span>
-                        <p className="text-gray-600 text-sm">
-                          <strong>{item.term}:</strong> {item.desc}
-                        </p>
+          {t.articles.map((article) => (
+            <Card key={article.num} className="border-0 shadow-lg rounded-2xl overflow-hidden">
+              <CardContent className="p-6 sm:p-8">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-bold shrink-0">
+                    {article.num}
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-xl font-bold mb-3">{article.title}</h2>
+                    {article.text && <p className="text-gray-600 leading-relaxed text-sm">{article.text}</p>}
+                    {article.definitions && (
+                      <div className="space-y-3">
+                        {article.definitions.map((def, i) => (
+                          <div key={i} className="flex gap-2 text-sm">
+                            <span className="font-semibold text-indigo-600 min-w-[100px]">{def.term}:</span>
+                            <span className="text-gray-600">{def.desc}</span>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    )}
+                    {article.items && (
+                      <ul className="space-y-2 text-gray-600 text-sm">
+                        {article.items.map((item, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <span className="text-indigo-500 font-bold">{article.num}.{i + 1}</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          ))}
 
-          {/* Madde 3 - Konu */}
-          <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
-            <CardContent className="p-6 sm:p-8">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center font-bold shrink-0">
-                  3
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold mb-3">Madde 3 - Konu</h2>
-                  <p className="text-gray-600 leading-relaxed text-sm">
-                    İşbu sözleşme, Alıcı'nın Satıcı'ya ait platform üzerinden hizmet sağlayıcılardan satın alabileceği hizmetlere ilişkin tarafların hak ve yükümlülüklerini düzenler. Satıcı, sadece aracılık hizmeti sunmakta olup, hizmet sağlayıcıların sunduğu hizmetlerden doğabilecek sorunlardan doğrudan sorumlu değildir.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Madde 4 - Hizmetin Özellikleri */}
-          <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
-            <CardContent className="p-6 sm:p-8">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-green-600 text-white rounded-xl flex items-center justify-center font-bold shrink-0">
-                  4
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold mb-4">Madde 4 - Sözleşme Konusu Hizmetin Özellikleri ve Bedeli</h2>
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-                      <span className="text-sm font-bold text-green-600 shrink-0">4.1.</span>
-                      <p className="text-gray-600 text-sm">
-                        Alıcı, platform üzerinden seçmiş olduğu hizmetin detayları, fiyatı, koşulları ve hizmet sağlayıcısına ilişkin bilgileri satın alma işleminden önce incelemekle yükümlüdür.
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-                      <span className="text-sm font-bold text-green-600 shrink-0">4.2.</span>
-                      <p className="text-gray-600 text-sm">
-                        Satıcı, Alıcı'nın seçtiği hizmete ilişkin detayları platformda açık bir şekilde sunacaktır.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Madde 5 - Ödeme ve İade */}
-          <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
-            <CardContent className="p-6 sm:p-8">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-orange-600 text-white rounded-xl flex items-center justify-center font-bold shrink-0">
-                  5
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold mb-4">Madde 5 - Ödeme ve İade Koşulları</h2>
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-                      <span className="text-sm font-bold text-orange-600 shrink-0">5.1.</span>
-                      <p className="text-gray-600 text-sm">
-                        Alıcı, platformda belirtilen hizmet bedelini online ödeme yöntemleriyle gerçekleştirecektir.
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-                      <span className="text-sm font-bold text-orange-600 shrink-0">5.2.</span>
-                      <p className="text-gray-600 text-sm">
-                        Alıcı'nın cayma hakkını kullanması durumunda, ödeme iade süreci 14 iş günü içinde tamamlanacaktır.
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-                      <span className="text-sm font-bold text-orange-600 shrink-0">5.3.</span>
-                      <p className="text-gray-600 text-sm">
-                        Hizmetin sağlayıcı tarafından ifa edilmemesi durumunda, iade süreci Satıcı'nın değerlendirmesi sonrasında yürütülecektir.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Madde 6 - Cayma Hakkı */}
-          <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
-            <CardContent className="p-6 sm:p-8">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-cyan-600 text-white rounded-xl flex items-center justify-center font-bold shrink-0">
-                  6
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold mb-4">Madde 6 - Cayma Hakkı</h2>
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-                      <span className="text-sm font-bold text-cyan-600 shrink-0">6.1.</span>
-                      <p className="text-gray-600 text-sm">
-                        Alıcı, hizmet alımını gerçekleştirdikten sonra 14 gün içinde hiçbir gerekçe göstermeksizin ve cezai şart ödemeksizin cayma hakkını kullanabilir. Ancak açılmakla bozulan ürünlerin geçerli bir nedeni olmaksızın iadesi mümkün değildir (mama vs.).
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-                      <span className="text-sm font-bold text-cyan-600 shrink-0">6.2.</span>
-                      <p className="text-gray-600 text-sm">
-                        Cayma hakkının kullanılması durumunda, cayma bildirimi Satıcı'ya yazılı olarak veya platformdaki ilgili bölümden yapılabilir.
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-                      <span className="text-sm font-bold text-cyan-600 shrink-0">6.3.</span>
-                      <p className="text-gray-600 text-sm">
-                        Cayma hakkının kullanılması halinde, hizmet bedeli Alıcı'ya aynı ödeme yöntemi ile iade edilecektir.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Madde 7 - Satıcı'nın Yükümlülükleri */}
-          <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
-            <CardContent className="p-6 sm:p-8">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-pink-600 text-white rounded-xl flex items-center justify-center font-bold shrink-0">
-                  7
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold mb-4">Madde 7 - Satıcı'nın Yükümlülükleri</h2>
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-                      <span className="text-sm font-bold text-pink-600 shrink-0">7.1.</span>
-                      <p className="text-gray-600 text-sm">
-                        Satıcı, platformda yer alan, hizmet sağlayıcılarından aldıkları bilgilerin; doğru, eksiksiz ve güncel olmasını sağlamakla yükümlüdür.
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-                      <span className="text-sm font-bold text-pink-600 shrink-0">7.2.</span>
-                      <p className="text-gray-600 text-sm">
-                        Satıcı, hizmet sağlayıcılar ile Alıcılar arasında aracılık yapmaktadır. Ancak hizmet sağlayıcıların sunduğu hizmetlerden kaynaklanan sorunlardan sorumluluk kabul etmez.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Madde 8 - Alıcı'nın Yükümlülükleri */}
-          <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
-            <CardContent className="p-6 sm:p-8">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-teal-600 text-white rounded-xl flex items-center justify-center font-bold shrink-0">
-                  8
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold mb-4">Madde 8 - Alıcı'nın Yükümlülükleri</h2>
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-                      <span className="text-sm font-bold text-teal-600 shrink-0">8.1.</span>
-                      <p className="text-gray-600 text-sm">
-                        Alıcı, platform üzerinden seçtiği hizmete ilişkin tüm bilgileri dikkatle incelemekle yükümlüdür.
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-                      <span className="text-sm font-bold text-teal-600 shrink-0">8.2.</span>
-                      <p className="text-gray-600 text-sm">
-                        Alıcı, hizmet sağlayıcıdan aldığı hizmet sırasında oluşabilecek sorunlarda, hizmet sağlayıcı ile iletişime geçebileceği gibi Satıcı ile de iletişime geçebilecektir.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Madde 9 - Sözleşmenin Süresi */}
-          <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
-            <CardContent className="p-6 sm:p-8">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-amber-600 text-white rounded-xl flex items-center justify-center font-bold shrink-0">
-                  9
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold mb-3">Madde 9 - Sözleşmenin Süresi ve Feshi</h2>
-                  <p className="text-gray-600 leading-relaxed text-sm">
-                    İşbu sözleşme, Alıcı'nın platform üzerinden hizmet satın alması ile yürürlüğe girer. Taraflar, karşılıklı mutabakat ile sözleşmeyi feshedebilir. İptal ve iade durumunda ise taraflar, Platformda yer alan İptal ve İade Koşullarına bağlıdır.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Madde 10 - Uyuşmazlıkların Çözümü */}
-          <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
-            <CardContent className="p-6 sm:p-8">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-red-600 text-white rounded-xl flex items-center justify-center font-bold shrink-0">
-                  10
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold mb-3">Madde 10 - Uyuşmazlıkların Çözümü</h2>
-                  <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-                    <span className="text-sm font-bold text-red-600 shrink-0">10.1.</span>
-                    <p className="text-gray-600 text-sm">
-                      İşbu sözleşmeden doğabilecek uyuşmazlıkların çözümünde, Ankara Tüketici Hakem Heyetleri ve Ankara Tüketici Mahkemeleri yetkilidir.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Madde 11 - Yürürlük */}
-          <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
-            <CardContent className="p-6 sm:p-8">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-violet-600 text-white rounded-xl flex items-center justify-center font-bold shrink-0">
-                  11
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold mb-4">Madde 11 - Yürürlük</h2>
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-                      <span className="text-sm font-bold text-violet-600 shrink-0">11.1.</span>
-                      <p className="text-gray-600 text-sm">
-                        Alıcı, platform üzerinden hizmet satın alırken işbu sözleşmenin tüm koşullarını okuduğunu, anladığını ve kabul ettiğini beyan eder.
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-                      <span className="text-sm font-bold text-violet-600 shrink-0">11.2.</span>
-                      <p className="text-gray-600 text-sm">
-                        Sözleşme, Alıcı tarafından elektronik ortamda onaylandığı ve hizmet bedeli ödendiği anda yürürlüğe girer.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Taraflar */}
+          {/* Parties */}
           <Card className="border-0 shadow-lg rounded-2xl overflow-hidden bg-gradient-to-r from-indigo-600 to-purple-600">
-            <CardContent className="p-6 sm:p-8">
-              <h2 className="text-xl font-bold mb-6 text-white">Taraflar</h2>
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="bg-white/10 rounded-xl p-5 text-white">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Building2 className="w-6 h-6" />
-                    <p className="font-bold">Satıcı</p>
-                  </div>
-                  <p className="text-sm text-indigo-100 font-medium mb-2">Petfendy Limited Şirketi</p>
-                  <div className="flex items-start gap-2 text-sm text-indigo-200">
-                    <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
-                    <span>Bağlıca, Şehit Hikmet Özer Cd. No:101 Etimesgut/Ankara</span>
-                  </div>
+            <CardContent className="p-6 sm:p-8 text-white">
+              <h3 className="font-bold text-lg mb-4">{t.parties}</h3>
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div className="bg-white/10 rounded-xl p-4">
+                  <p className="font-bold mb-2">{t.seller}</p>
+                  <p className="text-sm text-indigo-100 whitespace-pre-line">{t.sellerInfo}</p>
                 </div>
-                <div className="bg-white/10 rounded-xl p-5 text-white">
-                  <div className="flex items-center gap-3 mb-3">
-                    <UserCheck className="w-6 h-6" />
-                    <p className="font-bold">Alıcı</p>
-                  </div>
-                  <p className="text-sm text-indigo-200">[Ad-Soyad / Ticari Unvan]</p>
+                <div className="bg-white/10 rounded-xl p-4">
+                  <p className="font-bold mb-2">{t.buyer}</p>
+                  <p className="text-sm text-indigo-100">{t.buyerInfo}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-
         </div>
       </section>
-
       <Footer locale={locale} />
     </div>
   )
