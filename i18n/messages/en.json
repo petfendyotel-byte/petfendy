@@ -96,7 +96,12 @@
     "refund": "Cancellation & Refund Policy",
     "distance": "Distance Sales Policy",
     "cookies": "Cookie Policy",
-    "copyright": "© 2025 Petfendy.com. All rights reserved."
+    "copyright": "© 2025 Petfendy.com. All rights reserved.",
+    "privacyPolicy": "Privacy and Personal Data Protection Policy",
+    "refundPolicy": "Cancellation and Refund Policy",
+    "distancePolicy": "Distance Sales Agreement",
+    "preliminaryInfo": "Preliminary Information Form",
+    "cookiePolicy": "Cookie Policy"
   },
   "common": {
     "appName": "Petfendy",

@@ -196,15 +196,15 @@ export function Footer({ locale }: FooterProps) {
             <div className="flex flex-wrap justify-center items-center gap-2 text-xs text-gray-400">
               <span>© 2025 PetFendy.com</span>
               <span className="hidden sm:inline">·</span>
-              <a href={`/${locale}/gizlilik-politikasi`} className="hover:text-orange-400 transition-colors">Gizlilik ve Kişisel Verilerin Korunması Politikası</a>
+              <a href={`/${locale}/gizlilik-politikasi`} className="hover:text-orange-400 transition-colors">{t('privacyPolicy')}</a>
               <span className="hidden sm:inline">·</span>
-              <a href={`/${locale}/iptal-iade-politikasi`} className="hover:text-orange-400 transition-colors">İptal ve İade Politikası</a>
+              <a href={`/${locale}/iptal-iade-politikasi`} className="hover:text-orange-400 transition-colors">{t('refundPolicy')}</a>
               <span className="hidden sm:inline">·</span>
-              <a href={`/${locale}/mesafeli-satis-politikasi`} className="hover:text-orange-400 transition-colors">Mesafeli Satış Politikası</a>
+              <a href={`/${locale}/mesafeli-satis-politikasi`} className="hover:text-orange-400 transition-colors">{t('distancePolicy')}</a>
               <span className="hidden sm:inline">·</span>
-              <a href={`/${locale}/on-bilgilendirme-formu`} className="hover:text-orange-400 transition-colors">Ön Bilgilendirme Formu</a>
+              <a href={`/${locale}/on-bilgilendirme-formu`} className="hover:text-orange-400 transition-colors">{t('preliminaryInfo')}</a>
               <span className="hidden sm:inline">·</span>
-              <a href={`/${locale}/cerez`} className="hover:text-orange-400 transition-colors">Çerez Politikası</a>
+              <a href={`/${locale}/cerez`} className="hover:text-orange-400 transition-colors">{t('cookiePolicy')}</a>
             </div>
           </div>
         </div>
