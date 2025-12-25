@@ -133,6 +133,23 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 
 // Generate secure JWT token
 export function generateToken(userId: string, email: string, role: string = 'user'): string {
+  // Check if we're on server or client
+  if (typeof window !== 'undefined') {
+    // Client-side: Use simple base64 encoded token
+    const payload = {
+      userId,
+      email,
+      role,
+      iat: Math.floor(Date.now() / 1000),
+      exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24), // 24 hours
+    };
+    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+    const body = btoa(JSON.stringify(payload));
+    const signature = btoa(`${header}.${body}.${getJWTSecret().substring(0, 10)}`);
+    return `${header}.${body}.${signature}`;
+  }
+  
+  // Server-side: Use jsonwebtoken
   const payload = {
     userId,
     email,
@@ -159,6 +176,24 @@ export function generateRefreshToken(userId: string): string {
 // Verify JWT token
 export function verifyToken(token: string): { valid: boolean; payload?: any; error?: string } {
   try {
+    // Check if we're on client-side
+    if (typeof window !== 'undefined') {
+      // Client-side: Parse simple base64 token
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        return { valid: false, error: 'Invalid token format' };
+      }
+      const payload = JSON.parse(atob(parts[1]));
+      
+      // Check expiration
+      if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
+        return { valid: false, error: 'Token expired' };
+      }
+      
+      return { valid: true, payload };
+    }
+    
+    // Server-side: Use jsonwebtoken
     const payload = jwt.verify(token, getJWTSecret());
     return { valid: true, payload };
   } catch (error: any) {
