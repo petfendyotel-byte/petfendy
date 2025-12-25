@@ -24,7 +24,7 @@ const TEST_USERS_DB: Map<string, { passwordHash: string; user: Partial<User> }> 
 // Initialize test admin user (works in both dev and production for demo purposes)
 // Fallback values if environment variables are not set
 const testAdminEmail = process.env.NEXT_PUBLIC_TEST_ADMIN_EMAIL || 'petfendyotel@gmail.com'
-const testAdminPasswordHash = process.env.NEXT_PUBLIC_TEST_ADMIN_PASSWORD_HASH || '$2b$12$C8.izTK3qs/MOrucqQzw5.potXQo7b21fHT/Z4EnM6jEmZNZ7EGN2'
+const testAdminPasswordHash = process.env.NEXT_PUBLIC_TEST_ADMIN_PASSWORD_HASH || '$2b$12$1nEZKNLzKANQ7AfOKWzBueUBIRTMYQcoOwjILo7a1pbqetqJzMHbG'
 
 // Always initialize admin user
 TEST_USERS_DB.set(testAdminEmail, {
