@@ -62,8 +62,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     setIsLoading(true)
     try {
+      // Debug log
+      console.log('Login attempt for:', email)
+      console.log('TEST_USERS_DB has:', Array.from(TEST_USERS_DB.keys()))
+      
       // Look up user in test database
       const userRecord = TEST_USERS_DB.get(email)
+      console.log('User record found:', !!userRecord)
 
       if (!userRecord) {
         // Simulate timing to prevent user enumeration
@@ -71,8 +76,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error('Geçersiz email veya şifre')
       }
 
+      console.log('Stored hash:', userRecord.passwordHash)
+      console.log('Password length:', password.length)
+      
       // Verify password against hash
       const isValidPassword = await verifyPassword(password, userRecord.passwordHash)
+      console.log('Password valid:', isValidPassword)
 
       if (!isValidPassword) {
         throw new Error('Geçersiz email veya şifre')
