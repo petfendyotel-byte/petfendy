@@ -4,6 +4,7 @@ import { useState } from "react"
 import Image from "next/image"
 import type { HotelRoom } from "@/lib/types"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { 
@@ -72,6 +73,9 @@ export function RoomDetailModal({ room, isOpen, onClose, onSelect, locale = 'tr'
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
+        <VisuallyHidden>
+          <DialogTitle>{room.name} - {getRoomTypeLabel(room.type)}</DialogTitle>
+        </VisuallyHidden>
         {/* Image Gallery */}
         <div className="relative">
           {hasImages ? (

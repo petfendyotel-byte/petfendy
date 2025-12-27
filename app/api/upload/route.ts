@@ -3,7 +3,6 @@ import { writeFile, mkdir } from 'fs/promises'
 import { existsSync } from 'fs'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
-import prisma from '@/lib/prisma'
 
 // Allowed file types
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
@@ -75,22 +74,30 @@ export async function POST(request: NextRequest) {
     // Generate URL
     const url = `/${uploadDir}/${filename}`
 
-    // Save to database
-    const uploadedFile = await prisma.uploadedFile.create({
-      data: {
-        filename,
-        originalName: file.name,
-        mimeType,
-        size: file.size,
-        path: filePath,
-        url,
-      }
-    })
+    // Try to save to database (optional - don't fail if DB is unavailable)
+    let fileId = `file-${Date.now()}`
+    try {
+      const prisma = (await import('@/lib/prisma')).default
+      const uploadedFile = await prisma.uploadedFile.create({
+        data: {
+          filename,
+          originalName: file.name,
+          mimeType,
+          size: file.size,
+          path: filePath,
+          url,
+        }
+      })
+      fileId = uploadedFile.id
+    } catch (dbError) {
+      console.warn('Database save skipped:', dbError)
+      // Continue without database - file is already saved to disk
+    }
 
     return NextResponse.json({
       success: true,
       file: {
-        id: uploadedFile.id,
+        id: fileId,
         url,
         filename,
         originalName: file.name,
@@ -118,27 +125,43 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Dosya ID veya URL gerekli' }, { status: 400 })
     }
 
-    // Find file in database
-    const file = fileId 
-      ? await prisma.uploadedFile.findUnique({ where: { id: fileId } })
-      : await prisma.uploadedFile.findFirst({ where: { url: fileUrl! } })
-
-    if (!file) {
-      return NextResponse.json({ error: 'Dosya bulunamadı' }, { status: 404 })
-    }
-
-    // Delete from filesystem
-    const fs = await import('fs/promises')
+    // Try to find and delete from database
     try {
-      await fs.unlink(file.path)
-    } catch (e) {
-      console.warn('File not found on disk:', file.path)
+      const prisma = (await import('@/lib/prisma')).default
+      const file = fileId 
+        ? await prisma.uploadedFile.findUnique({ where: { id: fileId } })
+        : await prisma.uploadedFile.findFirst({ where: { url: fileUrl! } })
+
+      if (file) {
+        // Delete from filesystem
+        const fs = await import('fs/promises')
+        try {
+          await fs.unlink(file.path)
+        } catch (e) {
+          console.warn('File not found on disk:', file.path)
+        }
+
+        // Delete from database
+        await prisma.uploadedFile.delete({ where: { id: file.id } })
+        return NextResponse.json({ success: true })
+      }
+    } catch (dbError) {
+      console.warn('Database delete skipped:', dbError)
     }
 
-    // Delete from database
-    await prisma.uploadedFile.delete({ where: { id: file.id } })
+    // If no database record, try to delete file directly from URL
+    if (fileUrl) {
+      const fs = await import('fs/promises')
+      const filePath = path.join(process.cwd(), 'public', fileUrl)
+      try {
+        await fs.unlink(filePath)
+        return NextResponse.json({ success: true })
+      } catch (e) {
+        console.warn('File not found:', filePath)
+      }
+    }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, message: 'File may have been already deleted' })
 
   } catch (error) {
     console.error('Delete error:', error)

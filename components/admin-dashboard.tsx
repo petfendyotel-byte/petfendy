@@ -7,6 +7,7 @@ import { mockHotelRooms, mockTaxiServices } from "@/lib/mock-data"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -1399,10 +1400,11 @@ export function AdminDashboard() {
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Açıklama</label>
-                      <Input
+                      <Textarea
                         value={newRoom.description}
                         onChange={(e) => setNewRoom({ ...newRoom, description: e.target.value })}
                         placeholder="Oda hakkında detaylı açıklama"
+                        rows={3}
                       />
                     </div>
                     <div className="space-y-2">
@@ -1599,10 +1601,11 @@ export function AdminDashboard() {
                 </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Açıklama</label>
-                      <Input
+                      <Textarea
                         value={editingRoom.description || ""}
                         onChange={(e) => setEditingRoom({ ...editingRoom, description: e.target.value })}
                         placeholder="Oda hakkında detaylı açıklama"
+                        rows={3}
                       />
                     </div>
                     <div className="space-y-2">

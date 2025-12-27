@@ -174,7 +174,7 @@ Rol: Admin
 ### Test Kartları (Geliştirme)
 ```
 Kart No: 4242 4242 4242 4242
-Tarih: 12/25
+Tarih: 12/30
 CVV: 123
 ```
 

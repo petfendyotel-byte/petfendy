@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -19,8 +19,13 @@ interface VideoUploadProps {
 export function VideoUpload({ existingVideos, onVideosChange, maxVideos = 5 }: VideoUploadProps) {
   const [uploading, setUploading] = useState(false)
   const [compressing, setCompressing] = useState(false)
-  const [videos, setVideos] = useState<Array<{ type: 'upload' | 'youtube', url: string }>>(existingVideos)
+  const [videos, setVideos] = useState<Array<{ type: 'upload' | 'youtube', url: string }>>(existingVideos || [])
   const [youtubeUrl, setYoutubeUrl] = useState("")
+
+  // Sync with external changes (important for edit mode)
+  useEffect(() => {
+    setVideos(existingVideos || [])
+  }, [existingVideos])
 
   // Extract YouTube video ID from URL
   const extractYoutubeId = (url: string): string | null => {
@@ -228,9 +233,10 @@ export function VideoUpload({ existingVideos, onVideosChange, maxVideos = 5 }: V
 
         setCompressing(false)
 
-        // Upload file
+        // Upload file - use 'file' key to match API
         const formData = new FormData()
-        formData.append('files', finalFile)
+        formData.append('file', finalFile)
+        formData.append('type', 'video')
 
         const response = await fetch('/api/upload', {
           method: 'POST',
@@ -238,11 +244,13 @@ export function VideoUpload({ existingVideos, onVideosChange, maxVideos = 5 }: V
         })
 
         if (!response.ok) {
-          throw new Error('Upload failed')
+          const errorData = await response.json()
+          throw new Error(errorData.error || 'Upload failed')
         }
 
         const data = await response.json()
-        uploadedUrls.push(...data.urls)
+        // API returns { file: { url: ... } }
+        uploadedUrls.push(data.file.url)
       }
 
       const newVideos = [

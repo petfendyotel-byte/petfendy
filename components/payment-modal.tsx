@@ -202,7 +202,7 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
           <AlertDescription className="text-blue-800 text-xs sm:text-sm">
             <strong>Test Kartı (PayTR):</strong><br />
             Kart: 4242 4242 4242 4242<br />
-            Tarih: 12/25 | CVV: 123
+            Tarih: 12/30 | CVV: 123
           </AlertDescription>
         </Alert>
 
