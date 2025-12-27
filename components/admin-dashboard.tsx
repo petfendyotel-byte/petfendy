@@ -321,10 +321,19 @@ export function AdminDashboard() {
 
   // Room management
   const handleAddRoom = async () => {
-    if (!newRoom.name || newRoom.pricePerNight <= 0) {
+    if (!newRoom.name) {
       toast({
         title: "Hata",
-        description: "Lütfen tüm alanları doldurun",
+        description: "Lütfen oda adını girin",
+        variant: "destructive"
+      })
+      return
+    }
+
+    if (newRoom.pricePerNight < 0) {
+      toast({
+        title: "Hata",
+        description: "Fiyat 0 veya daha büyük olmalıdır",
         variant: "destructive"
       })
       return
@@ -1443,8 +1452,8 @@ export function AdminDashboard() {
                       />
                     </div>
                     <div className="flex gap-2">
-                      <Button onClick={handleAddRoom} className="flex-1">
-                        Oda Ekle
+                      <Button onClick={handleAddRoom} className="flex-1" disabled={isLoading}>
+                        {isLoading ? "Ekleniyor..." : "Oda Ekle"}
                       </Button>
                       <Button variant="outline" onClick={() => setShowAddRoom(false)} className="flex-1">
                         İptal
