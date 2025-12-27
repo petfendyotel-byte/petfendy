@@ -67,7 +67,10 @@ export function RoomDetailModal({ room, isOpen, onClose, onSelect, locale = 'tr'
   const getYouTubeEmbedUrl = (url: string) => {
     // YouTube URL'lerini embed formatına çevir
     const videoId = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)?.[1]
-    return videoId ? `https://www.youtube.com/embed/${videoId}` : url
+    if (videoId) {
+      return `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1`
+    }
+    return url
   }
 
   return (
@@ -270,6 +273,8 @@ export function RoomDetailModal({ room, isOpen, onClose, onSelect, locale = 'tr'
                     className="w-full h-full rounded-lg"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
+                    referrerPolicy="no-referrer-when-downgrade"
+                    sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
                   />
                 </div>
               ) : (

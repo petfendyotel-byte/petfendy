@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/components/ui/use-toast"
 import { FileUpload } from "@/components/file-upload"
 import { VideoUpload } from "@/components/video-upload"
+import { RoomEditModal } from "./room-edit-modal"
 import { sanitizeInput } from "@/lib/security"
 import { encryptPaymentCredential, decryptPaymentCredential, maskCredential, validatePaymentCredentials, sanitizePaymentUrl } from "@/lib/encryption"
 import { 
@@ -84,6 +85,7 @@ export function AdminDashboard() {
 
   // UI State
   const [editingRoom, setEditingRoom] = useState<HotelRoom | null>(null)
+  const [showRoomEditModal, setShowRoomEditModal] = useState(false)
   const [editingService, setEditingService] = useState<TaxiService | null>(null)
   const [editingVehicle, setEditingVehicle] = useState<TaxiVehicle | null>(null)
   const [showAddRoom, setShowAddRoom] = useState(false)
@@ -369,8 +371,8 @@ export function AdminDashboard() {
       description: sanitizedDescription,
       amenities: newRoom.amenities.split(",").map((a) => sanitizeInput(a)).filter(a => a),
       features: newRoom.features.split(",").map((f) => sanitizeInput(f)).filter(f => f),
-      images: newRoomImages,
-      videos: newRoomVideos,
+      images: newRoomImages || [],
+      videos: newRoomVideos || [],
     }
 
     // Try API first
@@ -414,8 +416,8 @@ export function AdminDashboard() {
       description: updatedRoom.description,
       amenities: updatedRoom.amenities,
       features: updatedRoom.features,
-      images: updatedRoom.images,
-      videos: updatedRoom.videos,
+      images: updatedRoom.images || [],
+      videos: updatedRoom.videos || [],
     })
 
     if (result) {
@@ -1530,7 +1532,10 @@ export function AdminDashboard() {
                           variant="outline"
                           size="sm"
                           className="flex-1"
-                          onClick={() => setEditingRoom(room)}
+                          onClick={() => {
+                            setEditingRoom(room)
+                            setShowRoomEditModal(true)
+                          }}
                         >
                           <Edit className="w-3 h-3 mr-1" />
                         Düzenle

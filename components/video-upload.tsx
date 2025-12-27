@@ -74,7 +74,7 @@ export function VideoUpload({ existingVideos, onVideosChange, maxVideos = 5 }: V
       return
     }
 
-    const embedUrl = `https://www.youtube.com/embed/${videoId}`
+    const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1`
     const newVideos = [...videos, { type: 'youtube' as const, url: embedUrl }]
     setVideos(newVideos)
     onVideosChange(newVideos)
@@ -385,6 +385,8 @@ export function VideoUpload({ existingVideos, onVideosChange, maxVideos = 5 }: V
                         className="w-full h-full"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
+                        referrerPolicy="no-referrer-when-downgrade"
+                        sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
                       />
                     </div>
                     <div className="flex items-center justify-between">
