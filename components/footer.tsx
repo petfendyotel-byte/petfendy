@@ -114,25 +114,25 @@ export function Footer({ locale }: FooterProps) {
             <h3 className="font-bold mb-4 text-pink-400">{t('policies')}</h3>
             <ul className="space-y-3 text-sm">
               <li>
-                <a href="#" className="text-gray-300 hover:text-pink-400 transition-colors flex items-center gap-2 group">
+                <a href={`/${locale}/gizlilik-politikasi`} className="text-gray-300 hover:text-pink-400 transition-colors flex items-center gap-2 group">
                   <PawPrint className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                   <span>{t('privacy')}</span>
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-pink-400 transition-colors flex items-center gap-2 group">
+                <a href={`/${locale}/iptal-iade-politikasi`} className="text-gray-300 hover:text-pink-400 transition-colors flex items-center gap-2 group">
                   <PawPrint className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                   <span>{t('refund')}</span>
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-pink-400 transition-colors flex items-center gap-2 group">
+                <a href={`/${locale}/mesafeli-satis-politikasi`} className="text-gray-300 hover:text-pink-400 transition-colors flex items-center gap-2 group">
                   <PawPrint className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                   <span>{t('distance')}</span>
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-pink-400 transition-colors flex items-center gap-2 group">
+                <a href={`/${locale}/cerez`} className="text-gray-300 hover:text-pink-400 transition-colors flex items-center gap-2 group">
                   <PawPrint className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                   <span>{t('cookies')}</span>
                 </a>
