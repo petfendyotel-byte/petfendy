@@ -77,7 +77,21 @@ export default function middleware(request: NextRequest) {
     });
   }
 
-  // 3. Apply internationalization
+  // 3. Redirect root locale paths to /home
+  const pathname = request.nextUrl.pathname;
+  
+  // Redirect root to /tr/home
+  if (pathname === '/' || pathname === '') {
+    return NextResponse.redirect(new URL('/tr/home', request.url));
+  }
+  
+  // Redirect /tr or /en to /tr/home or /en/home
+  if (pathname === '/tr' || pathname === '/en' || pathname === '/tr/' || pathname === '/en/') {
+    const locale = pathname.startsWith('/en') ? 'en' : 'tr';
+    return NextResponse.redirect(new URL(`/${locale}/home`, request.url));
+  }
+
+  // 4. Apply internationalization
   const response = intlMiddleware(request);
 
   // 4. Apply security headers
