@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
+import { writeFile, mkdir, unlink } from 'fs/promises'
 import { existsSync } from 'fs'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
+import { uploadToS3, deleteFromS3, isS3Configured, getS3KeyFromUrl } from '@/lib/s3'
 
 // Allowed file types
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
@@ -56,25 +57,32 @@ export async function POST(request: NextRequest) {
     const ext = path.extname(file.name) || (isImage ? '.jpg' : '.mp4')
     const filename = `${uuidv4()}${ext}`
     
-    // Determine upload directory
-    const uploadDir = isImage ? 'uploads/images' : 'uploads/videos'
-    const fullUploadDir = path.join(process.cwd(), 'public', uploadDir)
-
-    // Create directory if it doesn't exist
-    if (!existsSync(fullUploadDir)) {
-      await mkdir(fullUploadDir, { recursive: true })
-    }
-
-    // Save file
+    // Get file buffer
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
-    const filePath = path.join(fullUploadDir, filename)
-    await writeFile(filePath, buffer)
 
-    // Generate URL
-    const url = `/${uploadDir}/${filename}`
+    let url: string
+    let storageType: 's3' | 'local' = 'local'
 
-    // Try to save to database (optional - don't fail if DB is unavailable)
+    // Try S3 first if configured
+    if (isS3Configured()) {
+      try {
+        const folder = isImage ? 'images' : 'videos'
+        const s3Key = `uploads/${folder}/${filename}`
+        url = await uploadToS3(buffer, s3Key, mimeType)
+        storageType = 's3'
+        console.log('File uploaded to S3:', url)
+      } catch (s3Error) {
+        console.error('S3 upload failed, falling back to local:', s3Error)
+        // Fall back to local storage
+        url = await saveToLocal(buffer, filename, isImage)
+      }
+    } else {
+      // Use local storage
+      url = await saveToLocal(buffer, filename, isImage)
+    }
+
+    // Try to save to database (optional)
     let fileId = `file-${Date.now()}`
     try {
       const prisma = (await import('@/lib/prisma')).default
@@ -84,14 +92,13 @@ export async function POST(request: NextRequest) {
           originalName: file.name,
           mimeType,
           size: file.size,
-          path: filePath,
+          path: storageType === 's3' ? `s3:${url}` : path.join(process.cwd(), 'public', url),
           url,
         }
       })
       fileId = uploadedFile.id
     } catch (dbError) {
       console.warn('Database save skipped:', dbError)
-      // Continue without database - file is already saved to disk
     }
 
     return NextResponse.json({
@@ -103,6 +110,7 @@ export async function POST(request: NextRequest) {
         originalName: file.name,
         mimeType,
         size: file.size,
+        storageType,
       }
     })
 
@@ -112,6 +120,21 @@ export async function POST(request: NextRequest) {
       error: 'Dosya yüklenirken bir hata oluştu' 
     }, { status: 500 })
   }
+}
+
+// Helper function to save file locally
+async function saveToLocal(buffer: Buffer, filename: string, isImage: boolean): Promise<string> {
+  const uploadDir = isImage ? 'uploads/images' : 'uploads/videos'
+  const fullUploadDir = path.join(process.cwd(), 'public', uploadDir)
+
+  if (!existsSync(fullUploadDir)) {
+    await mkdir(fullUploadDir, { recursive: true })
+  }
+
+  const filePath = path.join(fullUploadDir, filename)
+  await writeFile(filePath, buffer)
+
+  return `/${uploadDir}/${filename}`
 }
 
 // Delete uploaded file
@@ -125,6 +148,23 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Dosya ID veya URL gerekli' }, { status: 400 })
     }
 
+    // Check if it's an S3 URL
+    const isS3Url = fileUrl?.includes('.s3.') || fileUrl?.includes('s3.amazonaws.com') || 
+                   (process.env.S3_PUBLIC_URL && fileUrl?.startsWith(process.env.S3_PUBLIC_URL))
+
+    if (isS3Url && fileUrl) {
+      // Delete from S3
+      const s3Key = getS3KeyFromUrl(fileUrl)
+      if (s3Key) {
+        try {
+          await deleteFromS3(s3Key)
+          console.log('File deleted from S3:', s3Key)
+        } catch (s3Error) {
+          console.error('S3 delete error:', s3Error)
+        }
+      }
+    }
+
     // Try to find and delete from database
     try {
       const prisma = (await import('@/lib/prisma')).default
@@ -133,12 +173,13 @@ export async function DELETE(request: NextRequest) {
         : await prisma.uploadedFile.findFirst({ where: { url: fileUrl! } })
 
       if (file) {
-        // Delete from filesystem
-        const fs = await import('fs/promises')
-        try {
-          await fs.unlink(file.path)
-        } catch (e) {
-          console.warn('File not found on disk:', file.path)
+        // Delete from filesystem if local
+        if (!file.path.startsWith('s3:')) {
+          try {
+            await unlink(file.path)
+          } catch (e) {
+            console.warn('File not found on disk:', file.path)
+          }
         }
 
         // Delete from database
@@ -149,12 +190,11 @@ export async function DELETE(request: NextRequest) {
       console.warn('Database delete skipped:', dbError)
     }
 
-    // If no database record, try to delete file directly from URL
-    if (fileUrl) {
-      const fs = await import('fs/promises')
+    // If no database record, try to delete file directly from URL (local only)
+    if (fileUrl && !isS3Url) {
       const filePath = path.join(process.cwd(), 'public', fileUrl)
       try {
-        await fs.unlink(filePath)
+        await unlink(filePath)
         return NextResponse.json({ success: true })
       } catch (e) {
         console.warn('File not found:', filePath)
