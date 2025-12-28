@@ -177,19 +177,50 @@ export function AdminDashboard() {
       const response = await fetch('/api/rooms')
       if (response.ok) {
         const data = await response.json()
-        setRooms(data)
-        // Also update localStorage for offline/fallback
-        localStorage.setItem("petfendy_rooms", JSON.stringify(data))
+        // If API returns empty array, use localStorage or mock data
+        if (Array.isArray(data) && data.length > 0) {
+          setRooms(data)
+          localStorage.setItem("petfendy_rooms", JSON.stringify(data))
+        } else {
+          // API returned empty, try localStorage first
+          const storedRooms = localStorage.getItem("petfendy_rooms")
+          if (storedRooms) {
+            const parsed = JSON.parse(storedRooms)
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setRooms(parsed)
+              return
+            }
+          }
+          // Use mock data as last resort
+          setRooms(mockHotelRooms)
+          localStorage.setItem("petfendy_rooms", JSON.stringify(mockHotelRooms))
+        }
       } else {
-        // Fallback to localStorage
-        const storedRooms = JSON.parse(localStorage.getItem("petfendy_rooms") || JSON.stringify(mockHotelRooms))
-        setRooms(storedRooms)
+        // API error - fallback to localStorage or mock
+        const storedRooms = localStorage.getItem("petfendy_rooms")
+        if (storedRooms) {
+          const parsed = JSON.parse(storedRooms)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setRooms(parsed)
+            return
+          }
+        }
+        setRooms(mockHotelRooms)
       }
     } catch (error) {
       console.error('Failed to fetch rooms:', error)
-      // Fallback to localStorage
-      const storedRooms = JSON.parse(localStorage.getItem("petfendy_rooms") || JSON.stringify(mockHotelRooms))
-      setRooms(storedRooms)
+      // Fallback to localStorage or mock
+      const storedRooms = localStorage.getItem("petfendy_rooms")
+      if (storedRooms) {
+        try {
+          const parsed = JSON.parse(storedRooms)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setRooms(parsed)
+            return
+          }
+        } catch (e) {}
+      }
+      setRooms(mockHotelRooms)
     }
   }
 
