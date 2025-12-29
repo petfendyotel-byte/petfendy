@@ -29,7 +29,7 @@ import {
   ChevronRight,
 } from "lucide-react"
 
-// Slider images
+// Slider images - optimized with smaller sizes and quality
 const sliderImages = [
   {
     src: "/images/slider-hotel.jpg",
@@ -44,7 +44,7 @@ const sliderImages = [
     subtitle: "Konforlu & Güvenli Yolculuk"
   },
   {
-    src: "https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=1920&h=800&fit=crop",
+    src: "https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=1200&h=600&fit=crop&q=75",
     alt: "Pet Hotel & Taxi",
     title: "Petfendy",
     subtitle: "Evcil dostlarınız için en iyi hizmet"
@@ -441,10 +441,13 @@ export default function HomePage() {
             <Card className="overflow-hidden border-0 shadow-lg">
               <div className="relative h-64">
                 <Image
-                  src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&h=400&fit=crop"
+                  src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&h=400&fit=crop&q=75"
                   alt="Petfendy oyun anları"
                   fill
                   className="object-cover"
+                  loading="lazy"
+                  placeholder="blur"
+                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAIhAAAgEDAwUBAAAAAAAAAAAAAQIDAAQRBRIhBhMiMUFR/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAZEQACAwEAAAAAAAAAAAAAAAABAgADESH/2gAMAwEAAhEDEQA/ANF6d1qC+0+3uLiNYZJEDMqnIBPsZ+1Kp0xqVxqF5cXE8jSSyMzMx9kk5J/aUqhZYwJBuf/2Q=="
                 />
               </div>
               <CardContent className="p-4">
@@ -456,10 +459,13 @@ export default function HomePage() {
             <Card className="overflow-hidden border-0 shadow-lg">
               <div className="relative h-64">
                 <Image
-                  src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=400&fit=crop"
+                  src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=400&fit=crop&q=75"
                   alt="Petfendy'de kedi ve köpek sevgisi"
                   fill
                   className="object-cover"
+                  loading="lazy"
+                  placeholder="blur"
+                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAIhAAAgEDAwUBAAAAAAAAAAAAAQIDAAQRBRIhBhMiMUFR/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAZEQACAwEAAAAAAAAAAAAAAAABAgADESH/2gAMAwEAAhEDEQA/ANF6d1qC+0+3uLiNYZJEDMqnIBPsZ+1Kp0xqVxqF5cXE8jSSyMzMx9kk5J/aUqhZYwJBuf/2Q=="
                 />
               </div>
               <CardContent className="p-4">
@@ -471,10 +477,13 @@ export default function HomePage() {
             <Card className="overflow-hidden border-0 shadow-lg">
               <div className="relative h-64">
                 <Image
-                  src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=400&fit=crop"
+                  src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=400&fit=crop&q=75"
                   alt="Petfendy ailesiyle beraber"
                   fill
                   className="object-cover"
+                  loading="lazy"
+                  placeholder="blur"
+                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAIhAAAgEDAwUBAAAAAAAAAAAAAQIDAAQRBRIhBhMiMUFR/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAZEQACAwEAAAAAAAAAAAAAAAABAgADESH/2gAMAwEAAhEDEQA/ANF6d1qC+0+3uLiNYZJEDMqnIBPsZ+1Kp0xqVxqF5cXE8jSSyMzMx9kk5J/aUqhZYwJBuf/2Q=="
                 />
               </div>
               <CardContent className="p-4">
