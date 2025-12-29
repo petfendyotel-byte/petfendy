@@ -8,8 +8,19 @@ import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from "@/components/theme-provider"
 import { WhatsAppButton } from "@/components/whatsapp-button"
 
-const _geist = Geist({ subsets: ["latin"] })
-const _geistMono = Geist_Mono({ subsets: ["latin"] })
+const geistSans = Geist({ 
+  subsets: ["latin"],
+  display: 'swap',
+  preload: true,
+  variable: '--font-geist-sans',
+})
+
+const geistMono = Geist_Mono({ 
+  subsets: ["latin"],
+  display: 'swap', 
+  preload: true,
+  variable: '--font-geist-mono',
+})
 
 const locales = ['tr', 'en'];
 

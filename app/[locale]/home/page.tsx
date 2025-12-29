@@ -99,8 +99,9 @@ export default function HomePage() {
               className="object-cover"
               priority={index === 0}
               loading={index === 0 ? "eager" : "lazy"}
-              sizes="100vw"
-              quality={60}
+              sizes="(max-width: 768px) 100vw, 1920px"
+              quality={75}
+              {...(index === 0 && { fetchPriority: "high" })}
             />
             {/* Dark overlay for better text readability */}
             <div className="absolute inset-0 bg-black/30"></div>
@@ -543,7 +544,7 @@ export default function HomePage() {
             <div className="relative">
               <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-orange-50 to-yellow-50">
                 <Image
-                  src="/images/hero-pets.png"
+                  src="/images/hero-pets.webp"
                   alt={tNew('safetyBannerAlt')}
                   width={600}
                   height={600}
