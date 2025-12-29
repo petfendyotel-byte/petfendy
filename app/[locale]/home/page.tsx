@@ -84,12 +84,31 @@ export default function HomePage() {
 
       {/* Hero Section with Slider */}
       <section className="relative h-[700px] md:h-[800px] flex items-center justify-center overflow-hidden">
-        {/* Slider Images */}
-        {sliderImages.map((slide, index) => (
+        {/* LCP Image - First slide rendered separately for priority */}
+        <div
+          className={`absolute inset-0 transition-opacity duration-1000 ${
+            currentSlide === 0 ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
+          <Image
+            src="/images/slider-hotel.jpg"
+            alt="Petfendy Luxury Pet Hotel"
+            fill
+            className="object-cover"
+            priority
+            fetchPriority="high"
+            sizes="100vw"
+            quality={75}
+          />
+          <div className="absolute inset-0 bg-black/30"></div>
+        </div>
+        
+        {/* Other Slider Images */}
+        {sliderImages.slice(1).map((slide, index) => (
           <div
-            key={index}
+            key={index + 1}
             className={`absolute inset-0 transition-opacity duration-1000 ${
-              index === currentSlide ? 'opacity-100' : 'opacity-0'
+              index + 1 === currentSlide ? 'opacity-100' : 'opacity-0'
             }`}
           >
             <Image
@@ -97,13 +116,10 @@ export default function HomePage() {
               alt={slide.alt}
               fill
               className="object-cover"
-              priority={index === 0}
-              loading={index === 0 ? "eager" : "lazy"}
-              sizes="(max-width: 768px) 100vw, 1920px"
+              loading="lazy"
+              sizes="100vw"
               quality={75}
-              {...(index === 0 && { fetchPriority: "high" })}
             />
-            {/* Dark overlay for better text readability */}
             <div className="absolute inset-0 bg-black/30"></div>
           </div>
         ))}
