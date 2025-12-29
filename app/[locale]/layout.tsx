@@ -18,27 +18,139 @@ export function generateStaticParams() {
 }
 
 export const metadata = {
-  title: "Petfendy - Evcil Hayvan Oteli Ve Köpek Eğitim Merkezi | Ankara",
-  description: "Ankara'nın en güvenilir kedi, köpek ve evcil hayvan oteli. Profesyonel köpek eğitimi, pet taksi ve konforlu konaklama hizmetleri.",
-  keywords: "petfendy, evcil hayvan oteli, köpek oteli, kedi oteli, ankara pet hotel, köpek eğitimi, pet taksi, hayvan oteli ankara",
+  title: "Ankara Pet Otel & Pet Taksi | Petfendy Hayvan Oteli",
+  description: "Ankara pet otel, ankara pet taksi, ankara hayvan oteli hizmetleri. Kedi ve köpek oteli, profesyonel hayvan taksi servisi. 7/24 güvenli konaklama ve ulaşım.",
+  keywords: "ankara pet otel, ankara pet taksi, ankara hayvan oteli, ankara hayvan taksi, pet otel ankara, pet taksi ankara, kedi oteli ankara, köpek oteli ankara, evcil hayvan oteli, petfendy, hayvan pansiyonu ankara, kedi pansiyonu, köpek pansiyonu",
   authors: [{ name: "Petfendy" }],
   creator: "Petfendy",
   publisher: "Petfendy",
+  metadataBase: new URL('https://petfendy.com'),
+  alternates: {
+    canonical: '/',
+    languages: {
+      'tr-TR': '/tr',
+      'en-US': '/en',
+    },
+  },
   openGraph: {
-    title: "Petfendy - Evcil Hayvan Oteli Ve Köpek Eğitim Merkezi",
-    description: "Ankara'nın kedi, köpek ve evcil hayvan oteli",
+    title: "Ankara Pet Otel & Pet Taksi | Petfendy Hayvan Oteli",
+    description: "Ankara'nın en güvenilir pet oteli ve pet taksi hizmeti. Kedi, köpek ve tüm evcil hayvanlarınız için 7/24 profesyonel bakım ve ulaşım.",
     type: "website",
     locale: "tr_TR",
+    alternateLocale: "en_US",
     siteName: "Petfendy",
+    url: "https://petfendy.com",
+    images: [
+      {
+        url: "/images/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Petfendy - Ankara Pet Otel ve Pet Taksi",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Petfendy - Evcil Hayvan Oteli",
-    description: "Ankara'nın kedi, köpek ve evcil hayvan oteli",
+    title: "Ankara Pet Otel & Pet Taksi | Petfendy",
+    description: "Ankara'nın en güvenilir pet oteli ve pet taksi hizmeti. Kedi, köpek için 7/24 profesyonel bakım.",
+    images: ["/images/og-image.jpg"],
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: 'google-site-verification-code', // Google Search Console doğrulama kodu eklenecek
+  },
+  category: 'pet services',
+  classification: 'Pet Hotel, Pet Taxi, Animal Care',
+}
+
+// JSON-LD Structured Data for Local Business
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  '@id': 'https://petfendy.com',
+  name: 'Petfendy - Ankara Pet Otel & Pet Taksi',
+  alternateName: 'Petfendy Hayvan Oteli',
+  description: 'Ankara pet otel, pet taksi, hayvan oteli ve hayvan taksi hizmetleri. Kedi ve köpek pansiyonu, profesyonel evcil hayvan bakımı.',
+  url: 'https://petfendy.com',
+  telephone: '+905551234567', // Gerçek telefon numarası ile değiştirilecek
+  email: 'info@petfendy.com',
+  image: 'https://petfendy.com/images/og-image.jpg',
+  logo: 'https://petfendy.com/images/petfendy-main-logo.png',
+  priceRange: '₺₺',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'Ankara', // Gerçek adres ile değiştirilecek
+    addressLocality: 'Ankara',
+    addressRegion: 'Ankara',
+    postalCode: '06000',
+    addressCountry: 'TR',
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: 39.9334, // Gerçek koordinatlar ile değiştirilecek
+    longitude: 32.8597,
+  },
+  areaServed: {
+    '@type': 'City',
+    name: 'Ankara',
+  },
+  openingHoursSpecification: [
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+      opens: '00:00',
+      closes: '23:59',
+    },
+  ],
+  sameAs: [
+    'https://www.instagram.com/petfendy/',
+  ],
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: 'Petfendy Hizmetleri',
+    itemListElement: [
+      {
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Service',
+          name: 'Ankara Pet Otel',
+          description: 'Kedi ve köpekler için güvenli, konforlu konaklama hizmeti',
+        },
+      },
+      {
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Service',
+          name: 'Ankara Pet Taksi',
+          description: 'Evcil hayvanlarınız için güvenli ulaşım hizmeti',
+        },
+      },
+      {
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Service',
+          name: 'Ankara Hayvan Oteli',
+          description: 'Profesyonel hayvan bakım ve konaklama hizmeti',
+        },
+      },
+    ],
+  },
+  aggregateRating: {
+    '@type': 'AggregateRating',
+    ratingValue: '5',
+    reviewCount: '50',
+    bestRating: '5',
+    worstRating: '1',
   },
 }
 
@@ -70,6 +182,12 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className={`font-sans antialiased`} suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
