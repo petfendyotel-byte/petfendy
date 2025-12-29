@@ -80,15 +80,20 @@ export default function middleware(request: NextRequest) {
   // 3. Redirect root locale paths to /home
   const pathname = request.nextUrl.pathname;
   
-  // Redirect root to /tr/home
-  if (pathname === '/' || pathname === '') {
-    return NextResponse.redirect(new URL('/tr/home', request.url));
+  // Skip redirect if already on /home path
+  if (pathname.endsWith('/home')) {
+    // Continue to intl middleware
   }
-  
+  // Redirect root to /tr/home
+  else if (pathname === '/' || pathname === '') {
+    const redirectUrl = new URL('/tr/home', request.url);
+    return NextResponse.redirect(redirectUrl, { status: 308 });
+  }
   // Redirect /tr or /en to /tr/home or /en/home
-  if (pathname === '/tr' || pathname === '/en' || pathname === '/tr/' || pathname === '/en/') {
+  else if (pathname === '/tr' || pathname === '/en' || pathname === '/tr/' || pathname === '/en/') {
     const locale = pathname.startsWith('/en') ? 'en' : 'tr';
-    return NextResponse.redirect(new URL(`/${locale}/home`, request.url));
+    const redirectUrl = new URL(`/${locale}/home`, request.url);
+    return NextResponse.redirect(redirectUrl, { status: 308 });
   }
 
   // 4. Apply internationalization
