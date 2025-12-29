@@ -98,6 +98,9 @@ export default function HomePage() {
               fill
               className="object-cover"
               priority={index === 0}
+              loading={index === 0 ? "eager" : "lazy"}
+              sizes="100vw"
+              quality={60}
             />
             {/* Dark overlay for better text readability */}
             <div className="absolute inset-0 bg-black/30"></div>
