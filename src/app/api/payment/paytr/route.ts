@@ -1,202 +1,268 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
-import { sanitizeInput } from '@/lib/security'
-import { RateLimiterService, RateLimitProfiles } from '@/lib/rate-limiter-service'
 
-const rateLimiter = new RateLimiterService(RateLimitProfiles.payment)
+const PAYTR_MERCHANT_ID = process.env.PAYTR_MERCHANT_ID || ''
+const PAYTR_MERCHANT_KEY = process.env.PAYTR_MERCHANT_KEY || ''
+const PAYTR_MERCHANT_SALT = process.env.PAYTR_MERCHANT_SALT || ''
+const PAYTR_TEST_MODE = process.env.PAYTR_TEST_MODE === '1' ? '1' : '0'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
-interface PayTRTokenRequest {
-  amount: number
-  email: string
-  userName: string
-  userPhone: string
-  userAddress: string
-  basketItems: Array<{
-    name: string
-    price: string
-    quantity: number
-  }>
-  orderId?: string
+const paymentRateLimiter = new Map<string, { count: number; resetTime: number }>()
+
+function checkPaymentRateLimit(ip: string): { allowed: boolean; remaining: number } {
+  const now = Date.now()
+  const windowMs = 60 * 1000
+  const maxRequests = 3
+  
+  const record = paymentRateLimiter.get(ip)
+  
+  if (!record || now > record.resetTime) {
+    paymentRateLimiter.set(ip, { count: 1, resetTime: now + windowMs })
+    return { allowed: true, remaining: maxRequests - 1 }
+  }
+  
+  if (record.count >= maxRequests) {
+    return { allowed: false, remaining: 0 }
+  }
+  
+  record.count++
+  return { allowed: true, remaining: maxRequests - record.count }
 }
 
 function getClientIP(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for')
-  if (forwarded) {
-    return forwarded.split(',')[0].trim()
-  }
+  if (forwarded) return forwarded.split(',')[0].trim()
+  
   const realIp = request.headers.get('x-real-ip')
-  if (realIp) {
-    return realIp
-  }
+  if (realIp) return realIp
+  
   return '127.0.0.1'
 }
 
-function validateRequest(data: PayTRTokenRequest): { valid: boolean; errors: string[] } {
-  const errors: string[] = []
+function sanitizeInput(input: string, maxLength: number = 255): string {
+  if (!input) return ''
+  return input
+    .replace(/[<>'";\\/]/g, '')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+=/gi, '')
+    .trim()
+    .substring(0, maxLength)
+}
 
-  if (!data.amount || data.amount <= 0) {
-    errors.push('Geçersiz tutar')
-  }
-  if (data.amount > 100000) {
-    errors.push('Tutar limiti aşıldı (max 100.000 TL)')
-  }
-  if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-    errors.push('Geçersiz e-posta adresi')
-  }
-  if (!data.userName || data.userName.length < 2) {
-    errors.push('Geçersiz kullanıcı adı')
-  }
-  if (!data.userPhone || !/^(\+90|0)?[1-9]\d{9}$/.test(data.userPhone.replace(/\s/g, ''))) {
-    errors.push('Geçersiz telefon numarası')
-  }
-  if (!data.userAddress || data.userAddress.length < 10) {
-    errors.push('Geçersiz adres (minimum 10 karakter)')
-  }
-  if (!data.basketItems || data.basketItems.length === 0) {
-    errors.push('Sepet boş olamaz')
-  }
+function validateEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
+}
 
-  return { valid: errors.length === 0, errors }
+function validatePhone(phone: string): boolean {
+  const phoneRegex = /^(\+90|0)?[1-9]\d{9}$/
+  return phoneRegex.test(phone.replace(/\s/g, ''))
+}
+
+function generateMerchantOid(): string {
+  const timestamp = Date.now()
+  const random = crypto.randomBytes(4).toString('hex')
+  return `PF${timestamp}${random}`
+}
+
+function generatePayTRToken(params: {
+  merchantOid: string
+  userIp: string
+  email: string
+  paymentAmount: number
+  userBasket: string
+  noInstallment: string
+  maxInstallment: string
+  currency: string
+}): string {
+  const hashStr = [
+    PAYTR_MERCHANT_ID,
+    params.userIp,
+    params.merchantOid,
+    params.email,
+    params.paymentAmount.toString(),
+    params.userBasket,
+    params.noInstallment,
+    params.maxInstallment,
+    params.currency,
+    PAYTR_TEST_MODE,
+    PAYTR_MERCHANT_SALT
+  ].join('')
+  
+  const hmac = crypto.createHmac('sha256', PAYTR_MERCHANT_KEY)
+  hmac.update(hashStr)
+  return hmac.digest('base64')
 }
 
 export async function POST(request: NextRequest) {
   try {
     const clientIP = getClientIP(request)
-
-    const rateCheck = rateLimiter.check(`payment:${clientIP}`)
-    if (rateCheck.limited) {
+    
+    const rateLimit = checkPaymentRateLimit(clientIP)
+    if (!rateLimit.allowed) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Çok fazla istek. Lütfen biraz bekleyin.',
-          retryAfter: Math.ceil(rateCheck.resetMs / 1000)
-        },
+        { error: 'Çok fazla istek. Lütfen 1 dakika bekleyin.' },
         { 
           status: 429,
           headers: {
-            'Retry-After': Math.ceil(rateCheck.resetMs / 1000).toString()
+            'X-RateLimit-Remaining': '0',
+            'Retry-After': '60'
           }
         }
       )
     }
-
-    const merchantId = process.env.PAYTR_MERCHANT_ID
-    const merchantKey = process.env.PAYTR_MERCHANT_KEY
-    const merchantSalt = process.env.PAYTR_MERCHANT_SALT
-
-    if (!merchantId || !merchantKey || !merchantSalt) {
-      console.error('❌ PayTR credentials not configured')
+    
+    if (!PAYTR_MERCHANT_ID || !PAYTR_MERCHANT_KEY || !PAYTR_MERCHANT_SALT) {
+      console.error('PayTR credentials not configured')
       return NextResponse.json(
-        { success: false, error: 'Ödeme sistemi yapılandırılmamış' },
+        { error: 'Ödeme sistemi yapılandırılmamış' },
         { status: 500 }
       )
     }
-
-    const body: PayTRTokenRequest = await request.json()
-
-    const validation = validateRequest(body)
-    if (!validation.valid) {
+    
+    const body = await request.json()
+    
+    const {
+      amount,
+      currency = 'TL',
+      customerName,
+      customerEmail,
+      customerPhone,
+      customerAddress,
+      items,
+      locale = 'tr'
+    } = body
+    
+    if (!amount || typeof amount !== 'number' || amount <= 0 || amount > 1000000) {
       return NextResponse.json(
-        { success: false, errors: validation.errors },
+        { error: 'Geçersiz ödeme tutarı' },
         { status: 400 }
       )
     }
-
-    const merchantOid = body.orderId || `ORDER-${Date.now()}-${crypto.randomBytes(8).toString('hex')}`
-
+    
+    if (!customerName || customerName.length < 2) {
+      return NextResponse.json(
+        { error: 'Müşteri adı gereklidir' },
+        { status: 400 }
+      )
+    }
+    
+    if (!customerEmail || !validateEmail(customerEmail)) {
+      return NextResponse.json(
+        { error: 'Geçerli bir email adresi giriniz' },
+        { status: 400 }
+      )
+    }
+    
+    if (!customerPhone || !validatePhone(customerPhone)) {
+      return NextResponse.json(
+        { error: 'Geçerli bir telefon numarası giriniz' },
+        { status: 400 }
+      )
+    }
+    
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return NextResponse.json(
+        { error: 'Sepet bilgisi gereklidir' },
+        { status: 400 }
+      )
+    }
+    
+    const merchantOid = generateMerchantOid()
+    
+    const paymentAmount = Math.round(amount * 100)
+    
     const userBasket = Buffer.from(JSON.stringify(
-      body.basketItems.map(item => [
-        sanitizeInput(item.name),
-        item.price,
-        item.quantity
+      items.map((item: { name: string; price: number; quantity: number }) => [
+        sanitizeInput(item.name, 50),
+        (item.price * 100).toString(),
+        item.quantity.toString()
       ])
     )).toString('base64')
-
-    const paymentAmount = Math.round(body.amount * 100).toString()
-
-    const userIp = clientIP
+    
     const noInstallment = '0'
     const maxInstallment = '12'
-    const currency = 'TL'
-    const testMode = process.env.NODE_ENV === 'production' ? '0' : '1'
-    const debugOn = process.env.NODE_ENV === 'production' ? '0' : '1'
-    const lang = 'tr'
-    const timeoutLimit = '30'
-
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://petfendy.com'
-    const merchantOkUrl = `${baseUrl}/tr/checkout/success`
-    const merchantFailUrl = `${baseUrl}/tr/checkout?error=payment_failed`
-
-    const hashStr = [
-      merchantId,
-      userIp,
+    
+    const paytrToken = generatePayTRToken({
       merchantOid,
-      sanitizeInput(body.email),
+      userIp: clientIP,
+      email: sanitizeInput(customerEmail, 100),
       paymentAmount,
       userBasket,
       noInstallment,
       maxInstallment,
-      currency,
-      testMode
-    ].join('')
-
-    const paytrToken = crypto
-      .createHmac('sha256', merchantKey)
-      .update(hashStr + merchantSalt)
-      .digest('base64')
-
-    const formData = new URLSearchParams({
-      merchant_id: merchantId,
-      user_ip: userIp,
-      merchant_oid: merchantOid,
-      email: sanitizeInput(body.email),
-      payment_amount: paymentAmount,
-      paytr_token: paytrToken,
-      user_basket: userBasket,
-      debug_on: debugOn,
-      no_installment: noInstallment,
-      max_installment: maxInstallment,
-      user_name: sanitizeInput(body.userName),
-      user_address: sanitizeInput(body.userAddress),
-      user_phone: sanitizeInput(body.userPhone),
-      merchant_ok_url: merchantOkUrl,
-      merchant_fail_url: merchantFailUrl,
-      timeout_limit: timeoutLimit,
-      currency: currency,
-      test_mode: testMode,
-      lang: lang,
+      currency: currency === 'TL' ? 'TL' : 'USD'
     })
-
-    const response = await fetch('https://www.paytr.com/odeme/api/get-token', {
+    
+    const formData = new URLSearchParams()
+    formData.append('merchant_id', PAYTR_MERCHANT_ID)
+    formData.append('user_ip', clientIP)
+    formData.append('merchant_oid', merchantOid)
+    formData.append('email', sanitizeInput(customerEmail, 100))
+    formData.append('payment_amount', paymentAmount.toString())
+    formData.append('paytr_token', paytrToken)
+    formData.append('user_basket', userBasket)
+    formData.append('debug_on', PAYTR_TEST_MODE)
+    formData.append('no_installment', noInstallment)
+    formData.append('max_installment', maxInstallment)
+    formData.append('user_name', sanitizeInput(customerName, 100))
+    formData.append('user_address', sanitizeInput(customerAddress || 'Türkiye', 200))
+    formData.append('user_phone', sanitizeInput(customerPhone, 20))
+    formData.append('merchant_ok_url', `${APP_URL}/${locale}/checkout/success`)
+    formData.append('merchant_fail_url', `${APP_URL}/${locale}/checkout?error=payment_failed`)
+    formData.append('timeout_limit', '30')
+    formData.append('currency', currency === 'TL' ? 'TL' : 'USD')
+    formData.append('test_mode', PAYTR_TEST_MODE)
+    formData.append('lang', locale === 'en' ? 'en' : 'tr')
+    
+    const paytrResponse = await fetch('https://www.paytr.com/odeme/api/get-token', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/x-www-form-urlencoded'
       },
-      body: formData,
+      body: formData.toString()
     })
-
-    const result = await response.json()
-
-    if (result.status === 'success') {
-      console.log(`✅ [PayTR] Token generated for order: ${merchantOid}`)
+    
+    const paytrResult = await paytrResponse.json()
+    
+    if (paytrResult.status === 'success') {
+      console.log(`[PayTR] Token oluşturuldu: ${merchantOid}`)
+      
       return NextResponse.json({
         success: true,
-        token: result.token,
-        orderId: merchantOid,
+        token: paytrResult.token,
+        merchantOid,
+        iframeUrl: `https://www.paytr.com/odeme/guvenli/${paytrResult.token}`
       })
     } else {
-      console.error(`❌ [PayTR] Token generation failed: ${result.reason}`)
+      console.error('[PayTR] Token hatası:', paytrResult.reason)
+      
       return NextResponse.json(
-        { success: false, error: result.reason || 'Token oluşturulamadı' },
+        { 
+          error: 'Ödeme başlatılamadı',
+          details: PAYTR_TEST_MODE === '1' ? paytrResult.reason : undefined
+        },
         { status: 400 }
       )
     }
-
-  } catch (error: any) {
-    console.error('❌ [PayTR] API Error:', error.message)
+    
+  } catch (error) {
+    console.error('[PayTR] Sunucu hatası:', error)
+    
     return NextResponse.json(
-      { success: false, error: 'Ödeme sistemi hatası' },
+      { error: 'Sunucu hatası oluştu' },
       { status: 500 }
     )
   }
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Max-Age': '86400'
+    }
+  })
 }

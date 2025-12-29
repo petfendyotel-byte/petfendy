@@ -68,15 +68,15 @@ export function securityMiddleware(request: NextRequest) {
   // PayTR iframe ve Google Maps için izinler eklendi
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.google.com https://*.googleapis.com https://*.gstatic.com https://www.paytr.com https://*.paytr.com",
-    "style-src 'self' 'unsafe-inline' https://*.googleapis.com https://www.paytr.com https://*.paytr.com",
-    "img-src 'self' data: https: https://*.google.com https://*.googleapis.com https://*.gstatic.com https://www.paytr.com https://*.paytr.com",
-    "font-src 'self' data: https://*.googleapis.com https://*.gstatic.com https://www.paytr.com",
-    "connect-src 'self' https: https://*.google.com https://*.googleapis.com https://www.paytr.com https://*.paytr.com",
-    "frame-src 'self' https://*.google.com https://www.google.com https://www.paytr.com https://*.paytr.com",
-    "frame-ancestors 'self'",
+    "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.google.com https://*.googleapis.com https://*.gstatic.com https://www.paytr.com https://*.paytr.com", // Next.js, Google Maps, PayTR scripts
+    "style-src 'self' 'unsafe-inline' https://*.googleapis.com https://www.paytr.com https://*.paytr.com", // Tailwind, Google Maps, PayTR styles
+    "img-src 'self' data: https: https://*.google.com https://*.googleapis.com https://*.gstatic.com https://www.paytr.com https://*.paytr.com", // Google Maps, PayTR images
+    "font-src 'self' data: https://*.googleapis.com https://*.gstatic.com", // Google Maps fonts
+    "connect-src 'self' https: https://*.google.com https://*.googleapis.com https://www.paytr.com https://*.paytr.com", // Google Maps, PayTR API calls
+    "frame-src 'self' https://*.google.com https://www.google.com https://www.paytr.com https://*.paytr.com", // Allow Google Maps and PayTR iframes
+    "frame-ancestors 'self'", // PayTR callback için self izni
     "base-uri 'self'",
-    "form-action 'self' https://www.paytr.com https://*.paytr.com",
+    "form-action 'self' https://www.paytr.com https://*.paytr.com", // PayTR form submissions
   ].join('; ');
 
   response.headers.set('Content-Security-Policy', csp);
@@ -171,36 +171,13 @@ export function detectSuspiciousActivity(request: NextRequest): {
 } {
   const userAgent = request.headers.get('user-agent') || '';
   const url = request.url;
-  const pathname = new URL(url).pathname;
 
-  // PayTR webhook ve API endpoint'leri için bot kontrolünü atla
-  const trustedPaths = [
-    '/api/payment/webhook',
-    '/api/payment/paytr',
-  ];
-  
-  if (trustedPaths.some(path => pathname.includes(path))) {
-    return { suspicious: false };
-  }
-
-  // Check for common bot patterns (exclude payment gateways)
+  // Check for common bot patterns (PayTR webhook istekleri hariç)
   const botPatterns = [
-    /bot/i,
     /crawler/i,
     /spider/i,
     /scraper/i,
   ];
-
-  // PayTR ve diğer ödeme sistemlerinin user-agent'larını beyaz listeye al
-  const trustedAgents = [
-    /paytr/i,
-    /iyzico/i,
-    /stripe/i,
-  ];
-
-  if (trustedAgents.some(pattern => pattern.test(userAgent))) {
-    return { suspicious: false };
-  }
 
   if (botPatterns.some(pattern => pattern.test(userAgent))) {
     return { suspicious: true, reason: 'Bot detected' };
