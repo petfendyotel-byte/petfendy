@@ -66,9 +66,7 @@ export const metadata = {
       'max-snippet': -1,
     },
   },
-  verification: {
-    google: 'google-site-verification-code', // Google Search Console doğrulama kodu eklenecek
-  },
+
   category: 'pet services',
   classification: 'Pet Hotel, Pet Taxi, Animal Care',
 }
