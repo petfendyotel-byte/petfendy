@@ -44,7 +44,7 @@ const sliderImages = [
     subtitle: "Konforlu & Güvenli Yolculuk"
   },
   {
-    src: "https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=1200&h=600&fit=crop&q=75",
+    src: "/images/slider-pets.jpg",
     alt: "Pet Hotel & Taxi",
     title: "Petfendy",
     subtitle: "Evcil dostlarınız için en iyi hizmet"
@@ -98,7 +98,7 @@ export default function HomePage() {
             priority
             fetchPriority="high"
             sizes="100vw"
-            quality={75}
+            quality={60}
           />
           <div className="absolute inset-0 bg-black/30"></div>
         </div>
@@ -118,7 +118,7 @@ export default function HomePage() {
               className="object-cover"
               loading="lazy"
               sizes="100vw"
-              quality={75}
+              quality={60}
             />
             <div className="absolute inset-0 bg-black/30"></div>
           </div>
