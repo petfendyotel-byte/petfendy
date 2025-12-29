@@ -13,6 +13,7 @@ const geistSans = Geist({
   display: 'swap',
   preload: true,
   variable: '--font-geist-sans',
+  adjustFontFallback: true,
 })
 
 const geistMono = Geist_Mono({ 
@@ -20,6 +21,7 @@ const geistMono = Geist_Mono({
   display: 'swap', 
   preload: true,
   variable: '--font-geist-mono',
+  adjustFontFallback: true,
 })
 
 const locales = ['tr', 'en'];
@@ -192,18 +194,24 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
+        {/* Preload critical resources */}
         <link
           rel="preload"
           as="image"
           href="/images/slider-hotel.jpg"
           fetchPriority="high"
         />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={`font-sans antialiased`} suppressHydrationWarning>
+      <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`} suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
