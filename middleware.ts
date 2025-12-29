@@ -80,20 +80,22 @@ export default function middleware(request: NextRequest) {
   // 3. Redirect root locale paths to /home
   const pathname = request.nextUrl.pathname;
   
-  // Skip redirect if already on /home path
-  if (pathname.endsWith('/home')) {
-    // Continue to intl middleware
+  // Skip if already on a valid path with content
+  if (pathname.includes('/home') || pathname.includes('/admin') || pathname.includes('/checkout') || 
+      pathname.includes('/iletisim') || pathname.includes('/hakkimda') || pathname.includes('/gizlilik') ||
+      pathname.includes('/mesafeli') || pathname.includes('/iptal') || pathname.includes('/cerez') ||
+      pathname.includes('/on-bilgilendirme') || pathname.includes('/sss')) {
+    // Continue to intl middleware without redirect
   }
-  // Redirect root to /tr/home
-  else if (pathname === '/' || pathname === '') {
-    const redirectUrl = new URL('/tr/home', request.url);
-    return NextResponse.redirect(redirectUrl, { status: 308 });
+  // Redirect exact root paths only
+  else if (pathname === '/') {
+    return NextResponse.redirect(new URL('/tr/home', request.url), 308);
   }
-  // Redirect /tr or /en to /tr/home or /en/home
-  else if (pathname === '/tr' || pathname === '/en' || pathname === '/tr/' || pathname === '/en/') {
-    const locale = pathname.startsWith('/en') ? 'en' : 'tr';
-    const redirectUrl = new URL(`/${locale}/home`, request.url);
-    return NextResponse.redirect(redirectUrl, { status: 308 });
+  else if (pathname === '/tr' || pathname === '/tr/') {
+    return NextResponse.redirect(new URL('/tr/home', request.url), 308);
+  }
+  else if (pathname === '/en' || pathname === '/en/') {
+    return NextResponse.redirect(new URL('/en/home', request.url), 308);
   }
 
   // 4. Apply internationalization
