@@ -538,6 +538,12 @@
       "contact": "Contact:",
       "email": "Email"
     }
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Useful information about pet care, training and health",
+    "readMore": "Read More",
+    "noPosts": "No blog posts found yet."
   }
 }
 

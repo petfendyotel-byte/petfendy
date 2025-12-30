@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import Image from "next/image"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
@@ -17,6 +18,7 @@ export default function BlogPage() {
   const params = useParams()
   const router = useRouter()
   const locale = (params?.locale as string) || 'tr'
+  const t = useTranslations('blog')
   const [posts, setPosts] = useState<BlogPost[]>([])
 
   useEffect(() => {
@@ -43,9 +45,9 @@ export default function BlogPage() {
       {/* Hero Section */}
       <section className="relative h-[300px] flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
         <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Blog</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('title')}</h1>
           <p className="text-lg opacity-90">
-            Evcil hayvan bakımı, eğitimi ve sağlığı hakkında faydalı bilgiler
+            {t('subtitle')}
           </p>
         </div>
       </section>
@@ -85,7 +87,7 @@ export default function BlogPage() {
                   <div className="flex items-center gap-4 text-xs text-gray-500">
                     <div className="flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
-                      <span>{new Date(post.publishedAt).toLocaleDateString('tr-TR')}</span>
+                      <span>{new Date(post.publishedAt).toLocaleDateString(locale === 'tr' ? 'tr-TR' : 'en-US')}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <User className="w-3 h-3" />
@@ -93,7 +95,7 @@ export default function BlogPage() {
                     </div>
                   </div>
                   <Button variant="ghost" size="sm" className="w-full mt-4 group-hover:bg-gray-900 group-hover:text-white transition-colors">
-                    Devamını Oku
+                    {t('readMore')}
                     <ChevronRight className="w-4 h-4 ml-2" />
                   </Button>
                 </CardContent>
@@ -103,7 +105,7 @@ export default function BlogPage() {
 
           {posts.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-500">Henüz blog yazısı bulunmuyor.</p>
+              <p className="text-gray-500">{t('noPosts')}</p>
             </div>
           )}
         </div>

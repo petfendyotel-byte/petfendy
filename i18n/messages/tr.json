@@ -538,6 +538,12 @@
       "contact": "İletişim:",
       "email": "E-posta"
     }
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Evcil hayvan bakımı, eğitimi ve sağlığı hakkında faydalı bilgiler",
+    "readMore": "Devamını Oku",
+    "noPosts": "Henüz blog yazısı bulunmuyor."
   }
 }
 
