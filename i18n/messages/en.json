@@ -347,6 +347,27 @@
       "cookies": "Cookies"
     }
   },
+  "services": {
+    "title": "Our Services",
+    "subtitle": "We offer comprehensive and professional services for your pets",
+    "service1": {
+      "title": "Cat & Dog Hotel",
+      "description": "You can leave your beloved pets in a comfortable and safe environment. Our professional care team provides 24/7 service."
+    },
+    "service2": {
+      "title": "Pet Taxi",
+      "description": "Safe intercity pet transportation service. Comfortable travel with transparent distance-based pricing."
+    },
+    "service3": {
+      "title": "Pet Grooming",
+      "description": "Professional grooming services for the beauty and health of your pets."
+    },
+    "service4": {
+      "title": "Dog Training",
+      "description": "We offer basic obedience training, advanced training and socialization services with our expert trainers."
+    },
+    "detailsButton": "Learn More"
+  },
   "privacy": {
     "title": "Privacy and Personal Data Protection Policy",
     "subtitle": "In accordance with Law No. 6698 on Protection of Personal Data",

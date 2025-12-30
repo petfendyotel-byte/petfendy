@@ -1,6 +1,7 @@
 "use client"
 
 import { useParams, useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,12 +12,13 @@ export default function ServicesPage() {
   const params = useParams()
   const router = useRouter()
   const locale = (params?.locale as string) || 'tr'
+  const t = useTranslations('services')
 
   const services = [
     {
       id: 1,
-      title: "Kedi Köpek Oteli",
-      description: "Evcil dostlarınızı konforlu ve güvenli ortamda bırakabilirsiniz. Profesyonel bakım ekibimiz 24/7 hizmet vermektedir.",
+      titleKey: "service1.title",
+      descriptionKey: "service1.description",
       icon: Home,
       color: "from-purple-500 to-purple-700",
       bgColor: "bg-purple-100",
@@ -24,8 +26,8 @@ export default function ServicesPage() {
     },
     {
       id: 2,
-      title: "Pet Taksi",
-      description: "Şehirlerarası güvenli pet taşıma hizmeti. Mesafe bazlı şeffaf fiyatlandırma ile rahat seyahat.",
+      titleKey: "service2.title",
+      descriptionKey: "service2.description",
       icon: Car,
       color: "from-orange-500 to-orange-700",
       bgColor: "bg-orange-100",
@@ -33,8 +35,8 @@ export default function ServicesPage() {
     },
     {
       id: 3,
-      title: "Pet Kuaför",
-      description: "Evcil hayvanlarınızın güzelliği ve sağlığı için profesyonel kuaför hizmetleri.",
+      titleKey: "service3.title",
+      descriptionKey: "service3.description",
       icon: Scissors,
       color: "from-pink-500 to-pink-700",
       bgColor: "bg-pink-100",
@@ -42,8 +44,8 @@ export default function ServicesPage() {
     },
     {
       id: 4,
-      title: "Köpek Eğitimi",
-      description: "Uzman eğitmenlerimiz ile temel itaat eğitimi, ileri eğitim ve sosyalleştirme hizmetleri sunuyoruz.",
+      titleKey: "service4.title",
+      descriptionKey: "service4.description",
       icon: GraduationCap,
       color: "from-blue-500 to-blue-700",
       bgColor: "bg-blue-100",
@@ -58,9 +60,9 @@ export default function ServicesPage() {
       {/* Hero Section */}
       <section className="relative h-[400px] flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
         <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Hizmetlerimiz</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('title')}</h1>
           <p className="text-lg md:text-xl opacity-90">
-            Evcil hayvanlarınız için kapsamlı ve profesyonel hizmetler sunuyoruz
+            {t('subtitle')}
           </p>
         </div>
       </section>
@@ -78,10 +80,10 @@ export default function ServicesPage() {
                       <IconComponent className="w-8 h-8 text-white" />
                     </div>
                     <CardTitle className="text-2xl text-white mb-3">
-                      {service.title}
+                      {t(service.titleKey)}
                     </CardTitle>
                     <p className="text-white/90">
-                      {service.description}
+                      {t(service.descriptionKey)}
                     </p>
                   </div>
                   <CardContent className="p-6">
@@ -90,7 +92,7 @@ export default function ServicesPage() {
                       className="w-full group-hover:bg-gray-900 group-hover:text-white transition-colors"
                       onClick={() => router.push(`/${locale}`)}
                     >
-                      Detaylı Bilgi
+                      {t('detailsButton')}
                       <ChevronRight className="w-4 h-4 ml-2" />
                     </Button>
                   </CardContent>

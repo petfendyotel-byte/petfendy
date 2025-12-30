@@ -347,6 +347,27 @@
       "cookies": "Çerezler"
     }
   },
+  "services": {
+    "title": "Hizmetlerimiz",
+    "subtitle": "Evcil hayvanlarınız için kapsamlı ve profesyonel hizmetler sunuyoruz",
+    "service1": {
+      "title": "Kedi Köpek Oteli",
+      "description": "Evcil dostlarınızı konforlu ve güvenli ortamda bırakabilirsiniz. Profesyonel bakım ekibimiz 24/7 hizmet vermektedir."
+    },
+    "service2": {
+      "title": "Pet Taksi",
+      "description": "Şehirlerarası güvenli pet taşıma hizmeti. Mesafe bazlı şeffaf fiyatlandırma ile rahat seyahat."
+    },
+    "service3": {
+      "title": "Pet Kuaför",
+      "description": "Evcil hayvanlarınızın güzelliği ve sağlığı için profesyonel kuaför hizmetleri."
+    },
+    "service4": {
+      "title": "Köpek Eğitimi",
+      "description": "Uzman eğitmenlerimiz ile temel itaat eğitimi, ileri eğitim ve sosyalleştirme hizmetleri sunuyoruz."
+    },
+    "detailsButton": "Detaylı Bilgi"
+  },
   "privacy": {
     "title": "Gizlilik ve Kişisel Verilerin Korunması Politikası",
     "subtitle": "6698 sayılı Kişisel Verilerin Korunması Kanunu uyarınca",
