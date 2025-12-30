@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
 import Image from "next/image"
 import { useTranslations } from 'next-intl'
@@ -24,7 +25,31 @@ import {
   Instagram,
   PawPrint,
   Sparkles,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react"
+
+// Slider images - optimized with smaller sizes and quality
+const sliderImages = [
+  {
+    src: "/images/slider-hotel.jpg",
+    alt: "Petfendy Luxury Pet Hotel",
+    title: "Lüks Pet Otel",
+    subtitle: "Evcil dostlarınız için 5 yıldızlı konaklama"
+  },
+  {
+    src: "/images/slider-taxi.jpg", 
+    alt: "Petfendy Pet Taksi",
+    title: "Pet Taksi",
+    subtitle: "Konforlu & Güvenli Yolculuk"
+  },
+  {
+    src: "/images/slider-pets.jpg",
+    alt: "Pet Hotel & Taxi",
+    title: "Petfendy",
+    subtitle: "Evcil dostlarınız için en iyi hizmet"
+  }
+]
 
 export default function HomePage() {
   const tHome = useTranslations('homepage')
@@ -32,9 +57,24 @@ export default function HomePage() {
   const router = useRouter()
   const params = useParams()
   const locale = (params?.locale as string) || 'tr'
+  
+  // Slider state
+  const [currentSlide, setCurrentSlide] = useState(0)
 
-  const scrollToReservation = () => {
-    document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })
+  // Auto-slide every 5 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % sliderImages.length)
+    }, 5000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % sliderImages.length)
+  }
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + sliderImages.length) % sliderImages.length)
   }
 
   return (
@@ -42,30 +82,78 @@ export default function HomePage() {
       {/* Navbar */}
       <Navbar locale={locale} />
 
-      {/* Hero Section */}
+      {/* Hero Section with Slider */}
       <section className="relative h-[700px] md:h-[800px] flex items-center justify-center overflow-hidden">
-        {/* Gradient Background Overlay */}
-        <div className="absolute inset-0 z-0 gradient-primary opacity-90"></div>
-        
-        {/* Background Image with Overlay */}
-        <div className="absolute inset-0 z-0">
+        {/* LCP Image - First slide rendered separately for priority */}
+        <div
+          className={`absolute inset-0 transition-opacity duration-1000 ${
+            currentSlide === 0 ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
           <Image
-            src="https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=1920&h=800&fit=crop"
-            alt="Pet Hotel & Taxi"
+            src="/images/slider-hotel.jpg"
+            alt="Petfendy Luxury Pet Hotel"
             fill
-            className="object-cover mix-blend-overlay"
+            className="object-cover"
             priority
+            fetchPriority="high"
+            sizes="100vw"
+            quality={60}
           />
+          <div className="absolute inset-0 bg-black/30"></div>
         </div>
+        
+        {/* Other Slider Images */}
+        {sliderImages.slice(1).map((slide, index) => (
+          <div
+            key={index + 1}
+            className={`absolute inset-0 transition-opacity duration-1000 ${
+              index + 1 === currentSlide ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            <Image
+              src={slide.src}
+              alt={slide.alt}
+              fill
+              className="object-cover"
+              loading="lazy"
+              sizes="100vw"
+              quality={60}
+            />
+            <div className="absolute inset-0 bg-black/30"></div>
+          </div>
+        ))}
 
-        {/* Decorative Pet Icons */}
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          <PawPrint className="absolute top-20 left-10 w-16 h-16 text-white/20 animate-float" style={{ animationDelay: '0s' }} />
-          <PawPrint className="absolute top-40 right-20 w-12 h-12 text-white/15 animate-float" style={{ animationDelay: '1s' }} />
-          <PawPrint className="absolute bottom-32 left-1/4 w-14 h-14 text-white/20 animate-float" style={{ animationDelay: '2s' }} />
-          <PawPrint className="absolute bottom-20 right-1/3 w-10 h-10 text-white/15 animate-float" style={{ animationDelay: '1.5s' }} />
-          <Sparkles className="absolute top-1/4 right-1/4 w-20 h-20 text-yellow-300/30 animate-bounce-slow" style={{ animationDelay: '0.5s' }} />
-          <Sparkles className="absolute bottom-1/3 left-1/3 w-16 h-16 text-pink-300/30 animate-bounce-slow" style={{ animationDelay: '1.2s' }} />
+        {/* Slider Navigation Arrows */}
+        <button
+          onClick={prevSlide}
+          className="absolute left-4 md:left-8 z-20 p-3 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/40 transition-all"
+          aria-label="Previous slide"
+        >
+          <ChevronLeft className="w-6 h-6 md:w-8 md:h-8 text-white" />
+        </button>
+        <button
+          onClick={nextSlide}
+          className="absolute right-4 md:right-8 z-20 p-3 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/40 transition-all"
+          aria-label="Next slide"
+        >
+          <ChevronRight className="w-6 h-6 md:w-8 md:h-8 text-white" />
+        </button>
+
+        {/* Slider Dots */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex gap-3">
+          {sliderImages.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentSlide(index)}
+              className={`w-3 h-3 rounded-full transition-all ${
+                index === currentSlide 
+                  ? 'bg-white w-8' 
+                  : 'bg-white/50 hover:bg-white/70'
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
         </div>
 
         {/* Content */}
@@ -92,7 +180,7 @@ export default function HomePage() {
             <Button
               size="lg"
               className="bg-white text-gray-900 hover:bg-gray-50 gap-3 px-8 py-6 text-lg rounded-2xl hover-scale shadow-2xl font-semibold"
-              onClick={scrollToReservation}
+              onClick={() => router.push(`/${locale}/booking/hotel`)}
             >
               <HomeIcon className="w-6 h-6" />
               {tNew('hotelButton')}
@@ -100,7 +188,7 @@ export default function HomePage() {
             <Button
               size="lg"
               className="gradient-orange-pink hover:opacity-90 gap-3 px-8 py-6 text-lg rounded-2xl hover-scale shadow-2xl font-semibold text-white border-2 border-white/30"
-              onClick={scrollToReservation}
+              onClick={() => router.push(`/${locale}/booking/taxi`)}
             >
               <Car className="w-6 h-6" />
               {tNew('taxiButton')}
@@ -118,10 +206,10 @@ export default function HomePage() {
               <Sparkles className="w-8 h-8 text-pink-500 -ml-4 animate-pulse" />
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-gradient mb-4">
-              Hizmetlerimiz
+              {locale === 'en' ? 'Our Services' : 'Hizmetlerimiz'}
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Evcil dostlarınız için en iyi hizmetleri sunuyoruz
+              {locale === 'en' ? 'We offer the best services for your pet friends' : 'Evcil dostlarınız için en iyi hizmetleri sunuyoruz'}
             </p>
           </div>
           
@@ -148,7 +236,7 @@ export default function HomePage() {
               <CardContent className="p-8 bg-white">
                 <Button 
                   className="w-full gradient-orange-pink hover:opacity-90 text-white py-6 text-lg rounded-2xl font-semibold hover-scale shadow-lg"
-                  onClick={() => router.push(`/${locale}`)}
+                  onClick={() => router.push(`/${locale}/booking/hotel`)}
                 >
                   <HomeIcon className="w-5 h-5 mr-2" />
                   {tNew('hotelButton')}
@@ -178,7 +266,7 @@ export default function HomePage() {
               <CardContent className="p-8 bg-white">
                 <Button 
                   className="w-full gradient-warm hover:opacity-90 text-white py-6 text-lg rounded-2xl font-semibold hover-scale shadow-lg"
-                  onClick={() => router.push(`/${locale}`)}
+                  onClick={() => router.push(`/${locale}/booking/taxi`)}
                 >
                   <Car className="w-5 h-5 mr-2" />
                   {tNew('taxiButton')}
@@ -373,10 +461,13 @@ export default function HomePage() {
             <Card className="overflow-hidden border-0 shadow-lg">
               <div className="relative h-64">
                 <Image
-                  src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&h=400&fit=crop"
+                  src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&h=400&fit=crop&q=75"
                   alt="Petfendy oyun anları"
                   fill
                   className="object-cover"
+                  loading="lazy"
+                  placeholder="blur"
+                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAIhAAAgEDAwUBAAAAAAAAAAAAAQIDAAQRBRIhBhMiMUFR/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAZEQACAwEAAAAAAAAAAAAAAAABAgADESH/2gAMAwEAAhEDEQA/ANF6d1qC+0+3uLiNYZJEDMqnIBPsZ+1Kp0xqVxqF5cXE8jSSyMzMx9kk5J/aUqhZYwJBuf/2Q=="
                 />
               </div>
               <CardContent className="p-4">
@@ -388,10 +479,13 @@ export default function HomePage() {
             <Card className="overflow-hidden border-0 shadow-lg">
               <div className="relative h-64">
                 <Image
-                  src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=400&fit=crop"
+                  src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=400&fit=crop&q=75"
                   alt="Petfendy'de kedi ve köpek sevgisi"
                   fill
                   className="object-cover"
+                  loading="lazy"
+                  placeholder="blur"
+                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAIhAAAgEDAwUBAAAAAAAAAAAAAQIDAAQRBRIhBhMiMUFR/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAZEQACAwEAAAAAAAAAAAAAAAABAgADESH/2gAMAwEAAhEDEQA/ANF6d1qC+0+3uLiNYZJEDMqnIBPsZ+1Kp0xqVxqF5cXE8jSSyMzMx9kk5J/aUqhZYwJBuf/2Q=="
                 />
               </div>
               <CardContent className="p-4">
@@ -403,10 +497,13 @@ export default function HomePage() {
             <Card className="overflow-hidden border-0 shadow-lg">
               <div className="relative h-64">
                 <Image
-                  src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=400&fit=crop"
+                  src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=400&fit=crop&q=75"
                   alt="Petfendy ailesiyle beraber"
                   fill
                   className="object-cover"
+                  loading="lazy"
+                  placeholder="blur"
+                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAIhAAAgEDAwUBAAAAAAAAAAAAAQIDAAQRBRIhBhMiMUFR/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAZEQACAwEAAAAAAAAAAAAAAAABAgADESH/2gAMAwEAAhEDEQA/ANF6d1qC+0+3uLiNYZJEDMqnIBPsZ+1Kp0xqVxqF5cXE8jSSyMzMx9kk5J/aUqhZYwJBuf/2Q=="
                 />
               </div>
               <CardContent className="p-4">
@@ -444,7 +541,7 @@ export default function HomePage() {
                 <Button
                   size="lg"
                   className="gradient-warm hover:opacity-90 text-white font-semibold shadow-lg hover-scale rounded-2xl px-8 py-6 text-lg"
-                  onClick={scrollToReservation}
+                  onClick={() => router.push(`/${locale}/booking/hotel`)}
                 >
                   {tNew('safetyBannerButton1')}
                 </Button>
@@ -461,9 +558,9 @@ export default function HomePage() {
 
             {/* Image */}
             <div className="relative">
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-orange-50 to-yellow-50">
                 <Image
-                  src="/images/pet-services-hero.svg"
+                  src="/images/hero-pets.webp"
                   alt={tNew('safetyBannerAlt')}
                   width={600}
                   height={600}
@@ -473,7 +570,7 @@ export default function HomePage() {
               </div>
               {/* Decorative elements */}
               <div className="absolute -top-4 -right-4 w-24 h-24 bg-orange-200 rounded-full opacity-50 blur-xl"></div>
-              <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-purple-200 rounded-full opacity-50 blur-xl"></div>
+              <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-yellow-200 rounded-full opacity-50 blur-xl"></div>
             </div>
           </div>
         </div>

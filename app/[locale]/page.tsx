@@ -136,16 +136,17 @@ export default function Home() {
               className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => router.push(`/${locale}/home`)}
             >
-              <div className="w-16 h-12 sm:w-20 sm:h-16">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white rounded-lg p-1">
                 <Image
-                  src="/petfendy-logo.svg"
+                  src="/images/petfendy-main-logo.png"
                   alt="Petfendy Logo"
-                  width={80}
+                  width={64}
                   height={64}
                   className="w-full h-full object-contain"
                   priority
                 />
               </div>
+              <span className="hidden sm:block text-lg md:text-xl font-bold">Petfendy</span>
             </div>
 
             {/* Right Side Actions */}

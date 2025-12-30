@@ -1,196 +1,212 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
-import { existsSync, statSync } from 'fs'
+import { writeFile, mkdir, unlink } from 'fs/promises'
+import { existsSync } from 'fs'
 import path from 'path'
-import crypto from 'crypto'
-import { RateLimiter } from '@/lib/security'
+import { v4 as uuidv4 } from 'uuid'
+import { uploadToS3, deleteFromS3, isS3Configured, getS3KeyFromUrl } from '@/lib/s3'
 
-// Rate limiter: 20 uploads per 15 minutes per IP
-const uploadRateLimiter = new RateLimiter(20, 15 * 60 * 1000)
-
-// Allowed file types with their magic numbers (file signatures)
-const ALLOWED_IMAGE_TYPES = {
-  'image/jpeg': { ext: ['.jpg', '.jpeg'], magic: ['FFD8FF'] },
-  'image/png': { ext: ['.png'], magic: ['89504E47'] },
-  'image/webp': { ext: ['.webp'], magic: ['52494646'] },
-  'image/gif': { ext: ['.gif'], magic: ['474946'] },
-}
-
-const ALLOWED_VIDEO_TYPES = {
-  'video/mp4': { ext: ['.mp4'], magic: ['00000'] },
-  'video/webm': { ext: ['.webm'], magic: ['1A45DFA3'] },
-  'video/ogg': { ext: ['.ogg', '.ogv'], magic: ['4F676753'] },
-}
-
-// File size limits (in bytes)
-const MAX_IMAGE_SIZE = parseInt(process.env.MAX_FILE_SIZE || '10485760') // 10MB
-const MAX_VIDEO_SIZE = parseInt(process.env.MAX_VIDEO_SIZE || '104857600') // 100MB
-
-/**
- * Check file signature (magic numbers) to prevent file type spoofing
- */
-function checkFileSignature(buffer: Buffer, allowedSignatures: string[]): boolean {
-  const fileSignature = buffer.toString('hex', 0, 4).toUpperCase()
-  return allowedSignatures.some(sig => fileSignature.startsWith(sig))
-}
-
-/**
- * Generate secure random filename
- */
-function generateSecureFilename(originalName: string): string {
-  const ext = path.extname(originalName).toLowerCase()
-  const randomBytes = crypto.randomBytes(16).toString('hex')
-  const timestamp = Date.now()
-  return `room_${timestamp}_${randomBytes}${ext}`
-}
-
-/**
- * Validate file type and size
- */
-function validateFile(
-  file: File,
-  buffer: Buffer,
-  allowedTypes: Record<string, any>,
-  maxSize: number
-): { valid: boolean; error?: string } {
-  // Check file size
-  if (file.size > maxSize) {
-    return {
-      valid: false,
-      error: `File size exceeds maximum allowed (${maxSize / 1024 / 1024}MB)`
-    }
-  }
-
-  // Check MIME type
-  const fileType = allowedTypes[file.type]
-  if (!fileType) {
-    return { valid: false, error: 'File type not allowed' }
-  }
-
-  // Check file extension
-  const ext = path.extname(file.name).toLowerCase()
-  if (!fileType.ext.includes(ext)) {
-    return { valid: false, error: 'File extension does not match MIME type' }
-  }
-
-  // Check magic numbers (file signature)
-  if (!checkFileSignature(buffer, fileType.magic)) {
-    return { valid: false, error: 'File signature validation failed' }
-  }
-
-  return { valid: true }
-}
+// Allowed file types
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime']
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
+const MAX_VIDEO_SIZE = 100 * 1024 * 1024 // 100MB
 
 export async function POST(request: NextRequest) {
   try {
-    // Get client IP for rate limiting
-    const clientIP = request.headers.get('x-forwarded-for') ||
-                     request.headers.get('x-real-ip') ||
-                     'unknown'
-
-    // Check rate limit
-    if (uploadRateLimiter.isLimited(clientIP)) {
-      return NextResponse.json(
-        { error: 'Too many upload requests. Please try again later.' },
-        { status: 429 }
-      )
-    }
-
     const formData = await request.formData()
-    const files = formData.getAll('files') as File[]
+    const file = formData.get('file') as File | null
+    const type = formData.get('type') as string | null // 'image' or 'video'
 
-    if (!files || files.length === 0) {
-      return NextResponse.json(
-        { error: 'No files provided' },
-        { status: 400 }
-      )
+    if (!file) {
+      return NextResponse.json({ error: 'Dosya bulunamadı' }, { status: 400 })
     }
 
-    // Limit number of files per request
-    if (files.length > 10) {
-      return NextResponse.json(
-        { error: 'Maximum 10 files per upload' },
-        { status: 400 }
-      )
+    const mimeType = file.type
+    const isImage = ALLOWED_IMAGE_TYPES.includes(mimeType)
+    const isVideo = ALLOWED_VIDEO_TYPES.includes(mimeType)
+
+    // Validate file type
+    if (type === 'image' && !isImage) {
+      return NextResponse.json({ 
+        error: 'Geçersiz resim formatı. Desteklenen formatlar: JPEG, PNG, WebP, GIF' 
+      }, { status: 400 })
     }
 
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'rooms')
-
-    // Create directory if it doesn't exist
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true })
+    if (type === 'video' && !isVideo) {
+      return NextResponse.json({ 
+        error: 'Geçersiz video formatı. Desteklenen formatlar: MP4, WebM, MOV' 
+      }, { status: 400 })
     }
 
-    const uploadedUrls: string[] = []
-    const errors: string[] = []
+    if (!isImage && !isVideo) {
+      return NextResponse.json({ 
+        error: 'Desteklenmeyen dosya formatı' 
+      }, { status: 400 })
+    }
 
-    for (const file of files) {
+    // Validate file size
+    const maxSize = isImage ? MAX_IMAGE_SIZE : MAX_VIDEO_SIZE
+    if (file.size > maxSize) {
+      const maxSizeMB = maxSize / (1024 * 1024)
+      return NextResponse.json({ 
+        error: `Dosya boyutu çok büyük. Maksimum: ${maxSizeMB}MB` 
+      }, { status: 400 })
+    }
+
+    // Generate unique filename
+    const ext = path.extname(file.name) || (isImage ? '.jpg' : '.mp4')
+    const filename = `${uuidv4()}${ext}`
+    
+    // Get file buffer
+    const bytes = await file.arrayBuffer()
+    const buffer = Buffer.from(bytes)
+
+    let url: string
+    let storageType: 's3' | 'local' = 'local'
+
+    // Try S3 first if configured
+    if (isS3Configured()) {
       try {
-        const bytes = await file.arrayBuffer()
-        const buffer = Buffer.from(bytes)
-
-        // Determine if it's an image or video based on MIME type
-        const isImage = file.type.startsWith('image/')
-        const isVideo = file.type.startsWith('video/')
-
-        if (!isImage && !isVideo) {
-          errors.push(`${file.name}: Invalid file type`)
-          continue
-        }
-
-        // Validate file
-        const validation = validateFile(
-          file,
-          buffer,
-          isImage ? ALLOWED_IMAGE_TYPES : ALLOWED_VIDEO_TYPES,
-          isImage ? MAX_IMAGE_SIZE : MAX_VIDEO_SIZE
-        )
-
-        if (!validation.valid) {
-          errors.push(`${file.name}: ${validation.error}`)
-          continue
-        }
-
-        // Generate secure filename (prevents path traversal)
-        const filename = generateSecureFilename(file.name)
-        const filepath = path.join(uploadDir, filename)
-
-        // Write file
-        await writeFile(filepath, buffer)
-
-        // Verify file was written correctly
-        const stats = statSync(filepath)
-        if (stats.size !== buffer.length) {
-          errors.push(`${file.name}: File write verification failed`)
-          continue
-        }
-
-        // Return URL path
-        uploadedUrls.push(`/uploads/rooms/${filename}`)
-      } catch (error) {
-        console.error(`Error processing file ${file.name}:`, error)
-        errors.push(`${file.name}: Processing failed`)
+        const folder = isImage ? 'images' : 'videos'
+        const s3Key = `uploads/${folder}/${filename}`
+        url = await uploadToS3(buffer, s3Key, mimeType)
+        storageType = 's3'
+        console.log('File uploaded to S3:', url)
+      } catch (s3Error) {
+        console.error('S3 upload failed, falling back to local:', s3Error)
+        // Fall back to local storage
+        url = await saveToLocal(buffer, filename, isImage)
       }
+    } else {
+      // Use local storage
+      url = await saveToLocal(buffer, filename, isImage)
     }
 
-    // Return response
-    if (uploadedUrls.length === 0 && errors.length > 0) {
-      return NextResponse.json(
-        { error: 'All uploads failed', details: errors },
-        { status: 400 }
-      )
+    // Try to save to database (optional)
+    let fileId = `file-${Date.now()}`
+    try {
+      const prisma = (await import('@/lib/prisma')).default
+      const uploadedFile = await prisma.uploadedFile.create({
+        data: {
+          filename,
+          originalName: file.name,
+          mimeType,
+          size: file.size,
+          path: storageType === 's3' ? `s3:${url}` : path.join(process.cwd(), 'public', url),
+          url,
+        }
+      })
+      fileId = uploadedFile.id
+    } catch (dbError) {
+      console.warn('Database save skipped:', dbError)
     }
 
     return NextResponse.json({
       success: true,
-      urls: uploadedUrls,
-      errors: errors.length > 0 ? errors : undefined
+      file: {
+        id: fileId,
+        url,
+        filename,
+        originalName: file.name,
+        mimeType,
+        size: file.size,
+        storageType,
+      }
     })
+
   } catch (error) {
     console.error('Upload error:', error)
-    return NextResponse.json(
-      { error: 'Upload failed' },
-      { status: 500 }
-    )
+    return NextResponse.json({ 
+      error: 'Dosya yüklenirken bir hata oluştu' 
+    }, { status: 500 })
+  }
+}
+
+// Helper function to save file locally
+async function saveToLocal(buffer: Buffer, filename: string, isImage: boolean): Promise<string> {
+  const uploadDir = isImage ? 'uploads/images' : 'uploads/videos'
+  const fullUploadDir = path.join(process.cwd(), 'public', uploadDir)
+
+  if (!existsSync(fullUploadDir)) {
+    await mkdir(fullUploadDir, { recursive: true })
+  }
+
+  const filePath = path.join(fullUploadDir, filename)
+  await writeFile(filePath, buffer)
+
+  return `/${uploadDir}/${filename}`
+}
+
+// Delete uploaded file
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const fileId = searchParams.get('id')
+    const fileUrl = searchParams.get('url')
+
+    if (!fileId && !fileUrl) {
+      return NextResponse.json({ error: 'Dosya ID veya URL gerekli' }, { status: 400 })
+    }
+
+    // Check if it's an S3 URL
+    const isS3Url = fileUrl?.includes('.s3.') || fileUrl?.includes('s3.amazonaws.com') || 
+                   (process.env.S3_PUBLIC_URL && fileUrl?.startsWith(process.env.S3_PUBLIC_URL))
+
+    if (isS3Url && fileUrl) {
+      // Delete from S3
+      const s3Key = getS3KeyFromUrl(fileUrl)
+      if (s3Key) {
+        try {
+          await deleteFromS3(s3Key)
+          console.log('File deleted from S3:', s3Key)
+        } catch (s3Error) {
+          console.error('S3 delete error:', s3Error)
+        }
+      }
+    }
+
+    // Try to find and delete from database
+    try {
+      const prisma = (await import('@/lib/prisma')).default
+      const file = fileId 
+        ? await prisma.uploadedFile.findUnique({ where: { id: fileId } })
+        : await prisma.uploadedFile.findFirst({ where: { url: fileUrl! } })
+
+      if (file) {
+        // Delete from filesystem if local
+        if (!file.path.startsWith('s3:')) {
+          try {
+            await unlink(file.path)
+          } catch (e) {
+            console.warn('File not found on disk:', file.path)
+          }
+        }
+
+        // Delete from database
+        await prisma.uploadedFile.delete({ where: { id: file.id } })
+        return NextResponse.json({ success: true })
+      }
+    } catch (dbError) {
+      console.warn('Database delete skipped:', dbError)
+    }
+
+    // If no database record, try to delete file directly from URL (local only)
+    if (fileUrl && !isS3Url) {
+      const filePath = path.join(process.cwd(), 'public', fileUrl)
+      try {
+        await unlink(filePath)
+        return NextResponse.json({ success: true })
+      } catch (e) {
+        console.warn('File not found:', filePath)
+      }
+    }
+
+    return NextResponse.json({ success: true, message: 'File may have been already deleted' })
+
+  } catch (error) {
+    console.error('Delete error:', error)
+    return NextResponse.json({ 
+      error: 'Dosya silinirken bir hata oluştu' 
+    }, { status: 500 })
   }
 }

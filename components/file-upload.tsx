@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,6 +19,11 @@ export function FileUpload({ type, existingFiles, onFilesChange, maxFiles = 10 }
   const [uploading, setUploading] = useState(false)
   const [previews, setPreviews] = useState<string[]>(existingFiles)
 
+  // Sync with external changes
+  useEffect(() => {
+    setPreviews(existingFiles)
+  }, [existingFiles])
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files || files.length === 0) return
@@ -36,7 +41,7 @@ export function FileUpload({ type, existingFiles, onFilesChange, maxFiles = 10 }
     // Validate file types
     const allowedTypes = type === "image"
       ? ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"]
-      : ["video/mp4", "video/webm", "video/ogg"]
+      : ["video/mp4", "video/webm", "video/ogg", "video/quicktime"]
 
     for (const file of Array.from(files)) {
       if (!allowedTypes.includes(file.type)) {
@@ -48,12 +53,12 @@ export function FileUpload({ type, existingFiles, onFilesChange, maxFiles = 10 }
         return
       }
 
-      // Validate file size (max 10MB for images, 50MB for videos)
-      const maxSize = type === "image" ? 10 * 1024 * 1024 : 50 * 1024 * 1024
+      // Validate file size (max 10MB for images, 100MB for videos)
+      const maxSize = type === "image" ? 10 * 1024 * 1024 : 100 * 1024 * 1024
       if (file.size > maxSize) {
         toast({
           title: "Hata",
-          description: `Dosya boyutu çok büyük. Maksimum ${type === "image" ? "10MB" : "50MB"}`,
+          description: `Dosya boyutu çok büyük. Maksimum ${type === "image" ? "10MB" : "100MB"}`,
           variant: "destructive"
         })
         return
@@ -63,22 +68,29 @@ export function FileUpload({ type, existingFiles, onFilesChange, maxFiles = 10 }
     setUploading(true)
 
     try {
-      const formData = new FormData()
-      Array.from(files).forEach(file => {
-        formData.append('files', file)
-      })
+      const uploadedUrls: string[] = []
 
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      })
+      // Upload files one by one
+      for (const file of Array.from(files)) {
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('type', type)
 
-      if (!response.ok) {
-        throw new Error('Upload failed')
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        })
+
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.error || 'Upload failed')
+        }
+
+        const data = await response.json()
+        uploadedUrls.push(data.file.url)
       }
 
-      const data = await response.json()
-      const newUrls = [...previews, ...data.urls]
+      const newUrls = [...previews, ...uploadedUrls]
       setPreviews(newUrls)
       onFilesChange(newUrls)
 
@@ -93,7 +105,7 @@ export function FileUpload({ type, existingFiles, onFilesChange, maxFiles = 10 }
       console.error('Upload error:', error)
       toast({
         title: "Hata",
-        description: "Dosya yükleme başarısız",
+        description: error instanceof Error ? error.message : "Dosya yükleme başarısız",
         variant: "destructive"
       })
     } finally {
@@ -101,7 +113,18 @@ export function FileUpload({ type, existingFiles, onFilesChange, maxFiles = 10 }
     }
   }
 
-  const handleRemove = (index: number) => {
+  const handleRemove = async (index: number) => {
+    const urlToRemove = previews[index]
+    
+    // Try to delete from server
+    try {
+      await fetch(`/api/upload?url=${encodeURIComponent(urlToRemove)}`, {
+        method: 'DELETE'
+      })
+    } catch (error) {
+      console.warn('Failed to delete file from server:', error)
+    }
+
     const newPreviews = previews.filter((_, i) => i !== index)
     setPreviews(newPreviews)
     onFilesChange(newPreviews)

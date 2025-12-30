@@ -403,6 +403,129 @@ export const mockBlogPosts: BlogPost[] = [
     publishedAt: new Date("2025-01-25"),
     createdAt: new Date("2025-01-25"),
     updatedAt: new Date("2025-01-25")
+  },
+  {
+    id: "blog-4",
+    title: "Temel İtaat Eğitimi: Köpeğinizle İyi Bir İletişim Kurmanın Anahtarı",
+    slug: "temel-itaat-egitimi-kopeginizle-iyi-bir-iletisim-kurmanin-anahtari",
+    excerpt: "Köpeğinizle sağlam bir iletişim kurmak, onunla sağlıklı bir ilişki geliştirmenin ve davranışlarını kontrol altında tutmanın önemli bir parçasıdır.",
+    content: `<p>Köpeğinizle sağlam bir iletişim kurmak, onunla sağlıklı bir ilişki geliştirmenin ve davranışlarını kontrol altında tutmanın önemli bir parçasıdır. Temel itaat eğitimi, köpeğinize gerekli komutları öğretirken aynı zamanda sizinle güçlü bir bağ oluşturmanızı sağlar.</p>
+
+<h2>Temel İtaat Eğitimi Nedir?</h2>
+<p>Temel itaat eğitimi, köpeklere temel davranış ve komutları öğretmeyi amaçlayan bir eğitim programıdır. Bu eğitim, köpeğinizin günlük hayatta sizinle ve çevresiyle uyumlu bir şekilde yaşamasını sağlamak için önemlidir. Temel itaat eğitimi, köpeğinizi disipline etmenin yanı sıra güvenliği, sosyalizasyonu ve iletişimi geliştirmeyi hedefler.</p>
+
+<h2>Temel Komutlar</h2>
+<p>Temel itaat eğitimi, köpeğinize aşağıdaki temel komutları öğretmeyi içerir:</p>
+
+<h3>Otur</h3>
+<p>Köpeğinizi oturmaya teşvik etmek için bu komutu kullanabilirsiniz. Otur komutu, köpeğinizi sakinleştirmek, kontrollü bir davranış sergilemesini sağlamak veya başka bir komuta geçiş yapmak için kullanılabilir.</p>
+
+<h3>Yat/Yer</h3>
+<p>Bu komut, köpeğinizi yatmaya veya belirli bir yerde beklemeye yönlendirmek için kullanılır. Yat komutu, köpeğinize sakin ve rahat bir şekilde uzanmayı öğretir.</p>
+
+<h3>Gel</h3>
+<p>Köpeğinizi size doğru gelmeye teşvik etmek ve onu çağırdığınızda size yaklaşmasını sağlamak için kullanılır. Gel komutu, köpeğinizin güvenliğini sağlamak ve serbest dolaşımda kontrolü elinizde tutmak için önemlidir.</p>
+
+<h3>Bekle/Dur</h3>
+<p>Bu komut, köpeğinizi belirli bir noktada bekletmek veya hareketini sınırlamak için kullanılır. Bekle komutu, köpeğinizin bir kapıda, merdivende veya trafikte güvende kalmasını sağlar.</p>
+
+<h2>Pozitif Takviye</h2>
+<p>Temel itaat eğitimi, pozitif takviye yöntemleriyle gerçekleştirilir. Köpeğinize doğru davranışı sergilediğinde övgü, sevgi veya ödül gibi teşvikler vermek temel bir prensiptir. Pozitif takviye, köpeğinizle güvene dayalı bir ilişki kurmayı ve onun motivasyonunu artırmayı amaçlar.</p>
+
+<p>Temel itaat eğitimi, köpeğinizin davranış problemlerini önlemek veya düzeltmek için de kullanılabilir. Düzenli ve tutarlı bir şekilde eğitime devam etmek, köpeğinizin öğrendiği becerileri pekiştirmek ve sürdürmek için önemlidir.</p>
+
+<p>Unutmayın ki, her köpek farklıdır ve öğrenme hızı ve yetenekleri de farklılık gösterebilir. Sabır, sürekli pratik ve pozitif takviye yöntemlerini kullanmak, köpeğinizle iyi bir iletişim ve sağlıklı bir ilişki kurmanın temelidir.</p>
+
+<p><strong>Temel itaat eğitiminde uzmanlar ile birlikte çalışmak için bizimle iletişime geçebilirsiniz.</strong></p>`,
+    coverImage: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&h=600&fit=crop",
+    category: "Eğitim",
+    tags: ["köpek eğitimi", "itaat eğitimi", "komutlar", "pozitif takviye"],
+    author: "Petfendy Ekibi",
+    published: true,
+    publishedAt: new Date("2023-06-03"),
+    createdAt: new Date("2023-06-03"),
+    updatedAt: new Date("2023-06-03")
+  },
+  {
+    id: "blog-5",
+    title: "Yavru Köpek Eğitimi için İpuçları",
+    slug: "yavru-kopek-egitimi-icin-ipuclari",
+    excerpt: "Yeni bir yavru köpek evlat edindiğinizde, evcil hayvanınızın eğitimi önemlidir. Yavruluk zamanı bir köpeğin eğitimi için en uygun zamandır.",
+    content: `<p>Yeni bir yavru köpek evlat edindiğinizde, evcil hayvanınızın eğitimi önemlidir. Eğitimsiz bir köpek, stresli olabilir ve yanlış davranışlar geliştirebilir. Yavruluk zamanı bir köpeğin eğitimi için en uygun zamandır. Düzgün eğitim almamış bir köpekte sosyalleşme, davranış bozuklukları ve hayatınıza adapte olma sorunları ortaya çıkabilir.</p>
+
+<h2>1. Adım: Yavru Köpeğinizi Tanıyın</h2>
+<p>Yavru köpeğinizi tanımak, onunla etkileşim kurmanızı ve onun davranışını anlamanızı sağlar. Bu nedenle, ilk adım yavru köpeğinizin karakteristik özelliklerini öğrenmek olmalıdır. Bu özellikler, köpeğin ırkına, yaşına, cinsiyetine, kişiliğine ve yeteneklerine bağlı olarak farklılık gösterir.</p>
+
+<h2>2. Adım: Tuvalet Eğitimi Verin</h2>
+<p>Tuvalet eğitimi, evcil hayvanınızın temel eğitiminde en önemli adımdır. Yavru köpekler tuvalet eğitimi almak için en iyi yaş aralığı 8-16 hafta arasındadır. Tuvalet eğitimi, sabır ve özveri gerektiren bir süreçtir, ancak doğru bir şekilde yapılırsa, evcil hayvanınızın hayatı boyunca ona faydası olacaktır.</p>
+
+<h2>3. Adım: Komutları Öğretin</h2>
+<p>Evcil hayvanınızın komutları öğrenmesi, güvenliği sağlamak için önemlidir. Komutlar, temel olarak "otur", "yere", "bekle", "gel", "hayır" gibi kelimeleri içerir. Bu komutları öğretmek, evcil hayvanınızın iyi davranışlar sergilemesini sağlar.</p>
+
+<h2>4. Adım: Sosyalleşme Eğitimi Verin</h2>
+<p>Köpekler sosyal hayvanlardır ve diğer köpeklerle ve insanlarla etkileşim kurmaya ihtiyaç duyarlar. Sosyalleşme eğitimi, köpeğinizi diğer insanlarla ve hayvanlarla uyumlu hale getirir ve evdeki yaşamınızı daha kolay hale getirir.</p>
+
+<h2>5. Adım: Olumlu Tepki Verin</h2>
+<p>Evcil hayvanınızın iyi davranışlar sergilemesi, onu teşvik etmek ve eğitim sürecini daha kolay hale getirmek için olumlu tepkiler verin. Köpeğinizi övün, sevin ve ödüllendirin. Bu, köpeğinizin öğrenme sürecini hızlandırır ve onu daha iyi davranışlar sergilemeye teşvik eder.</p>
+
+<h2>6. Adım: Sabırlı Olun</h2>
+<p>Köpek eğitimi, sabır gerektiren bir süreçtir. Eğitim sürecinde, evcil hayvanınızın öğrenme hızı ve özellikleri konusunda anlayışlı olun. Her köpek farklıdır, bu nedenle eğitim süreci de farklı olabilir. Sabırlı olmak, köpeğinizin iyi davranışlar sergilemesi için çok önemlidir.</p>
+
+<h2>7. Adım: Eğitimi Rutin Hale Getirin</h2>
+<p>Eğitim sürecini rutin hale getirin. Köpeğinizin öğrenme hızını artırmak için, eğitimi aynı zamanda ve aynı yerde yapın. Bu, köpeğinizin eğitim sürecinde daha hızlı ilerlemesine yardımcı olacaktır.</p>
+
+<p>Temel köpek eğitimi, evcil hayvanınızın güvenliği ve sağlığı için son derece önemlidir. Yavru köpeklerinizi eğitmek, sabır, özveri ve tutarlılık gerektirir. Kendiniz yeterli gelmediğiniz durumlarda mutlaka bir uzmana başvurun.</p>`,
+    coverImage: "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=800&h=600&fit=crop",
+    category: "Eğitim",
+    tags: ["yavru köpek", "köpek eğitimi", "tuvalet eğitimi", "sosyalleşme"],
+    author: "Petfendy Ekibi",
+    published: true,
+    publishedAt: new Date("2023-03-12"),
+    createdAt: new Date("2023-03-12"),
+    updatedAt: new Date("2023-03-12")
+  },
+  {
+    id: "blog-6",
+    title: "Köpeklerin Sosyalleşmesi: Sıkılmış Köpeklerinizi Mutlu Etmek İçin İpuçları",
+    slug: "kopeklerin-sosyallesmesi-sikilmis-kopeklerinizi-mutlu-etmek-icin-ipuclari",
+    excerpt: "Köpekler, sosyal yaratıklardır ve insanlar gibi etkileşim kurmaya ihtiyaç duyarlar. Sosyalizasyon eğitimi ile köpeğinizi mutlu edin.",
+    content: `<p>Köpekler, sosyal yaratıklardır ve insanlar gibi etkileşim kurmaya ihtiyaç duyarlar. Ancak, bazı köpekler sosyalizasyon konusunda zorluk çekebilirler ve bu da davranış problemlerine neden olabilir. Sıkılmış köpekler, yıkıcı davranışlar sergileme eğilimindedir ve bu da ev sahipleri için stresli bir durum olabilir.</p>
+
+<h2>Köpeklerde Sosyalleşme Nedir?</h2>
+<p>Köpeklerin sosyalleşmesi, onların insanlar ve diğer köpeklerle etkileşim kurmasını ve davranışlarını kontrol altında tutmasını öğrenmelerini içerir. Sosyalleşme süreci, köpeklerin erken yaşlarda başlar ve ömür boyu devam eder. Sosyalleşme, köpeklerin yeni insanlar ve diğer köpeklerle karşılaştıklarında rahat ve güvende hissetmelerine yardımcı olur.</p>
+
+<p>Köpeklerin sosyalleşmesi, sağlıklı bir yaşam sürmeleri için çok önemlidir. Sosyalleşmeyen köpekler, yabancılarla ve diğer köpeklerle etkileşim kurmakta zorluk çekebilirler ve bu da davranış problemlerine neden olabilir.</p>
+
+<h2>Sosyalizasyon Eğitimi Nedir?</h2>
+<p>Sosyalizasyon eğitimi, köpeklerin daha sosyal olmalarına yardımcı olmak için tasarlanmış bir eğitim programıdır. Bu program, köpeklerin diğer köpeklerle, insanlarla ve çevreleriyle daha iyi etkileşim kurmalarını sağlar. Sosyal köpekler, daha mutlu, daha az stresli ve daha az davranış problemleriyle karşı karşıya kalırlar.</p>
+
+<h2>Sosyalizasyon Eğitimi İçin Adımlar</h2>
+
+<h3>Sosyalizasyona Erken Başlamak</h3>
+<p>Köpeklerin sosyalizasyon süreci, erken yaşlarda başlamalıdır. Köpekler 12 haftalıkken sosyalleşmeye başlamalıdır. Köpeğiniz yetişkin bir köpek ise uzman eğitmenler ile bu sorunun üstesinden gelinebilir.</p>
+
+<h3>Köpeğinize Farklı Ortamlarda Deneyimler Sunmak</h3>
+<p>Köpeklerinizi farklı ortamlara götürün ve onları farklı deneyimler ile eğitin. Köpeklerinizi, parklara, sokaklara, plajlara, mağazalara ve diğer sosyal ortamlara götürün farklı canlılar ve köpekler ile tanıştırın.</p>
+
+<h3>Köpeğinizi Farklı İnsanlarla Tanıştırın</h3>
+<p>Köpeklerinizi farklı insanlarla tanıştırın. Farklı yaş, cinsiyet, boy, ten rengi ve kıyafetler giyen insanlarla tanıştırmak onu mutlu edecektir aynı zamanda farklı insanlara alışmasını sağlayacaktır.</p>
+
+<h3>Diğer Köpeklerle Tanıştırın</h3>
+<p>Köpek sosyalizasyonunun en önemli kısmı diğer köpekler ve canlılar ile tanıştırmaktadır. Eğer köpeğinizin agresif veya stresli tepkileri var ise bu işlemi bir uzman eşliğinde yapmanız köpeğiniz için en iyisi olacaktır.</p>
+
+<h3>Pozitif Takviye Kullanın</h3>
+<p>Pozitif takviye kullanmak köpekler için en iyi sonuç veren yöntemlerden biridir. Sosyalizasyon eğitimi sırasında pozitif takviye kullanın. Köpeklerinize, ödül vererek istenilen davranışları teşvik edin.</p>
+
+<h3>Bir Uzmana Danışın</h3>
+<p>Köpek sosyalizasyonu köpeğinizin mutluluğu için doğru bir şekilde yönetilmesi gereken bir süreçtir. Özellikle yetişkin köpeklerde oturmuş bir davranış şekli olduğu için eğitimleri için mutlaka bir uzmana başvurmanızı tavsiye ederiz.</p>`,
+    coverImage: "https://images.unsplash.com/photo-1534361960057-19889db9621e?w=800&h=600&fit=crop",
+    category: "Eğitim",
+    tags: ["köpek sosyalleşme", "sosyalizasyon", "köpek davranışı", "eğitim"],
+    author: "Petfendy Ekibi",
+    published: true,
+    publishedAt: new Date("2023-03-11"),
+    createdAt: new Date("2023-03-11"),
+    updatedAt: new Date("2023-03-11")
   }
 ]
 

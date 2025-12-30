@@ -628,7 +628,7 @@ Password: password123
 **Test Payment:**
 ```
 Card: 4242 4242 4242 4242
-Date: 12/25
+Date: 12/30
 CVV: 123
 ```
 

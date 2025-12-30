@@ -7,6 +7,7 @@ import { mockHotelRooms, mockTaxiServices } from "@/lib/mock-data"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -14,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/components/ui/use-toast"
 import { FileUpload } from "@/components/file-upload"
 import { VideoUpload } from "@/components/video-upload"
+import { RoomEditModal } from "./room-edit-modal"
 import { sanitizeInput } from "@/lib/security"
 import { encryptPaymentCredential, decryptPaymentCredential, maskCredential, validatePaymentCredentials, sanitizePaymentUrl } from "@/lib/encryption"
 import { 
@@ -79,9 +81,11 @@ export function AdminDashboard() {
   const [showAddGateway, setShowAddGateway] = useState(false)
   const [editingGateway, setEditingGateway] = useState<PaymentGateway | null>(null)
   const [showCredentials, setShowCredentials] = useState<Record<string, boolean>>({})
+  const [isLoading, setIsLoading] = useState(false)
 
   // UI State
   const [editingRoom, setEditingRoom] = useState<HotelRoom | null>(null)
+  const [showRoomEditModal, setShowRoomEditModal] = useState(false)
   const [editingService, setEditingService] = useState<TaxiService | null>(null)
   const [editingVehicle, setEditingVehicle] = useState<TaxiVehicle | null>(null)
   const [showAddRoom, setShowAddRoom] = useState(false)
@@ -133,6 +137,12 @@ export function AdminDashboard() {
     pricePerNight: 0,
   })
 
+  // Taksi km fiyat ayarları
+  const [taxiPrices, setTaxiPrices] = useState({
+    vipPricePerKm: 15,
+    sharedPricePerKm: 8
+  })
+
   const [newGateway, setNewGateway] = useState<{
     provider: "paytr" | "paratika"
     name: string
@@ -161,11 +171,111 @@ export function AdminDashboard() {
     currency: "TL"
   })
 
+  // API Functions for Rooms
+  const fetchRooms = async () => {
+    try {
+      const response = await fetch('/api/rooms')
+      if (response.ok) {
+        const data = await response.json()
+        // If API returns empty array, use localStorage or mock data
+        if (Array.isArray(data) && data.length > 0) {
+          setRooms(data)
+          localStorage.setItem("petfendy_rooms", JSON.stringify(data))
+        } else {
+          // API returned empty, try localStorage first
+          const storedRooms = localStorage.getItem("petfendy_rooms")
+          if (storedRooms) {
+            const parsed = JSON.parse(storedRooms)
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setRooms(parsed)
+              return
+            }
+          }
+          // Use mock data as last resort
+          setRooms(mockHotelRooms)
+          localStorage.setItem("petfendy_rooms", JSON.stringify(mockHotelRooms))
+        }
+      } else {
+        // API error - fallback to localStorage or mock
+        const storedRooms = localStorage.getItem("petfendy_rooms")
+        if (storedRooms) {
+          const parsed = JSON.parse(storedRooms)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setRooms(parsed)
+            return
+          }
+        }
+        setRooms(mockHotelRooms)
+      }
+    } catch (error) {
+      console.error('Failed to fetch rooms:', error)
+      // Fallback to localStorage or mock
+      const storedRooms = localStorage.getItem("petfendy_rooms")
+      if (storedRooms) {
+        try {
+          const parsed = JSON.parse(storedRooms)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setRooms(parsed)
+            return
+          }
+        } catch (e) {}
+      }
+      setRooms(mockHotelRooms)
+    }
+  }
+
+  const createRoomAPI = async (roomData: any): Promise<HotelRoom | null> => {
+    try {
+      const response = await fetch('/api/rooms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(roomData)
+      })
+      if (response.ok) {
+        return await response.json()
+      }
+      return null
+    } catch (error) {
+      console.error('Failed to create room:', error)
+      return null
+    }
+  }
+
+  const updateRoomAPI = async (id: string, roomData: any): Promise<HotelRoom | null> => {
+    try {
+      const response = await fetch(`/api/rooms/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(roomData)
+      })
+      if (response.ok) {
+        return await response.json()
+      }
+      return null
+    } catch (error) {
+      console.error('Failed to update room:', error)
+      return null
+    }
+  }
+
+  const deleteRoomAPI = async (id: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`/api/rooms/${id}`, { method: 'DELETE' })
+      return response.ok
+    } catch (error) {
+      console.error('Failed to delete room:', error)
+      return false
+    }
+  }
+
   // Load data
   useEffect(() => {
+    // Fetch rooms from API
+    fetchRooms()
+
+    // Load other data from localStorage (will be migrated later)
     const storedOrders = JSON.parse(localStorage.getItem("petfendy_orders") || "[]")
     const storedBookings = JSON.parse(localStorage.getItem("petfendy_bookings") || "[]")
-    const storedRooms = JSON.parse(localStorage.getItem("petfendy_rooms") || JSON.stringify(mockHotelRooms))
     const storedServices = JSON.parse(localStorage.getItem("petfendy_services") || JSON.stringify(mockTaxiServices))
     const storedVehicles = JSON.parse(localStorage.getItem("petfendy_taxi_vehicles") || "[]")
     const storedRoomPricings = JSON.parse(localStorage.getItem("petfendy_room_pricings") || "[]")
@@ -174,11 +284,16 @@ export function AdminDashboard() {
 
     setOrders(storedOrders)
     setBookings(storedBookings)
-    setRooms(storedRooms)
     setServices(storedServices)
     setTaxiVehicles(storedVehicles)
     setRoomPricings(storedRoomPricings)
     setPaymentGateways(storedGateways)
+
+    // Taksi fiyatlarını yükle
+    const storedTaxiPrices = localStorage.getItem("petfendy_taxi_prices")
+    if (storedTaxiPrices) {
+      setTaxiPrices(JSON.parse(storedTaxiPrices))
+    }
 
     if (storedAbout) {
       setAboutPage(JSON.parse(storedAbout))
@@ -195,7 +310,7 @@ export function AdminDashboard() {
     }
   }, [])
 
-  // Save to localStorage
+  // Save to localStorage (and API for rooms)
   const saveRooms = (updatedRooms: HotelRoom[]) => {
     localStorage.setItem("petfendy_rooms", JSON.stringify(updatedRooms))
     setRooms(updatedRooms)
@@ -221,17 +336,35 @@ export function AdminDashboard() {
     }
   }
 
+  // Taksi km fiyatlarını kaydet
+  const saveTaxiPrices = () => {
+    localStorage.setItem("petfendy_taxi_prices", JSON.stringify(taxiPrices))
+    toast({
+      title: "✅ Fiyatlar Güncellendi",
+      description: `VIP: ₺${taxiPrices.vipPricePerKm}/km, Paylaşımlı: ₺${taxiPrices.sharedPricePerKm}/km`,
+    })
+  }
+
   const saveRoomPricings = (updatedPricings: RoomPricing[]) => {
     localStorage.setItem("petfendy_room_pricings", JSON.stringify(updatedPricings))
     setRoomPricings(updatedPricings)
   }
 
   // Room management
-  const handleAddRoom = () => {
-    if (!newRoom.name || newRoom.pricePerNight <= 0) {
+  const handleAddRoom = async () => {
+    if (!newRoom.name) {
       toast({
         title: "Hata",
-        description: "Lütfen tüm alanları doldurun",
+        description: "Lütfen oda adını girin",
+        variant: "destructive"
+      })
+      return
+    }
+
+    if (newRoom.pricePerNight < 0) {
+      toast({
+        title: "Hata",
+        description: "Fiyat 0 veya daha büyük olmalıdır",
         variant: "destructive"
       })
       return
@@ -268,35 +401,75 @@ export function AdminDashboard() {
       return
     }
 
-    const room: HotelRoom = {
-      id: `room-${Date.now()}`,
+    setIsLoading(true)
+
+    const roomData = {
       name: sanitizedName,
       type: newRoom.type,
-      capacity: Math.floor(newRoom.capacity), // Ensure integer
-      pricePerNight: Math.round(newRoom.pricePerNight * 100) / 100, // Round to 2 decimals
-      available: true,
-      amenities: newRoom.amenities.split(",").map((a) => sanitizeInput(a)).filter(a => a),
+      capacity: Math.floor(newRoom.capacity),
+      pricePerNight: Math.round(newRoom.pricePerNight * 100) / 100,
       description: sanitizedDescription,
+      amenities: newRoom.amenities.split(",").map((a) => sanitizeInput(a)).filter(a => a),
       features: newRoom.features.split(",").map((f) => sanitizeInput(f)).filter(f => f),
-      images: newRoomImages,
-      videos: newRoomVideos,
+      images: newRoomImages || [],
+      videos: newRoomVideos || [],
     }
 
-    saveRooms([...rooms, room])
+    // Try API first
+    const createdRoom = await createRoomAPI(roomData)
+    
+    if (createdRoom) {
+      // API success - refresh rooms from API
+      await fetchRooms()
+    } else {
+      // Fallback to localStorage
+      const room: HotelRoom = {
+        id: `room-${Date.now()}`,
+        ...roomData,
+        available: true,
+      }
+      saveRooms([...rooms, room])
+    }
+
     setNewRoom({ name: "", type: "standard", capacity: 1, pricePerNight: 0, amenities: "", description: "", features: "" })
     setNewRoomImages([])
     setNewRoomVideos([])
     setShowAddRoom(false)
+    setIsLoading(false)
 
     toast({
       title: "✅ Başarılı",
-      description: `${room.name} eklendi`,
+      description: `${sanitizedName} eklendi`,
     })
   }
 
-  const handleUpdateRoom = (updatedRoom: HotelRoom) => {
-    saveRooms(rooms.map((r) => (r.id === updatedRoom.id ? updatedRoom : r)))
+  const handleUpdateRoom = async (updatedRoom: HotelRoom) => {
+    setIsLoading(true)
+
+    // Try API first
+    const result = await updateRoomAPI(updatedRoom.id, {
+      name: updatedRoom.name,
+      type: updatedRoom.type,
+      capacity: updatedRoom.capacity,
+      pricePerNight: updatedRoom.pricePerNight,
+      available: updatedRoom.available,
+      description: updatedRoom.description,
+      amenities: updatedRoom.amenities,
+      features: updatedRoom.features,
+      images: updatedRoom.images || [],
+      videos: updatedRoom.videos || [],
+    })
+
+    if (result) {
+      // API success - refresh rooms from API
+      await fetchRooms()
+    } else {
+      // Fallback to localStorage
+      saveRooms(rooms.map((r) => (r.id === updatedRoom.id ? updatedRoom : r)))
+    }
+
     setEditingRoom(null)
+    setIsLoading(false)
     
     toast({
       title: "✅ Güncellendi",
@@ -304,9 +477,22 @@ export function AdminDashboard() {
     })
   }
 
-  const handleDeleteRoom = (roomId: string) => {
+  const handleDeleteRoom = async (roomId: string) => {
     const room = rooms.find(r => r.id === roomId)
-    saveRooms(rooms.filter((r) => r.id !== roomId))
+    setIsLoading(true)
+
+    // Try API first
+    const success = await deleteRoomAPI(roomId)
+
+    if (success) {
+      // API success - refresh rooms from API
+      await fetchRooms()
+    } else {
+      // Fallback to localStorage
+      saveRooms(rooms.filter((r) => r.id !== roomId))
+    }
+
+    setIsLoading(false)
     
     toast({
       title: "🗑️ Silindi",
@@ -1256,10 +1442,11 @@ export function AdminDashboard() {
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Açıklama</label>
-                      <Input
+                      <Textarea
                         value={newRoom.description}
                         onChange={(e) => setNewRoom({ ...newRoom, description: e.target.value })}
                         placeholder="Oda hakkında detaylı açıklama"
+                        rows={3}
                       />
                     </div>
                     <div className="space-y-2">
@@ -1296,8 +1483,8 @@ export function AdminDashboard() {
                       />
                     </div>
                     <div className="flex gap-2">
-                      <Button onClick={handleAddRoom} className="flex-1">
-                        Oda Ekle
+                      <Button onClick={handleAddRoom} className="flex-1" disabled={isLoading}>
+                        {isLoading ? "Ekleniyor..." : "Oda Ekle"}
                       </Button>
                       <Button variant="outline" onClick={() => setShowAddRoom(false)} className="flex-1">
                         İptal
@@ -1385,7 +1572,10 @@ export function AdminDashboard() {
                           variant="outline"
                           size="sm"
                           className="flex-1"
-                          onClick={() => setEditingRoom(room)}
+                          onClick={() => {
+                            setEditingRoom(room)
+                            setShowRoomEditModal(true)
+                          }}
                         >
                           <Edit className="w-3 h-3 mr-1" />
                         Düzenle
@@ -1456,10 +1646,11 @@ export function AdminDashboard() {
                 </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Açıklama</label>
-                      <Input
+                      <Textarea
                         value={editingRoom.description || ""}
                         onChange={(e) => setEditingRoom({ ...editingRoom, description: e.target.value })}
                         placeholder="Oda hakkında detaylı açıklama"
+                        rows={3}
                       />
                     </div>
                     <div className="space-y-2">
@@ -1703,6 +1894,50 @@ export function AdminDashboard() {
 
         {/* Vehicles Tab */}
         <TabsContent value="vehicles" className="space-y-4">
+          {/* Taksi KM Fiyat Ayarları */}
+          <Card className="border-2 border-blue-200 bg-blue-50/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="w-5 h-5 text-blue-600" />
+                Taksi Kilometre Fiyatları
+              </CardTitle>
+              <CardDescription>
+                Tüm taksi rezervasyonlarında kullanılacak km başı fiyatları belirleyin
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <Car className="w-4 h-4 text-orange-500" />
+                    VIP Taksi (₺/km)
+                  </label>
+                  <Input
+                    type="number"
+                    value={taxiPrices.vipPricePerKm}
+                    onChange={(e) => setTaxiPrices({ ...taxiPrices, vipPricePerKm: parseFloat(e.target.value) || 0 })}
+                    placeholder="15"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <Car className="w-4 h-4 text-blue-500" />
+                    Paylaşımlı Taksi (₺/km)
+                  </label>
+                  <Input
+                    type="number"
+                    value={taxiPrices.sharedPricePerKm}
+                    onChange={(e) => setTaxiPrices({ ...taxiPrices, sharedPricePerKm: parseFloat(e.target.value) || 0 })}
+                    placeholder="8"
+                  />
+                </div>
+              </div>
+              <Button onClick={saveTaxiPrices} className="mt-4 w-full">
+                Fiyatları Kaydet
+              </Button>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <div className="flex justify-between items-center">

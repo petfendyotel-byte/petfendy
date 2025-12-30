@@ -186,16 +186,25 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <CreditCard className="w-5 h-5" />
+      <DialogContent className="w-full max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+        <DialogHeader className="pb-2">
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <CreditCard className="w-4 h-4 sm:w-5 sm:h-5" />
             {t('title')}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-xs sm:text-sm">
             Güvenli ödeme - Tüm bilgileriniz şifrelenir
           </DialogDescription>
         </DialogHeader>
+
+        {/* Test Card Info */}
+        <Alert className="border-blue-200 bg-blue-50 py-2">
+          <AlertDescription className="text-blue-800 text-xs sm:text-sm">
+            <strong>Test Kartı (PayTR):</strong><br />
+            Kart: 4242 4242 4242 4242<br />
+            Tarih: 12/30 | CVV: 123
+          </AlertDescription>
+        </Alert>
 
         {success ? (
           <Alert className="border-green-200 bg-green-50">
@@ -204,15 +213,15 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
             </AlertDescription>
           </Alert>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             {errors.submit && (
               <Alert variant="destructive">
-                <AlertDescription>{errors.submit}</AlertDescription>
+                <AlertDescription className="text-sm">{errors.submit}</AlertDescription>
               </Alert>
             )}
 
-            <div className="space-y-2">
-              <label htmlFor="cardNumber" className="text-sm font-medium">
+            <div className="space-y-1 sm:space-y-2">
+              <label htmlFor="cardNumber" className="text-xs sm:text-sm font-medium">
                 {t('cardNumber')}
               </label>
               <div className="relative">
@@ -224,15 +233,15 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
                   onChange={handleCardNumberChange}
                   disabled={isProcessing}
                   required
-                  className="pl-10"
+                  className="pl-9 sm:pl-10 h-9 sm:h-10 text-sm"
                 />
                 <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               </div>
-              {errors.cardNumber && <p className="text-sm text-destructive">{errors.cardNumber}</p>}
+              {errors.cardNumber && <p className="text-xs text-destructive">{errors.cardNumber}</p>}
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="cardHolder" className="text-sm font-medium">
+            <div className="space-y-1 sm:space-y-2">
+              <label htmlFor="cardHolder" className="text-xs sm:text-sm font-medium">
                 {t('cardHolder')}
               </label>
               <Input
@@ -243,13 +252,14 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
                 onChange={(e) => setFormData({ ...formData, cardHolder: e.target.value.toUpperCase() })}
                 disabled={isProcessing}
                 required
+                className="h-9 sm:h-10 text-sm"
               />
-              {errors.cardHolder && <p className="text-sm text-destructive">{errors.cardHolder}</p>}
+              {errors.cardHolder && <p className="text-xs text-destructive">{errors.cardHolder}</p>}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label htmlFor="expiryDate" className="text-sm font-medium">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+              <div className="space-y-1 sm:space-y-2">
+                <label htmlFor="expiryDate" className="text-xs sm:text-sm font-medium">
                   {t('expiryDate')}
                 </label>
                 <Input
@@ -261,12 +271,13 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
                   disabled={isProcessing}
                   required
                   maxLength={5}
+                  className="h-9 sm:h-10 text-sm"
                 />
-                {errors.expiryDate && <p className="text-sm text-destructive">{errors.expiryDate}</p>}
+                {errors.expiryDate && <p className="text-xs text-destructive">{errors.expiryDate}</p>}
               </div>
 
-              <div className="space-y-2">
-                <label htmlFor="cvv" className="text-sm font-medium flex items-center gap-1">
+              <div className="space-y-1 sm:space-y-2">
+                <label htmlFor="cvv" className="text-xs sm:text-sm font-medium flex items-center gap-1">
                   {t('cvv')}
                   <Lock className="w-3 h-3" />
                 </label>
@@ -279,28 +290,29 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
                   disabled={isProcessing}
                   required
                   maxLength={3}
+                  className="h-9 sm:h-10 text-sm"
                 />
-                {errors.cvv && <p className="text-sm text-destructive">{errors.cvv}</p>}
+                {errors.cvv && <p className="text-xs text-destructive">{errors.cvv}</p>}
               </div>
             </div>
 
             {/* Invoice Type Selection */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Fatura Türü</label>
+            <div className="space-y-3 sm:space-y-4">
+              <div className="space-y-1 sm:space-y-2">
+                <label className="text-xs sm:text-sm font-medium">Fatura Türü</label>
                 <Select value={invoiceType} onValueChange={(value: "individual" | "corporate") => setInvoiceType(value)}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-9 sm:h-10 text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="individual">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 text-sm">
                         <User className="w-4 h-4" />
                         Bireysel Fatura
                       </div>
                     </SelectItem>
                     <SelectItem value="corporate">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 text-sm">
                         <Building2 className="w-4 h-4" />
                         Kurumsal Fatura
                       </div>
@@ -311,9 +323,9 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
 
               {/* Individual Invoice Form */}
               {invoiceType === "individual" && (
-                <div className="space-y-3 p-4 border rounded-lg bg-muted/30">
-                  <h4 className="font-medium text-sm">Bireysel Fatura Bilgileri</h4>
-                  <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2 sm:space-y-3 p-3 sm:p-4 border rounded-lg bg-muted/30">
+                  <h4 className="font-medium text-xs sm:text-sm">Bireysel Fatura Bilgileri</h4>
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     <div className="space-y-1">
                       <label className="text-xs font-medium">Ad</label>
                       <Input
@@ -321,6 +333,7 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
                         value={invoiceInfo.individualName}
                         onChange={(e) => setInvoiceInfo({ ...invoiceInfo, individualName: e.target.value })}
                         disabled={isProcessing}
+                        className="h-8 sm:h-9 text-sm"
                       />
                       {errors.individualName && <p className="text-xs text-destructive">{errors.individualName}</p>}
                     </div>
@@ -331,6 +344,7 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
                         value={invoiceInfo.individualSurname}
                         onChange={(e) => setInvoiceInfo({ ...invoiceInfo, individualSurname: e.target.value })}
                         disabled={isProcessing}
+                        className="h-8 sm:h-9 text-sm"
                       />
                       {errors.individualSurname && <p className="text-xs text-destructive">{errors.individualSurname}</p>}
                     </div>
@@ -343,6 +357,7 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
                       onChange={(e) => setInvoiceInfo({ ...invoiceInfo, individualTcNo: e.target.value.replace(/\D/g, '').substring(0, 11) })}
                       disabled={isProcessing}
                       maxLength={11}
+                      className="h-8 sm:h-9 text-sm"
                     />
                     {errors.individualTcNo && <p className="text-xs text-destructive">{errors.individualTcNo}</p>}
                   </div>
@@ -351,9 +366,9 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
 
               {/* Corporate Invoice Form */}
               {invoiceType === "corporate" && (
-                <div className="space-y-3 p-4 border rounded-lg bg-muted/30">
-                  <h4 className="font-medium text-sm">Kurumsal Fatura Bilgileri</h4>
-                  <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3 p-3 sm:p-4 border rounded-lg bg-muted/30">
+                  <h4 className="font-medium text-xs sm:text-sm">Kurumsal Fatura Bilgileri</h4>
+                  <div className="space-y-2 sm:space-y-3">
                     <div className="space-y-1">
                       <label className="text-xs font-medium">Şirket Adı</label>
                       <Input
@@ -361,6 +376,7 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
                         value={invoiceInfo.corporateName}
                         onChange={(e) => setInvoiceInfo({ ...invoiceInfo, corporateName: e.target.value })}
                         disabled={isProcessing}
+                        className="h-8 sm:h-9 text-sm"
                       />
                       {errors.corporateName && <p className="text-xs text-destructive">{errors.corporateName}</p>}
                     </div>
@@ -372,6 +388,7 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
                         onChange={(e) => setInvoiceInfo({ ...invoiceInfo, corporateTaxNo: e.target.value.replace(/\D/g, '').substring(0, 10) })}
                         disabled={isProcessing}
                         maxLength={10}
+                        className="h-8 sm:h-9 text-sm"
                       />
                       {errors.corporateTaxNo && <p className="text-xs text-destructive">{errors.corporateTaxNo}</p>}
                     </div>
@@ -382,6 +399,7 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
                         value={invoiceInfo.corporateAddress}
                         onChange={(e) => setInvoiceInfo({ ...invoiceInfo, corporateAddress: e.target.value })}
                         disabled={isProcessing}
+                        className="h-8 sm:h-9 text-sm"
                       />
                       {errors.corporateAddress && <p className="text-xs text-destructive">{errors.corporateAddress}</p>}
                     </div>
@@ -390,10 +408,10 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
               )}
             </div>
 
-            <div className="bg-muted p-4 rounded-lg">
+            <div className="bg-muted p-3 sm:p-4 rounded-lg">
               <div className="flex justify-between items-center">
-                <span className="font-medium">{t('totalAmount')}:</span>
-                <span className="text-2xl font-bold text-primary">₺{totalAmount.toFixed(2)}</span>
+                <span className="font-medium text-sm sm:text-base">{t('totalAmount')}:</span>
+                <span className="text-xl sm:text-2xl font-bold text-primary">₺{totalAmount.toFixed(2)}</span>
               </div>
             </div>
 
@@ -403,11 +421,11 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
                 variant="outline"
                 onClick={onClose}
                 disabled={isProcessing}
-                className="flex-1"
+                className="flex-1 h-10 sm:h-11 text-sm"
               >
                 İptal
               </Button>
-              <Button type="submit" disabled={isProcessing} className="flex-1">
+              <Button type="submit" disabled={isProcessing} className="flex-1 h-10 sm:h-11 text-sm">
                 {isProcessing ? t('processing') : t('payNow')}
               </Button>
             </div>

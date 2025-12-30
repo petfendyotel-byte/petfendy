@@ -77,6 +77,26 @@ export interface HotelReservation extends Booking {
   specialRequests: string
 }
 
+// Hotel reservation data for checkout
+export interface HotelReservationData {
+  roomId: string
+  roomName: string
+  checkInDate: string
+  checkOutDate: string
+  nights: number
+  petCount: number
+  specialRequests: string
+  additionalServices: Array<{
+    id: string
+    name: string
+    price: number
+    duration?: string
+  }>
+  basePrice: number
+  servicesTotal: number
+  totalPrice: number
+}
+
 export interface TaxiService {
   id: string
   name: string

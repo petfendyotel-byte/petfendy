@@ -42,3 +42,4 @@ my-next-app/
 
 # Windows special files
 nul
+/lib/generated/prisma
