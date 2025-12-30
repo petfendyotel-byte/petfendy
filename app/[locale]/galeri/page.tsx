@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
+import { useTranslations } from "next-intl"
 import Image from "next/image"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
@@ -13,6 +14,7 @@ import type { GalleryImage } from "@/lib/types"
 export default function GalleryPage() {
   const params = useParams()
   const locale = (params?.locale as string) || 'tr'
+  const t = useTranslations('gallery')
   const [images, setImages] = useState<GalleryImage[]>([])
 
   useEffect(() => {
@@ -34,9 +36,9 @@ export default function GalleryPage() {
       {/* Hero Section */}
       <section className="relative h-[300px] flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
         <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">İşte Dostlarımız</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('title')}</h1>
           <p className="text-lg opacity-90">
-            Petfendy'e uğrayan dostlarımızla anılar biriktirmeyi ve bunları saklamayı seviyoruz. İşte dostlarımızla anılarımızın bazıları...
+            {t('subtitle')}
           </p>
         </div>
       </section>
@@ -71,7 +73,7 @@ export default function GalleryPage() {
 
           {images.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-500">Henüz galeri görseli bulunmuyor.</p>
+              <p className="text-gray-500">{t('noImages')}</p>
             </div>
           )}
         </div>

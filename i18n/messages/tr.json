@@ -544,6 +544,11 @@
     "subtitle": "Evcil hayvan bakımı, eğitimi ve sağlığı hakkında faydalı bilgiler",
     "readMore": "Devamını Oku",
     "noPosts": "Henüz blog yazısı bulunmuyor."
+  },
+  "gallery": {
+    "title": "İşte Dostlarımız",
+    "subtitle": "Petfendy'e uğrayan dostlarımızla anılar biriktirmeyi ve bunları saklamayı seviyoruz. İşte dostlarımızla anılarımızın bazıları...",
+    "noImages": "Henüz galeri görseli bulunmuyor."
   }
 }
 

@@ -544,6 +544,11 @@
     "subtitle": "Useful information about pet care, training and health",
     "readMore": "Read More",
     "noPosts": "No blog posts found yet."
+  },
+  "gallery": {
+    "title": "Here Are Our Friends",
+    "subtitle": "We love collecting and preserving memories with our friends who visit Petfendy. Here are some of our memories with our friends...",
+    "noImages": "No gallery images found yet."
   }
 }
 
