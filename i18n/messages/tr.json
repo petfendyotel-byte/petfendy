@@ -242,6 +242,177 @@
       "privacy": "Gizlilik",
       "cookies": "Çerezler"
     }
+  },
+  "privacy": {
+    "title": "Gizlilik ve Kişisel Verilerin Korunması Politikası",
+    "subtitle": "6698 sayılı Kişisel Verilerin Korunması Kanunu uyarınca",
+    "lastUpdated": "Son Güncelleme",
+    "section1": {
+      "title": "1. Veri Sorumlusu",
+      "content": "Bu Gizlilik ve Kişisel Verilerin Korunması Politikası (\"Politika\"), 6698 sayılı Kişisel Verilerin Korunması Kanunu (\"KVKK\") uyarınca hazırlanmıştır. Bu Politika, Petfendy tarafından sunulan hizmetler kapsamında işlenen kişisel verilerin korunmasına ilişkin bilgileri içermektedir.",
+      "company": "Veri Sorumlusu:",
+      "address": "Bağlıca, Şehit Hikmet Özer Cd. No:101, Etimesgut/Ankara"
+    },
+    "section2": {
+      "title": "2. Toplanan Kişisel Veriler",
+      "content": "Hizmetlerimiz kapsamında aşağıdaki kişisel veriler toplanmaktadır:",
+      "item1": "Kimlik bilgileri (ad, soyad, TC kimlik numarası)",
+      "item2": "İletişim bilgileri (e-posta, telefon, adres)",
+      "item3": "Ödeme bilgileri (kart bilgileri şifrelenmiş olarak işlenir)",
+      "item4": "Rezervasyon bilgileri (tarih, oda tercihleri, özel istekler)",
+      "item5": "Evcil hayvan bilgileri (isim, ırk, yaş, aşı durumu)"
+    },
+    "section3": {
+      "title": "3. Kişisel Verilerin İşlenme Amaçları",
+      "content": "Toplanan kişisel veriler aşağıdaki amaçlarla işlenmektedir:",
+      "item1": "Rezervasyon işlemlerinin gerçekleştirilmesi",
+      "item2": "Ödeme işlemlerinin yürütülmesi",
+      "item3": "Müşteri hizmetleri ve destek sağlanması",
+      "item4": "Yasal yükümlülüklerin yerine getirilmesi",
+      "item5": "Hizmet kalitesinin artırılması ve geliştirilmesi"
+    },
+    "section4": {
+      "title": "4. Kişisel Verilerin Korunması",
+      "content": "Kişisel verileriniz, KVKK ve ilgili mevzuat hükümlerine uygun olarak, güvenli bir şekilde saklanmakta ve işlenmektedir. Verileriniz, yetkisiz erişim, kayıp, değiştirme veya ifşa edilme riskine karşı teknik ve idari önlemlerle korunmaktadır.",
+      "rights": "KVKK'nın 11. maddesi uyarınca, kişisel verileriniz hakkında bilgi talep etme, erişim sağlama, düzeltme, silme, itiraz etme ve veri taşınabilirliği haklarınız bulunmaktadır."
+    },
+    "section5": {
+      "title": "5. İletişim",
+      "content": "Kişisel verilerinizle ilgili haklarınızı kullanmak veya sorularınız için bizimle iletişime geçebilirsiniz:",
+      "contact": "İletişim:",
+      "email": "E-posta"
+    },
+    "section6": {
+      "title": "6. Değişiklikler",
+      "content": "Bu Politika, yasal düzenlemelerdeki değişiklikler veya hizmetlerimizdeki güncellemeler nedeniyle güncellenebilir. Güncellemeler web sitemizde yayınlanacaktır."
+    }
+  },
+  "distanceSelling": {
+    "title": "Mesafeli Satış Sözleşmesi",
+    "subtitle": "6502 sayılı Tüketicinin Korunması Hakkında Kanun uyarınca",
+    "lastUpdated": "Son Güncelleme",
+    "section1": {
+      "title": "1. Taraflar",
+      "content": "Bu Mesafeli Satış Sözleşmesi (\"Sözleşme\"), aşağıda belirtilen taraflar arasında, 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği hükümlerine uygun olarak düzenlenmiştir.",
+      "company": "Satıcı:",
+      "address": "Bağlıca, Şehit Hikmet Özer Cd. No:101, Etimesgut/Ankara"
+    },
+    "section2": {
+      "title": "2. Konu",
+      "content": "Bu Sözleşme, Tüketici'nin Petfendy tarafından sunulan pet otel ve pet taksi hizmetlerini satın almasına ilişkindir. Sözleşme konusu hizmetler:",
+      "item1": "Pet otel rezervasyon hizmetleri",
+      "item2": "Pet taksi rezervasyon hizmetleri",
+      "item3": "İlgili ek hizmetler",
+      "item4": "Yardımcı hizmetler"
+    },
+    "section3": {
+      "title": "3. Cayma Hakkı",
+      "content": "Tüketici, sözleşmeden, sözleşmenin kendisine bildirilmesinden itibaren 14 gün içinde, herhangi bir gerekçe göstermeksizin ve cezai şart ödemeksizin cayabilir.",
+      "rights": "Cayma hakkı, hizmetin tamamen ifa edilmesinden sonra, tüketicinin onayı ile ve hizmetin ifasına başlanmasından önce açıkça beyan edilen sözleşmelerde kullanılamaz.",
+      "period": "Cayma süresi, sözleşmenin tüketiciye bildirildiği tarihten itibaren başlar."
+    },
+    "section4": {
+      "title": "4. Ödeme ve Fatura",
+      "content": "Ödeme, kredi kartı, banka kartı veya diğer kabul edilen ödeme yöntemleri ile yapılabilir. Fatura, ödeme işleminin tamamlanmasından sonra e-posta adresinize gönderilecektir.",
+      "item1": "Ödeme güvenliği PCI DSS standartlarına uygundur",
+      "item2": "Kart bilgileri saklanmaz ve şifrelenmiş olarak işlenir",
+      "item3": "Tüm ödemeler 3D Secure ile korunmaktadır",
+      "item4": "Fatura bilgileri rezervasyon sonrası e-posta ile gönderilir"
+    },
+    "section5": {
+      "title": "5. İptal ve İade",
+      "content": "Rezervasyon iptalleri ve iadeler, İptal ve İade Politikamız kapsamında yönetilmektedir. Detaylı bilgi için lütfen İptal ve İade Politikası sayfamızı inceleyiniz.",
+      "methods": "İptal talepleri, web sitemiz üzerinden veya e-posta ile iletilmelidir."
+    },
+    "section6": {
+      "title": "6. İletişim",
+      "content": "Sözleşme ile ilgili tüm sorularınız için bizimle iletişime geçebilirsiniz:",
+      "contact": "İletişim:",
+      "email": "E-posta"
+    }
+  },
+  "deliveryReturn": {
+    "title": "Teslimat ve İade Şartları",
+    "subtitle": "Hizmetlerimiz ve iade politikamız hakkında bilgi",
+    "lastUpdated": "Son Güncelleme",
+    "section1": {
+      "title": "1. Hizmet Teslimatı",
+      "content": "Petfendy olarak sunduğumuz hizmetler aşağıdaki şekilde teslim edilmektedir:",
+      "item1": "Pet otel rezervasyonları: Rezervasyon tarihinde belirtilen giriş saatinde teslim edilir",
+      "item2": "Pet taksi hizmetleri: Rezervasyon tarihinde belirtilen saat ve konumda teslim edilir",
+      "item3": "Tüm hizmetler için rezervasyon onayı e-posta ve SMS ile bildirilir"
+    },
+    "section2": {
+      "title": "2. İptal ve İade Hakkı",
+      "content": "6502 sayılı Tüketicinin Korunması Hakkında Kanun uyarınca, hizmetlerimiz için 14 günlük cayma hakkınız bulunmaktadır.",
+      "period": "Cayma hakkı, rezervasyon onayının size ulaştığı tarihten itibaren 14 gün içinde kullanılabilir.",
+      "note": "Ancak, hizmetin tamamen ifa edilmesinden sonra (rezervasyon tarihi geçtikten sonra) cayma hakkı kullanılamaz."
+    },
+    "section3": {
+      "title": "3. İptal Koşulları",
+      "content": "Rezervasyon iptalleri için aşağıdaki koşullar geçerlidir:",
+      "item1": "Rezervasyon tarihinden 48 saat önce yapılan iptaller: %100 iade",
+      "item2": "Rezervasyon tarihinden 24-48 saat arası yapılan iptaller: %50 iade",
+      "item3": "Rezervasyon tarihinden 24 saatten az süre kala yapılan iptaller: İade yapılmaz",
+      "item4": "Zorunlu nedenler (hastalık, acil durum vb.) için özel değerlendirme yapılabilir"
+    },
+    "section4": {
+      "title": "4. İade İşlemi",
+      "content": "İptal edilen rezervasyonlar için iade işlemi, ödeme yönteminize göre aşağıdaki sürelerde gerçekleştirilir:",
+      "process": "Kredi kartı ile yapılan ödemeler: 5-7 iş günü içinde hesabınıza iade edilir. Banka kartı ile yapılan ödemeler: 3-5 iş günü içinde hesabınıza iade edilir."
+    },
+    "section5": {
+      "title": "5. İletişim",
+      "content": "İptal ve iade işlemleri ile ilgili sorularınız için bizimle iletişime geçebilirsiniz:",
+      "contact": "İletişim:",
+      "email": "E-posta"
+    }
+  },
+  "cookiePolicy": {
+    "title": "Çerez Politikası",
+    "subtitle": "Web sitemizde kullanılan çerezler hakkında bilgi",
+    "lastUpdated": "Son Güncelleme",
+    "section1": {
+      "title": "1. Çerez Nedir?",
+      "content": "Çerezler, web sitelerini ziyaret ettiğinizde cihazınıza (bilgisayar, tablet, telefon) kaydedilen küçük metin dosyalarıdır. Çerezler, web sitesinin düzgün çalışmasını sağlar ve kullanıcı deneyimini iyileştirir.",
+      "purpose": "Web sitemizde çerezler, site işlevselliğini sağlamak, kullanıcı tercihlerini hatırlamak ve analitik amaçlarla kullanılmaktadır."
+    },
+    "section2": {
+      "title": "2. Kullanılan Çerez Türleri",
+      "content": "Web sitemizde aşağıdaki çerez türleri kullanılmaktadır:",
+      "item1": {
+        "title": "Zorunlu Çerezler",
+        "desc": "Web sitesinin temel işlevlerini sağlamak için gerekli çerezlerdir. Bu çerezler olmadan web sitesi düzgün çalışmaz."
+      },
+      "item2": {
+        "title": "Performans Çerezleri",
+        "desc": "Web sitesinin performansını analiz etmek ve kullanıcı deneyimini iyileştirmek için kullanılan çerezlerdir."
+      },
+      "item3": {
+        "title": "İşlevsellik Çerezleri",
+        "desc": "Kullanıcı tercihlerini hatırlamak ve kişiselleştirilmiş deneyim sunmak için kullanılan çerezlerdir."
+      },
+      "item4": {
+        "title": "Hedefleme Çerezleri",
+        "desc": "Kullanıcılara ilgili reklamlar göstermek için kullanılan çerezlerdir."
+      }
+    },
+    "section3": {
+      "title": "3. Çerez Yönetimi",
+      "content": "Tarayıcı ayarlarınızdan çerezleri yönetebilir veya silme işlemi yapabilirsiniz. Ancak, bazı çerezlerin devre dışı bırakılması web sitesinin bazı özelliklerinin çalışmamasına neden olabilir.",
+      "manage": "Çerez tercihlerinizi yönetmek için tarayıcınızın ayarlar menüsünü kullanabilirsiniz."
+    },
+    "section4": {
+      "title": "4. Üçüncü Taraf Çerezler",
+      "content": "Web sitemizde, analitik ve pazarlama amaçlı üçüncü taraf çerezler kullanılmaktadır. Bu çerezler, ilgili üçüncü tarafların gizlilik politikalarına tabidir.",
+      "thirdParty": "Kullanılan üçüncü taraf hizmetler: Google Analytics, reklam platformları ve sosyal medya entegrasyonları."
+    },
+    "section5": {
+      "title": "5. İletişim",
+      "content": "Çerez politikamız hakkında sorularınız için bizimle iletişime geçebilirsiniz:",
+      "contact": "İletişim:",
+      "email": "E-posta"
+    }
   }
 }
 

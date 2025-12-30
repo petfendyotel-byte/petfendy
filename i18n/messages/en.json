@@ -242,6 +242,177 @@
       "privacy": "Privacy",
       "cookies": "Cookies"
     }
+  },
+  "privacy": {
+    "title": "Privacy and Personal Data Protection Policy",
+    "subtitle": "In accordance with Law No. 6698 on Protection of Personal Data",
+    "lastUpdated": "Last Updated",
+    "section1": {
+      "title": "1. Data Controller",
+      "content": "This Privacy and Personal Data Protection Policy (\"Policy\") has been prepared in accordance with Law No. 6698 on Protection of Personal Data (\"KVKK\"). This Policy contains information regarding the protection of personal data processed within the scope of services provided by Petfendy.",
+      "company": "Data Controller:",
+      "address": "Bağlıca, Şehit Hikmet Özer Cd. No:101, Etimesgut/Ankara"
+    },
+    "section2": {
+      "title": "2. Collected Personal Data",
+      "content": "The following personal data is collected within the scope of our services:",
+      "item1": "Identity information (name, surname, ID number)",
+      "item2": "Contact information (email, phone, address)",
+      "item3": "Payment information (card information is processed encrypted)",
+      "item4": "Reservation information (date, room preferences, special requests)",
+      "item5": "Pet information (name, breed, age, vaccination status)"
+    },
+    "section3": {
+      "title": "3. Purposes of Processing Personal Data",
+      "content": "The collected personal data is processed for the following purposes:",
+      "item1": "Execution of reservation transactions",
+      "item2": "Execution of payment transactions",
+      "item3": "Providing customer service and support",
+      "item4": "Fulfillment of legal obligations",
+      "item5": "Improving and developing service quality"
+    },
+    "section4": {
+      "title": "4. Protection of Personal Data",
+      "content": "Your personal data is stored and processed securely in accordance with KVKK and relevant legislation provisions. Your data is protected against risks of unauthorized access, loss, alteration or disclosure with technical and administrative measures.",
+      "rights": "In accordance with Article 11 of KVKK, you have the right to request information, access, correction, deletion, objection and data portability regarding your personal data."
+    },
+    "section5": {
+      "title": "5. Contact",
+      "content": "You can contact us to exercise your rights regarding your personal data or for your questions:",
+      "contact": "Contact:",
+      "email": "Email"
+    },
+    "section6": {
+      "title": "6. Changes",
+      "content": "This Policy may be updated due to changes in legal regulations or updates in our services. Updates will be published on our website."
+    }
+  },
+  "distanceSelling": {
+    "title": "Distance Selling Agreement",
+    "subtitle": "In accordance with Law No. 6502 on Protection of Consumers",
+    "lastUpdated": "Last Updated",
+    "section1": {
+      "title": "1. Parties",
+      "content": "This Distance Selling Agreement (\"Agreement\") is concluded between the parties specified below in accordance with Law No. 6502 on Protection of Consumers and Distance Contracts Regulation.",
+      "company": "Seller:",
+      "address": "Bağlıca, Şehit Hikmet Özer Cd. No:101, Etimesgut/Ankara"
+    },
+    "section2": {
+      "title": "2. Subject",
+      "content": "This Agreement relates to the Consumer's purchase of pet hotel and pet taxi services offered by Petfendy. The services subject to the Agreement:",
+      "item1": "Pet hotel reservation services",
+      "item2": "Pet taxi reservation services",
+      "item3": "Related additional services",
+      "item4": "Auxiliary services"
+    },
+    "section3": {
+      "title": "3. Right of Withdrawal",
+      "content": "The Consumer may withdraw from the contract within 14 days from the date of notification of the contract, without showing any reason and without paying any penalty.",
+      "rights": "The right of withdrawal cannot be used in contracts where the service has been fully performed, with the consumer's consent and clearly stated before the start of service performance.",
+      "period": "The withdrawal period starts from the date the contract is notified to the consumer."
+    },
+    "section4": {
+      "title": "4. Payment and Invoice",
+      "content": "Payment can be made by credit card, debit card or other accepted payment methods. Invoice will be sent to your email address after the payment transaction is completed.",
+      "item1": "Payment security complies with PCI DSS standards",
+      "item2": "Card information is not stored and is processed encrypted",
+      "item3": "All payments are protected with 3D Secure",
+      "item4": "Invoice information is sent by email after reservation"
+    },
+    "section5": {
+      "title": "5. Cancellation and Refund",
+      "content": "Reservation cancellations and refunds are managed within the scope of our Cancellation and Refund Policy. For detailed information, please review our Cancellation and Refund Policy page.",
+      "methods": "Cancellation requests must be submitted through our website or by email."
+    },
+    "section6": {
+      "title": "6. Contact",
+      "content": "You can contact us for all questions regarding the Agreement:",
+      "contact": "Contact:",
+      "email": "Email"
+    }
+  },
+  "deliveryReturn": {
+    "title": "Delivery and Return Terms",
+    "subtitle": "Information about our services and refund policy",
+    "lastUpdated": "Last Updated",
+    "section1": {
+      "title": "1. Service Delivery",
+      "content": "The services we offer as Petfendy are delivered as follows:",
+      "item1": "Pet hotel reservations: Delivered at the check-in time specified on the reservation date",
+      "item2": "Pet taxi services: Delivered at the time and location specified on the reservation date",
+      "item3": "Reservation confirmation is notified by email and SMS for all services"
+    },
+    "section2": {
+      "title": "2. Cancellation and Refund Right",
+      "content": "In accordance with Law No. 6502 on Protection of Consumers, you have a 14-day right of withdrawal for our services.",
+      "period": "The right of withdrawal can be used within 14 days from the date the reservation confirmation reaches you.",
+      "note": "However, the right of withdrawal cannot be used after the service has been fully performed (after the reservation date has passed)."
+    },
+    "section3": {
+      "title": "3. Cancellation Conditions",
+      "content": "The following conditions apply for reservation cancellations:",
+      "item1": "Cancellations made 48 hours before the reservation date: 100% refund",
+      "item2": "Cancellations made 24-48 hours before the reservation date: 50% refund",
+      "item3": "Cancellations made less than 24 hours before the reservation date: No refund",
+      "item4": "Special evaluation can be made for mandatory reasons (illness, emergency, etc.)"
+    },
+    "section4": {
+      "title": "4. Refund Process",
+      "content": "For cancelled reservations, the refund process is carried out within the following periods according to your payment method:",
+      "process": "Payments made by credit card: Refunded to your account within 5-7 business days. Payments made by debit card: Refunded to your account within 3-5 business days."
+    },
+    "section5": {
+      "title": "5. Contact",
+      "content": "You can contact us for questions regarding cancellation and refund procedures:",
+      "contact": "Contact:",
+      "email": "Email"
+    }
+  },
+  "cookiePolicy": {
+    "title": "Cookie Policy",
+    "subtitle": "Information about cookies used on our website",
+    "lastUpdated": "Last Updated",
+    "section1": {
+      "title": "1. What is a Cookie?",
+      "content": "Cookies are small text files saved to your device (computer, tablet, phone) when you visit websites. Cookies ensure the website works properly and improve user experience.",
+      "purpose": "On our website, cookies are used to provide site functionality, remember user preferences and for analytical purposes."
+    },
+    "section2": {
+      "title": "2. Types of Cookies Used",
+      "content": "The following types of cookies are used on our website:",
+      "item1": {
+        "title": "Essential Cookies",
+        "desc": "Cookies necessary to provide the basic functions of the website. The website does not work properly without these cookies."
+      },
+      "item2": {
+        "title": "Performance Cookies",
+        "desc": "Cookies used to analyze website performance and improve user experience."
+      },
+      "item3": {
+        "title": "Functionality Cookies",
+        "desc": "Cookies used to remember user preferences and provide a personalized experience."
+      },
+      "item4": {
+        "title": "Targeting Cookies",
+        "desc": "Cookies used to show relevant ads to users."
+      }
+    },
+    "section3": {
+      "title": "3. Cookie Management",
+      "content": "You can manage or delete cookies from your browser settings. However, disabling some cookies may cause some features of the website to not work.",
+      "manage": "You can use your browser's settings menu to manage your cookie preferences."
+    },
+    "section4": {
+      "title": "4. Third-Party Cookies",
+      "content": "Third-party cookies are used on our website for analytical and marketing purposes. These cookies are subject to the privacy policies of the relevant third parties.",
+      "thirdParty": "Third-party services used: Google Analytics, advertising platforms and social media integrations."
+    },
+    "section5": {
+      "title": "5. Contact",
+      "content": "You can contact us for questions about our cookie policy:",
+      "contact": "Contact:",
+      "email": "Email"
+    }
   }
 }
 

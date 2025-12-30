@@ -117,25 +117,25 @@ export function Footer({ locale }: FooterProps) {
             <h3 className="font-bold mb-4 text-pink-400">Politikalar</h3>
             <ul className="space-y-3 text-sm">
               <li>
-                <a href="#" className="text-gray-300 hover:text-pink-400 transition-colors flex items-center gap-2 group">
+                <a href={`/${locale}/gizlilik-politikasi`} className="text-gray-300 hover:text-pink-400 transition-colors flex items-center gap-2 group">
                   <PawPrint className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                   <span>Gizlilik ve Kişisel Verilerin Korunması</span>
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-pink-400 transition-colors flex items-center gap-2 group">
+                <a href={`/${locale}/teslimat-ve-iade`} className="text-gray-300 hover:text-pink-400 transition-colors flex items-center gap-2 group">
                   <PawPrint className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                   <span>İptal ve İade Politikası</span>
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-pink-400 transition-colors flex items-center gap-2 group">
+                <a href={`/${locale}/mesafeli-satis-sozlesmesi`} className="text-gray-300 hover:text-pink-400 transition-colors flex items-center gap-2 group">
                   <PawPrint className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                   <span>Mesafeli Satış Politikası</span>
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-pink-400 transition-colors flex items-center gap-2 group">
+                <a href={`/${locale}/cerez-politikasi`} className="text-gray-300 hover:text-pink-400 transition-colors flex items-center gap-2 group">
                   <PawPrint className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                   <span>Çerez Politikası</span>
                 </a>
@@ -188,10 +188,10 @@ export function Footer({ locale }: FooterProps) {
 
             {/* Policy Links */}
             <div className="flex gap-4 text-sm">
-              <a href="#" className="text-gray-300 hover:text-orange-400 transition-colors font-medium">
+              <a href={`/${locale}/gizlilik-politikasi`} className="text-gray-300 hover:text-orange-400 transition-colors font-medium">
                 Gizlilik
               </a>
-              <a href="#" className="text-gray-300 hover:text-orange-400 transition-colors font-medium">
+              <a href={`/${locale}/cerez-politikasi`} className="text-gray-300 hover:text-orange-400 transition-colors font-medium">
                 Çerezler
               </a>
             </div>
