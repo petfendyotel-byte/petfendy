@@ -185,7 +185,7 @@ export default function ContactPage() {
               <h3 className="font-bold text-gray-900 p-6 pb-0">{t.mapTitle}</h3>
               <div className="aspect-video w-full">
                 <iframe
-                  src={`https://www.google.com/maps?q=${encodeURIComponent(t.addressValue)}&output=embed`}
+                  src="https://maps.google.com/maps?q=Etimesgut,Ankara,Turkey&output=embed"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
