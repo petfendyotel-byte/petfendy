@@ -279,21 +279,22 @@ export default function ContactPage() {
                 </div>
               </div>
             )}
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3060.285312221125!2d32.654489!3d39.935014!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14d33d243489a9c1%3A0x7de56ccc70ce972!2sPetfendy%20%7C%20Pet%20Otel%20%26%20E%C4%9Fitim%20Ankara!5e0!3m2!1str!2str!4v1735689600000!5m2!1str!2str"
-                width="100%"
-                height="450"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title="Petfendy | Pet Otel & Eğitim Ankara"
-                onLoad={() => setMapLoaded(true)}
-                onError={() => {
-                  setMapError(true)
-                  setMapLoaded(false)
-                }}
-              />
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3060.285312221125!2d32.654489!3d39.935014!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14d33d243489a9c1%3A0x7de56ccc70ce972!2sPetfendy%20%7C%20Pet%20Otel%20%26%20E%C4%9Fitim%20Ankara!5e0!3m2!1str!2str!4v1735689600000!5m2!1str!2str"
+                  width="100%"
+                  height="450"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Petfendy | Pet Otel & Eğitim Ankara"
+                  allow="geolocation"
+                  onLoad={() => setMapLoaded(true)}
+                  onError={() => {
+                    setMapError(true)
+                    setMapLoaded(false)
+                  }}
+                />
           </div>
 
           {/* Map Link Fallback */}

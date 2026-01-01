@@ -51,9 +51,9 @@ export function securityMiddleware(request: NextRequest) {
     'max-age=31536000; includeSubDomains; preload'
   );
 
-  // X-Frame-Options: Allow same-origin and Google Maps iframes
-  // Note: SAMEORIGIN allows iframes from same origin, which is needed for Google Maps embed
-  response.headers.set('X-Frame-Options', 'SAMEORIGIN');
+    // X-Frame-Options: Prevent clickjacking by restricting embedding of this site
+    // We use frame-ancestors in CSP instead for better control
+    // response.headers.set('X-Frame-Options', 'SAMEORIGIN');
 
   // X-Content-Type-Options: Prevent MIME sniffing
   response.headers.set('X-Content-Type-Options', 'nosniff');
@@ -81,11 +81,11 @@ export function securityMiddleware(request: NextRequest) {
 
   response.headers.set('Content-Security-Policy', csp);
 
-  // Permissions-Policy: Control browser features
-  response.headers.set(
-    'Permissions-Policy',
-    'camera=(), microphone=(), geolocation=(), interest-cohort=()'
-  );
+    // Permissions-Policy: Control browser features
+    response.headers.set(
+      'Permissions-Policy',
+      'camera=(), microphone=(), geolocation=(self "https://www.google.com" "https://maps.googleapis.com"), interest-cohort=()'
+    );
 
   // 2. CORS Headers - Only allow specific origins (no wildcard!)
   if (origin && isOriginAllowed(origin)) {
