@@ -354,8 +354,9 @@ export function HotelBookingGuest() {
                   <p className="text-xs text-muted-foreground mb-2">
                     {room.type === "standard" ? "Standart" : room.type === "deluxe" ? "Deluxe" : "Suit"}
                   </p>
-                  <p className="text-xl font-bold text-orange-500">₺{room.pricePerNight}</p>
-                  <p className="text-xs text-muted-foreground">/gece</p>
+                  {/* Geçici olarak fiyat gizlendi */}
+                  {/* <p className="text-xl font-bold text-orange-500">₺{room.pricePerNight}</p>
+                  <p className="text-xs text-muted-foreground">/gece</p> */}
                 </div>
 
                 {/* Detail Button */}
@@ -417,7 +418,8 @@ export function HotelBookingGuest() {
                   <span className="text-xl">{service.icon}</span>
                   <span className="font-medium">{service.name}</span>
                 </div>
-                <span className="text-orange-500 font-semibold">₺{service.price}</span>
+                {/* Geçici olarak fiyat gizlendi */}
+                {/* <span className="text-orange-500 font-semibold">₺{service.price}</span> */}
               </div>
             ))}
           </div>
@@ -477,8 +479,10 @@ export function HotelBookingGuest() {
           <CardContent className="pt-4">
             <div className="flex justify-between items-center mb-4">
               <div>
-                <p className="text-sm text-muted-foreground">Toplam Tutar</p>
-                <p className="text-3xl font-bold text-primary">₺{calculateTotal().toFixed(2)}</p>
+                <p className="text-sm text-muted-foreground">Rezervasyon Özeti</p>
+                {/* Geçici olarak fiyat gizlendi */}
+                {/* <p className="text-3xl font-bold text-primary">₺{calculateTotal().toFixed(2)}</p> */}
+                <p className="text-lg font-semibold text-primary">{selectedRoom.name}</p>
                 <p className="text-xs text-muted-foreground">
                   {calculateNights()} gece + {selectedServices.length} hizmet
                 </p>

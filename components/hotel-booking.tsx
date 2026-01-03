@@ -220,10 +220,11 @@ export function HotelBooking() {
                   <p className="text-sm text-muted-foreground">{t('capacity')}</p>
                   <p className="font-semibold">{room.capacity} {t('pets')}</p>
                 </div>
-                <div>
+                {/* Geçici olarak fiyat gizlendi */}
+                {/* <div>
                   <p className="text-sm text-muted-foreground">{t('price')}</p>
                   <p className="text-xl font-bold text-primary">₺{room.pricePerNight}{t('perNight')}</p>
-                </div>
+                </div> */}
                 <div>
                   <p className="text-sm text-muted-foreground mb-2">{t('amenities')}</p>
                   <div className="flex flex-wrap gap-1">
@@ -295,11 +296,12 @@ export function HotelBooking() {
                 onChange={(e) => setPetCount(parseInt(e.target.value) || 1)}
                 placeholder="Kaç hayvan?"
               />
-              {petCount > 1 && (
+              {/* Geçici olarak fiyat gizlendi */}
+              {/* {petCount > 1 && (
                 <p className="text-xs text-muted-foreground">
                   İlk hayvan fiyata dahil. Ek {petCount - 1} hayvan için gecelik +₺{(selectedRoom.pricePerNight * 0.5 * (petCount - 1)).toFixed(2)} ek ücret.
                 </p>
-              )}
+              )} */}
             </div>
 
             <div className="space-y-2">
@@ -318,26 +320,29 @@ export function HotelBooking() {
                   <span>{t('nights')}:</span>
                   <span className="font-semibold">{calculateNights()}</span>
                 </div>
-                <div className="flex justify-between">
+                {/* Geçici olarak fiyat gizlendi */}
+                {/* <div className="flex justify-between">
                   <span>{t('nightPrice')}:</span>
                   <span className="font-semibold">₺{selectedRoom.pricePerNight}</span>
-                </div>
+                </div> */}
                 <div className="flex justify-between">
                   <span>Hayvan Sayısı:</span>
                   <span className="font-semibold">{petCount}</span>
                 </div>
-                {petCount > 1 && (
+                {/* Geçici olarak fiyat gizlendi */}
+                {/* {petCount > 1 && (
                   <div className="flex justify-between text-sm text-amber-600">
                     <span>Ek Hayvan Ücreti ({petCount - 1} hayvan):</span>
                     <span className="font-semibold">
                       +₺{((selectedRoom.pricePerNight * 0.5) * (petCount - 1) * calculateNights()).toFixed(2)}
                     </span>
                   </div>
-                )}
-                <div className="border-t pt-2 flex justify-between text-lg font-bold">
+                )} */}
+                {/* Geçici olarak fiyat gizlendi */}
+                {/* <div className="border-t pt-2 flex justify-between text-lg font-bold">
                   <span>{t('total')}:</span>
                   <span className="text-primary">₺{calculateTotal().toFixed(2)}</span>
-                </div>
+                </div> */}
               </div>
             )}
 
