@@ -22,7 +22,7 @@ const content = {
     socialMedia: "Sosyal Medya",
     followUs: "Bizi takip edin",
     companyInfo: "Şirket Bilgileri",
-    companyName: "Petfendy Limited Şirketi",
+    companyName: "BSG EVCİL HAYVAN BAKIM DIŞ TİCARET PAZARLAMA VE SANAYİ LİMİTED ŞİRKETİ",
     taxOffice: "Vergi Dairesi",
     taxNumber: "Vergi No",
     mapTitle: "Konum"
@@ -42,7 +42,7 @@ const content = {
     socialMedia: "Social Media",
     followUs: "Follow us",
     companyInfo: "Company Information",
-    companyName: "Petfendy Limited Company",
+    companyName: "BSG PET CARE FOREIGN TRADE MARKETING AND INDUSTRY LIMITED COMPANY",
     taxOffice: "Tax Office",
     taxNumber: "Tax Number",
     mapTitle: "Location"

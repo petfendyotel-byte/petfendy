@@ -13,7 +13,7 @@ const content = {
       {
         num: 1,
         title: "Madde 1 - Taraflar",
-        text: "İşbu sözleşme, bir tarafta merkezi Ankara adresinde bulunan Petfendy Limited Şirketi (bundan sonra \"Satıcı\" olarak anılacaktır) ile diğer tarafta, Satıcı'nın hizmetlerini platform üzerinden satın alan tüketici (\"Alıcı\") arasında, aşağıda belirtilen hüküm ve şartlar çerçevesinde akdedilmiştir."
+        text: "İşbu sözleşme, bir tarafta merkezi Ankara adresinde bulunan BSG EVCİL HAYVAN BAKIM DIŞ TİCARET PAZARLAMA VE SANAYİ LİMİTED ŞİRKETİ (bundan sonra \"Satıcı\" olarak anılacaktır) ile diğer tarafta, Satıcı'nın hizmetlerini platform üzerinden satın alan tüketici (\"Alıcı\") arasında, aşağıda belirtilen hüküm ve şartlar çerçevesinde akdedilmiştir."
       },
       {
         num: 2,
@@ -22,7 +22,7 @@ const content = {
           { term: "Bakanlık", desc: "Ticaret Bakanlığı" },
           { term: "Kanun", desc: "6502 sayılı Tüketicinin Korunması Hakkında Kanun" },
           { term: "Yönetmelik", desc: "Mesafeli Sözleşmeler Yönetmeliği" },
-          { term: "Satıcı", desc: "Petfendy Limited Şirketi, platform aracılığıyla pet sahipleri ve hizmet sağlayıcıları arasında aracılık hizmeti sunmaktadır." },
+          { term: "Satıcı", desc: "BSG EVCİL HAYVAN BAKIM DIŞ TİCARET PAZARLAMA VE SANAYİ LİMİTED ŞİRKETİ, platform aracılığıyla pet sahipleri ve hizmet sağlayıcıları arasında aracılık hizmeti sunmaktadır." },
           { term: "Alıcı", desc: "Satıcı'nın platformu üzerinden hizmet talep eden ve bu hizmetlerin bedelini ödeyen tüketici." },
           { term: "Platform", desc: "Satıcı tarafından işletilen ve Alıcıların hizmet sağlayıcılarından hizmet satın almasını sağlayan dijital platform." },
         ]
@@ -89,7 +89,7 @@ const content = {
     ],
     parties: "Taraflar:",
     seller: "Satıcı:",
-    sellerInfo: "Petfendy Limited Şirketi\nBağlıca, Şehit Hikmet Özer Cd. No:101 Etimesgut/Ankara",
+    sellerInfo: "BSG EVCİL HAYVAN BAKIM DIŞ TİCARET PAZARLAMA VE SANAYİ LİMİTED ŞİRKETİ\nİstasyon Mah. Şehit Hikmet Özer Cd. No:101 Etimesgut/Ankara",
     buyer: "Alıcı:",
     buyerInfo: "[Ad-Soyad / Ticari Unvan]"
   },
@@ -99,7 +99,7 @@ const content = {
       {
         num: 1,
         title: "Article 1 - Parties",
-        text: "This agreement has been concluded between Petfendy Limited Company (hereinafter referred to as \"Seller\") headquartered in Ankara and the consumer (\"Buyer\") who purchases the Seller's services through the platform, within the framework of the terms and conditions specified below."
+        text: "This agreement has been concluded between BSG PET CARE FOREIGN TRADE MARKETING AND INDUSTRY LIMITED COMPANY (hereinafter referred to as \"Seller\") headquartered in Ankara and the consumer (\"Buyer\") who purchases the Seller's services through the platform, within the framework of the terms and conditions specified below."
       },
       {
         num: 2,
@@ -108,7 +108,7 @@ const content = {
           { term: "Ministry", desc: "Ministry of Trade" },
           { term: "Law", desc: "Consumer Protection Law No. 6502" },
           { term: "Regulation", desc: "Distance Contracts Regulation" },
-          { term: "Seller", desc: "Petfendy Limited Company provides intermediary services between pet owners and service providers through the platform." },
+          { term: "Seller", desc: "BSG PET CARE FOREIGN TRADE MARKETING AND INDUSTRY LIMITED COMPANY provides intermediary services between pet owners and service providers through the platform." },
           { term: "Buyer", desc: "The consumer who requests services through the Seller's platform and pays for these services." },
           { term: "Platform", desc: "The digital platform operated by the Seller that enables Buyers to purchase services from service providers." },
         ]
@@ -175,7 +175,7 @@ const content = {
     ],
     parties: "Parties:",
     seller: "Seller:",
-    sellerInfo: "Petfendy Limited Company\nBağlıca, Şehit Hikmet Özer St. No:101 Etimesgut/Ankara",
+    sellerInfo: "BSG PET CARE FOREIGN TRADE MARKETING AND INDUSTRY LIMITED COMPANY\nİstasyon Mah. Şehit Hikmet Özer St. No:101 Etimesgut/Ankara",
     buyer: "Buyer:",
     buyerInfo: "[Name-Surname / Trade Name]"
   }

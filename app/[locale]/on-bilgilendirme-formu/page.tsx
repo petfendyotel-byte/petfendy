@@ -15,7 +15,7 @@ const content = {
         icon: "building",
         title: "Satıcı Bilgileri",
         items: [
-          { label: "Ticari Unvan", value: "Petfendy Limited Şirketi" },
+          { label: "Ticari Unvan", value: "BSG EVCİL HAYVAN BAKIM DIŞ TİCARET PAZARLAMA VE SANAYİ LİMİTED ŞİRKETİ" },
           { label: "Adres", value: "Bağlıca, Şehit Hikmet Özer Cd. No:101 Etimesgut/Ankara" },
           { label: "Telefon", value: "+90 532 307 32 64" },
           { label: "E-posta", value: "petfendyotel@gmail.com" },
@@ -57,7 +57,7 @@ const content = {
         icon: "building",
         title: "Seller Information",
         items: [
-          { label: "Trade Name", value: "Petfendy Limited Company" },
+          { label: "Trade Name", value: "BSG PET CARE FOREIGN TRADE MARKETING AND INDUSTRY LIMITED COMPANY" },
           { label: "Address", value: "Bağlıca, Şehit Hikmet Özer St. No:101 Etimesgut/Ankara, Turkey" },
           { label: "Phone", value: "+90 532 307 32 64" },
           { label: "Email", value: "petfendyotel@gmail.com" },
