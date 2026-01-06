@@ -369,6 +369,10 @@
       "title": "Dog Training",
       "description": "We offer basic obedience training, advanced training and socialization services with our expert trainers."
     },
+    "service5": {
+      "title": "Pet Daycare",
+      "description": "Daily care service keeps your pet friends in safe hands. Play, socialization and professional care for a happy day."
+    },
     "detailsButton": "Learn More"
   },
   "privacy": {
@@ -554,4 +558,3 @@
     "noImages": "No gallery images found yet."
   }
 }
-

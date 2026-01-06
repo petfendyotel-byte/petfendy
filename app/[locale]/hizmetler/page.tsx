@@ -6,7 +6,7 @@ import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Home, Car, Scissors, GraduationCap, ChevronRight } from "lucide-react"
+import { Home, Car, Scissors, GraduationCap, ChevronRight, Baby } from "lucide-react"
 
 export default function ServicesPage() {
   const params = useParams()
@@ -50,6 +50,15 @@ export default function ServicesPage() {
       color: "from-blue-500 to-blue-700",
       bgColor: "bg-blue-100",
       iconColor: "text-blue-600"
+    },
+    {
+      id: 5,
+      titleKey: "service5.title",
+      descriptionKey: "service5.description",
+      icon: Baby,
+      color: "from-green-500 to-green-700",
+      bgColor: "bg-green-100",
+      iconColor: "text-green-600"
     }
   ]
 
