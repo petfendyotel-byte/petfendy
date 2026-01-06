@@ -1378,7 +1378,13 @@ export function AdminDashboard() {
           <Card>
             <CardHeader>
               <div className="flex justify-between items-center">
-                <CardTitle>Otel Odaları Yönetimi</CardTitle>
+                <div>
+                  <CardTitle>Otel Odaları Yönetimi</CardTitle>
+                  <CardDescription className="mt-2">
+                    Otel odalarınızı buradan yönetebilirsiniz. Oda bilgileri, fiyatları, resimleri ve müsaitlik durumunu güncelleyebilirsiniz.
+                    Değişiklikler anında rezervasyon sayfalarına yansır.
+                  </CardDescription>
+                </div>
                 <Button onClick={() => setShowAddRoom(!showAddRoom)} className="gap-2">
                   <Plus className="w-4 h-4" />
                   Yeni Oda Ekle
