@@ -55,7 +55,7 @@ const content = {
     section3Title: "Genel Hükümler",
     supportLine: "Destek Hattı",
     support247: "7/24 Müşteri Desteği",
-    workingHours: "Pazartesi - Pazar: 09:00 - 22:00",
+    workingHours: "Pazartesi - Pazar: 08:00 - 20:00",
     emailSupport: "E-posta Desteği",
     emailResponse: "24 saat içinde yanıt",
     emailDesc: "Detaylı sorularınız için e-posta gönderin",
