@@ -104,7 +104,7 @@ export function Footer({ locale }: FooterProps) {
               </li>
               <li className="text-gray-300 flex items-start gap-2">
                 <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <span>Bağlıca, Şehit Hikmet Özer Cd. No:101, Etimesgut/Ankara</span>
+                <span>İstasyon Mah. Şehit Hikmet Özer Cd. No:101, Etimesgut/Ankara</span>
               </li>
             </ul>
           </div>
