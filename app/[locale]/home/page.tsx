@@ -213,7 +213,7 @@ export default function HomePage() {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-3 gap-8">
             {/* Pet Otel Card */}
             <Card className="border-0 shadow-xl hover-scale rounded-3xl overflow-hidden group cursor-pointer bg-white">
               <div className="gradient-orange-pink p-8 relative overflow-hidden">
@@ -270,6 +270,36 @@ export default function HomePage() {
                 >
                   <Car className="w-5 h-5 mr-2" />
                   {tNew('taxiButton')}
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Pet Kreş Card */}
+            <Card className="border-0 shadow-xl hover-scale rounded-3xl overflow-hidden group cursor-pointer bg-white">
+              <div className="bg-gradient-to-br from-purple-500 to-indigo-600 p-8 relative overflow-hidden">
+                {/* Decorative Pet Icons */}
+                <PawPrint className="absolute top-4 right-4 w-20 h-20 text-white/20 group-hover:scale-110 transition-transform duration-300" />
+                <PawPrint className="absolute bottom-4 left-4 w-16 h-16 text-white/15 group-hover:scale-110 transition-transform duration-300" />
+                
+                <div className="relative z-10">
+                  <div className="w-20 h-20 bg-white/30 backdrop-blur-sm rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                    <Heart className="w-10 h-10 text-white" />
+                  </div>
+                  <CardTitle className="text-3xl text-white mb-3 font-bold drop-shadow-lg">
+                    {tNew('petDaycareTitle')}
+                  </CardTitle>
+                  <CardDescription className="text-white/90 text-lg leading-relaxed">
+                    {tNew('petDaycareDesc')}
+                  </CardDescription>
+                </div>
+              </div>
+              <CardContent className="p-8 bg-white">
+                <Button 
+                  className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white py-6 text-lg rounded-2xl font-semibold hover-scale shadow-lg"
+                  onClick={() => router.push(`/${locale}/booking/daycare`)}
+                >
+                  <Heart className="w-5 h-5 mr-2" />
+                  {tNew('daycareButton')}
                 </Button>
               </CardContent>
             </Card>
