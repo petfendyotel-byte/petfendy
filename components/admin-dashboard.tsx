@@ -76,6 +76,7 @@ export function AdminDashboard() {
   const [services, setServices] = useState<TaxiService[]>([])
   const [taxiVehicles, setTaxiVehicles] = useState<TaxiVehicle[]>([])
   const [roomPricings, setRoomPricings] = useState<RoomPricing[]>([])
+  const [additionalServices, setAdditionalServices] = useState<any[]>([])
   const [aboutPage, setAboutPage] = useState<AboutPage | null>(null)
   const [paymentGateways, setPaymentGateways] = useState<PaymentGateway[]>([])
   const [showAddGateway, setShowAddGateway] = useState(false)
@@ -92,6 +93,8 @@ export function AdminDashboard() {
   const [showAddService, setShowAddService] = useState(false)
   const [showAddVehicle, setShowAddVehicle] = useState(false)
   const [showAddRoomPricing, setShowAddRoomPricing] = useState(false)
+  const [showAddAdditionalService, setShowAddAdditionalService] = useState(false)
+  const [editingAdditionalService, setEditingAdditionalService] = useState<any>(null)
   
   // Filter states
   const [orderFilter, setOrderFilter] = useState<string>("all")
@@ -135,6 +138,19 @@ export function AdminDashboard() {
     roomId: "",
     date: "",
     pricePerNight: 0,
+  })
+
+  const [newAdditionalService, setNewAdditionalService] = useState({
+    name: "",
+    type: "grooming" as const,
+    description: "",
+    pricingType: "weight" as "fixed" | "weight", // Sabit fiyat veya kg göre
+    basePrice: 0, // Sabit fiyat için
+    pricePerKg: 0, // Kg başına fiyat
+    minWeight: 0, // Minimum ağırlık
+    maxWeight: 50, // Maksimum ağırlık
+    duration: "",
+    icon: "✂️",
   })
 
   // Taksi km fiyat ayarları
@@ -279,6 +295,7 @@ export function AdminDashboard() {
     const storedServices = JSON.parse(localStorage.getItem("petfendy_services") || JSON.stringify(mockTaxiServices))
     const storedVehicles = JSON.parse(localStorage.getItem("petfendy_taxi_vehicles") || "[]")
     const storedRoomPricings = JSON.parse(localStorage.getItem("petfendy_room_pricings") || "[]")
+    const storedAdditionalServices = JSON.parse(localStorage.getItem("petfendy_additional_services") || "[]")
     const storedAbout = localStorage.getItem("petfendy_about")
     const storedGateways = JSON.parse(localStorage.getItem("petfendy_payment_gateways") || "[]")
 
@@ -287,6 +304,11 @@ export function AdminDashboard() {
     setServices(storedServices)
     setTaxiVehicles(storedVehicles)
     setRoomPricings(storedRoomPricings)
+    setAdditionalServices(storedAdditionalServices.length > 0 ? storedAdditionalServices : [
+      { id: "grooming-1", name: "Traş ve Bakım", type: "grooming", pricingType: "weight", pricePerKg: 15, minWeight: 1, maxWeight: 50, description: "Profesyonel tıraş ve bakım hizmeti", duration: "1-2 saat", icon: "✂️" },
+      { id: "training-1", name: "Eğitim", type: "training", pricingType: "fixed", basePrice: 150, description: "Temel itaat eğitimi", duration: "1 saat", icon: "🎓" },
+      { id: "vet-1", name: "Veteriner Kontrolü", type: "vet", pricingType: "fixed", basePrice: 200, description: "Genel sağlık kontrolü", duration: "30 dakika", icon: "👨‍⚕️" }
+    ])
     setPaymentGateways(storedGateways)
 
     // Taksi fiyatlarını yükle
@@ -348,6 +370,16 @@ export function AdminDashboard() {
   const saveRoomPricings = (updatedPricings: RoomPricing[]) => {
     localStorage.setItem("petfendy_room_pricings", JSON.stringify(updatedPricings))
     setRoomPricings(updatedPricings)
+  }
+
+  const saveAdditionalServices = (updatedServices: any[]) => {
+    localStorage.setItem("petfendy_additional_services", JSON.stringify(updatedServices))
+    setAdditionalServices(updatedServices)
+    
+    // Trigger custom event for same-page updates
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('additionalServicesUpdated'))
+    }
   }
 
   // Room management
@@ -645,6 +677,85 @@ export function AdminDashboard() {
     toast({
       title: "🗑️ Silindi",
       description: "Fiyat silindi",
+    })
+  }
+
+  // Additional Services Management
+  const handleAddAdditionalService = () => {
+    if (!newAdditionalService.name) {
+      toast({
+        title: "Hata",
+        description: "Hizmet adı zorunludur",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (newAdditionalService.pricingType === "fixed" && newAdditionalService.basePrice <= 0) {
+      toast({
+        title: "Hata", 
+        description: "Sabit fiyat 0'dan büyük olmalıdır",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (newAdditionalService.pricingType === "weight" && newAdditionalService.pricePerKg <= 0) {
+      toast({
+        title: "Hata",
+        description: "Kg başına fiyat 0'dan büyük olmalıdır", 
+        variant: "destructive",
+      })
+      return
+    }
+
+    const service = {
+      id: `service-${Date.now()}`,
+      ...newAdditionalService,
+    }
+
+    saveAdditionalServices([...additionalServices, service])
+    setNewAdditionalService({
+      name: "",
+      type: "grooming",
+      description: "",
+      pricingType: "weight",
+      basePrice: 0,
+      pricePerKg: 0,
+      minWeight: 0,
+      maxWeight: 50,
+      duration: "",
+      icon: "✂️",
+    })
+    setShowAddAdditionalService(false)
+    
+    toast({
+      title: "Başarılı",
+      description: "Ek hizmet eklendi",
+    })
+  }
+
+  const handleUpdateAdditionalService = () => {
+    if (!editingAdditionalService) return
+
+    const updatedServices = additionalServices.map(service =>
+      service.id === editingAdditionalService.id ? editingAdditionalService : service
+    )
+    
+    saveAdditionalServices(updatedServices)
+    setEditingAdditionalService(null)
+    
+    toast({
+      title: "Başarılı", 
+      description: "Ek hizmet güncellendi",
+    })
+  }
+
+  const handleDeleteAdditionalService = (serviceId: string) => {
+    saveAdditionalServices(additionalServices.filter(s => s.id !== serviceId))
+    toast({
+      title: "Başarılı",
+      description: "Ek hizmet silindi",
     })
   }
 
@@ -1121,9 +1232,10 @@ export function AdminDashboard() {
 
       {/* Main Tabs */}
       <Tabs defaultValue="orders" className="w-full">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-9">
           <TabsTrigger value="orders">Siparişler</TabsTrigger>
           <TabsTrigger value="rooms">Odalar</TabsTrigger>
+          <TabsTrigger value="additional-services">Ek Hizmetler</TabsTrigger>
           <TabsTrigger value="services">Pet Taksi</TabsTrigger>
           <TabsTrigger value="vehicles">Taksiler</TabsTrigger>
           <TabsTrigger value="pricing">Fiyatlandırma</TabsTrigger>
@@ -1709,6 +1821,237 @@ export function AdminDashboard() {
               </CardContent>
             </Card>
           )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Additional Services Tab */}
+        <TabsContent value="additional-services" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>Ek Hizmetler Yönetimi</CardTitle>
+                  <CardDescription className="mt-2">
+                    Otel rezervasyonlarında sunulan ek hizmetleri yönetin. Traş bakım hizmeti için kg göre fiyatlandırma yapabilirsiniz.
+                  </CardDescription>
+                </div>
+                <Button onClick={() => setShowAddAdditionalService(!showAddAdditionalService)} className="gap-2">
+                  <Plus className="w-4 h-4" />
+                  Yeni Hizmet Ekle
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {showAddAdditionalService && (
+                <Card className="bg-accent/50">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Yeni Ek Hizmet Ekle</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Hizmet Adı *</label>
+                        <Input
+                          value={newAdditionalService.name}
+                          onChange={(e) => setNewAdditionalService({ ...newAdditionalService, name: e.target.value })}
+                          placeholder="Örn: Traş ve Bakım"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Hizmet Tipi *</label>
+                        <Select
+                          value={newAdditionalService.type}
+                          onValueChange={(v) => setNewAdditionalService({ ...newAdditionalService, type: v as any })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="grooming">Traş ve Bakım</SelectItem>
+                            <SelectItem value="training">Eğitim</SelectItem>
+                            <SelectItem value="vet">Veteriner</SelectItem>
+                            <SelectItem value="daycare">Günlük Bakım</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Fiyatlandırma Tipi *</label>
+                        <Select
+                          value={newAdditionalService.pricingType}
+                          onValueChange={(v) => setNewAdditionalService({ ...newAdditionalService, pricingType: v as any })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="fixed">Sabit Fiyat</SelectItem>
+                            <SelectItem value="weight">Kg Göre Fiyat</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">İkon</label>
+                        <Input
+                          value={newAdditionalService.icon}
+                          onChange={(e) => setNewAdditionalService({ ...newAdditionalService, icon: e.target.value })}
+                          placeholder="✂️"
+                        />
+                      </div>
+                    </div>
+                    
+                    {newAdditionalService.pricingType === "fixed" ? (
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Sabit Fiyat (₺) *</label>
+                        <Input
+                          type="number"
+                          value={newAdditionalService.basePrice}
+                          onChange={(e) => setNewAdditionalService({ ...newAdditionalService, basePrice: parseFloat(e.target.value) || 0 })}
+                          min="0"
+                          step="0.01"
+                        />
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Kg Başına Fiyat (₺) *</label>
+                          <Input
+                            type="number"
+                            value={newAdditionalService.pricePerKg}
+                            onChange={(e) => setNewAdditionalService({ ...newAdditionalService, pricePerKg: parseFloat(e.target.value) || 0 })}
+                            min="0"
+                            step="0.01"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Min Ağırlık (kg)</label>
+                          <Input
+                            type="number"
+                            value={newAdditionalService.minWeight}
+                            onChange={(e) => setNewAdditionalService({ ...newAdditionalService, minWeight: parseFloat(e.target.value) || 0 })}
+                            min="0"
+                            step="0.1"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Max Ağırlık (kg)</label>
+                          <Input
+                            type="number"
+                            value={newAdditionalService.maxWeight}
+                            onChange={(e) => setNewAdditionalService({ ...newAdditionalService, maxWeight: parseFloat(e.target.value) || 50 })}
+                            min="0"
+                            step="0.1"
+                          />
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Süre</label>
+                        <Input
+                          value={newAdditionalService.duration}
+                          onChange={(e) => setNewAdditionalService({ ...newAdditionalService, duration: e.target.value })}
+                          placeholder="Örn: 1-2 saat"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Açıklama</label>
+                      <Textarea
+                        value={newAdditionalService.description}
+                        onChange={(e) => setNewAdditionalService({ ...newAdditionalService, description: e.target.value })}
+                        placeholder="Hizmet hakkında detaylı açıklama"
+                        rows={3}
+                      />
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button onClick={handleAddAdditionalService} className="flex-1">
+                        Hizmet Ekle
+                      </Button>
+                      <Button variant="outline" onClick={() => setShowAddAdditionalService(false)} className="flex-1">
+                        İptal
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {additionalServices.map((service) => (
+                  <Card key={service.id}>
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">{service.icon}</span>
+                          <div>
+                            <CardTitle className="text-lg">{service.name}</CardTitle>
+                            <CardDescription>{service.type}</CardDescription>
+                          </div>
+                        </div>
+                        <Badge variant={service.pricingType === "weight" ? "default" : "secondary"}>
+                          {service.pricingType === "weight" ? "Kg Göre" : "Sabit Fiyat"}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {service.description && (
+                        <p className="text-sm text-muted-foreground">{service.description}</p>
+                      )}
+                      
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        {service.pricingType === "fixed" ? (
+                          <div>
+                            <p className="text-muted-foreground">Fiyat</p>
+                            <p className="font-bold text-primary">₺{service.basePrice}</p>
+                          </div>
+                        ) : (
+                          <div>
+                            <p className="text-muted-foreground">Kg Başına</p>
+                            <p className="font-bold text-primary">₺{service.pricePerKg}/kg</p>
+                          </div>
+                        )}
+                        
+                        {service.duration && (
+                          <div>
+                            <p className="text-muted-foreground">Süre</p>
+                            <p className="font-semibold">{service.duration}</p>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {service.pricingType === "weight" && (
+                        <div className="text-xs text-muted-foreground">
+                          Ağırlık aralığı: {service.minWeight}kg - {service.maxWeight}kg
+                        </div>
+                      )}
+                      
+                      <div className="flex gap-2 pt-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => setEditingAdditionalService(service)}
+                        >
+                          <Edit className="w-3 h-3 mr-1" />
+                          Düzenle
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDeleteAdditionalService(service.id)}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
