@@ -185,7 +185,7 @@ export default function ContactPage() {
               <h3 className="font-bold text-gray-900 p-6 pb-0">{t.mapTitle}</h3>
               <div className="aspect-video w-full">
                 <iframe
-                  src="https://maps.google.com/maps?q=Etimesgut,Ankara,Turkey&output=embed"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3059.2850054395776!2d32.65409731098484!3d39.93501417140238!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14d339c491d74a59%3A0x32fac543504168e2!2s%C4%B0stasyon%2C%20Hikmet%20%C3%96zer%20Cd.%20No%3A101%2C%2006100%20Etimesgut%2FAnkara!5e0!3m2!1str!2str!4v1767725979106!5m2!1str!2str"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
