@@ -144,11 +144,16 @@ export function AdminDashboard() {
     name: "",
     type: "grooming" as const,
     description: "",
-    pricingType: "weight" as "fixed" | "weight", // Sabit fiyat veya kg göre
+    pricingType: "weight" as "fixed" | "weight" | "room", // Sabit fiyat, kg göre veya oda göre
     basePrice: 0, // Sabit fiyat için
     pricePerKg: 0, // Kg başına fiyat
     minWeight: 0, // Minimum ağırlık
     maxWeight: 50, // Maksimum ağırlık
+    roomPrices: { // Oda bazlı fiyatlar
+      standard: 0,
+      deluxe: 0,
+      suite: 0,
+    },
     duration: "",
     icon: "✂️",
   })
@@ -307,7 +312,7 @@ export function AdminDashboard() {
     setAdditionalServices(storedAdditionalServices.length > 0 ? storedAdditionalServices : [
       { id: "grooming-1", name: "Traş ve Bakım", type: "grooming", pricingType: "weight", pricePerKg: 15, minWeight: 1, maxWeight: 50, description: "Profesyonel tıraş ve bakım hizmeti", duration: "1-2 saat", icon: "✂️" },
       { id: "training-1", name: "Eğitim", type: "training", pricingType: "fixed", basePrice: 150, description: "Temel itaat eğitimi", duration: "1 saat", icon: "🎓" },
-      { id: "vet-1", name: "Veteriner Kontrolü", type: "vet", pricingType: "fixed", basePrice: 200, description: "Genel sağlık kontrolü", duration: "30 dakika", icon: "👨‍⚕️" }
+      { id: "vet-1", name: "Veteriner Kontrolü", type: "vet", pricingType: "room", roomPrices: { standard: 150, deluxe: 200, suite: 250 }, description: "Oda tipine göre veteriner kontrolü", duration: "30 dakika", icon: "👨‍⚕️" }
     ])
     setPaymentGateways(storedGateways)
 
@@ -709,6 +714,18 @@ export function AdminDashboard() {
       return
     }
 
+    if (newAdditionalService.pricingType === "room") {
+      const roomPrices = newAdditionalService.roomPrices
+      if (!roomPrices.standard || !roomPrices.deluxe || !roomPrices.suite) {
+        toast({
+          title: "Hata",
+          description: "Tüm oda tipleri için fiyat girilmelidir",
+          variant: "destructive",
+        })
+        return
+      }
+    }
+
     const service = {
       id: `service-${Date.now()}`,
       ...newAdditionalService,
@@ -724,6 +741,11 @@ export function AdminDashboard() {
       pricePerKg: 0,
       minWeight: 0,
       maxWeight: 50,
+      roomPrices: {
+        standard: 0,
+        deluxe: 0,
+        suite: 0,
+      },
       duration: "",
       icon: "✂️",
     })
@@ -1889,6 +1911,7 @@ export function AdminDashboard() {
                           <SelectContent>
                             <SelectItem value="fixed">Sabit Fiyat</SelectItem>
                             <SelectItem value="weight">Kg Göre Fiyat</SelectItem>
+                            <SelectItem value="room">Oda Tipine Göre Fiyat</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -1913,7 +1936,7 @@ export function AdminDashboard() {
                           step="0.01"
                         />
                       </div>
-                    ) : (
+                    ) : newAdditionalService.pricingType === "weight" ? (
                       <div className="grid grid-cols-3 gap-4">
                         <div className="space-y-2">
                           <label className="text-sm font-medium">Kg Başına Fiyat (₺) *</label>
@@ -1944,6 +1967,63 @@ export function AdminDashboard() {
                             min="0"
                             step="0.1"
                           />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <label className="text-sm font-medium">Oda Tipine Göre Fiyatlar (₺) *</label>
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="space-y-2">
+                            <label className="text-xs text-muted-foreground">Standart Oda</label>
+                            <Input
+                              type="number"
+                              value={newAdditionalService.roomPrices.standard}
+                              onChange={(e) => setNewAdditionalService({ 
+                                ...newAdditionalService, 
+                                roomPrices: { 
+                                  ...newAdditionalService.roomPrices, 
+                                  standard: parseFloat(e.target.value) || 0 
+                                }
+                              })}
+                              min="0"
+                              step="0.01"
+                              placeholder="Standart fiyat"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-xs text-muted-foreground">Deluxe Oda</label>
+                            <Input
+                              type="number"
+                              value={newAdditionalService.roomPrices.deluxe}
+                              onChange={(e) => setNewAdditionalService({ 
+                                ...newAdditionalService, 
+                                roomPrices: { 
+                                  ...newAdditionalService.roomPrices, 
+                                  deluxe: parseFloat(e.target.value) || 0 
+                                }
+                              })}
+                              min="0"
+                              step="0.01"
+                              placeholder="Deluxe fiyat"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-xs text-muted-foreground">Suite Oda</label>
+                            <Input
+                              type="number"
+                              value={newAdditionalService.roomPrices.suite}
+                              onChange={(e) => setNewAdditionalService({ 
+                                ...newAdditionalService, 
+                                roomPrices: { 
+                                  ...newAdditionalService.roomPrices, 
+                                  suite: parseFloat(e.target.value) || 0 
+                                }
+                              })}
+                              min="0"
+                              step="0.01"
+                              placeholder="Suite fiyat"
+                            />
+                          </div>
                         </div>
                       </div>
                     )}
@@ -1993,8 +2073,8 @@ export function AdminDashboard() {
                             <CardDescription>{service.type}</CardDescription>
                           </div>
                         </div>
-                        <Badge variant={service.pricingType === "weight" ? "default" : "secondary"}>
-                          {service.pricingType === "weight" ? "Kg Göre" : "Sabit Fiyat"}
+                        <Badge variant={service.pricingType === "weight" ? "default" : service.pricingType === "room" ? "destructive" : "secondary"}>
+                          {service.pricingType === "weight" ? "Kg Göre" : service.pricingType === "room" ? "Oda Göre" : "Sabit Fiyat"}
                         </Badge>
                       </div>
                     </CardHeader>
@@ -2009,10 +2089,28 @@ export function AdminDashboard() {
                             <p className="text-muted-foreground">Fiyat</p>
                             <p className="font-bold text-primary">₺{service.basePrice}</p>
                           </div>
-                        ) : (
+                        ) : service.pricingType === "weight" ? (
                           <div>
                             <p className="text-muted-foreground">Kg Başına</p>
                             <p className="font-bold text-primary">₺{service.pricePerKg}/kg</p>
+                          </div>
+                        ) : (
+                          <div className="col-span-2">
+                            <p className="text-muted-foreground mb-2">Oda Fiyatları</p>
+                            <div className="grid grid-cols-3 gap-2 text-xs">
+                              <div className="text-center">
+                                <p className="text-muted-foreground">Standart</p>
+                                <p className="font-bold text-primary">₺{service.roomPrices?.standard || 0}</p>
+                              </div>
+                              <div className="text-center">
+                                <p className="text-muted-foreground">Deluxe</p>
+                                <p className="font-bold text-primary">₺{service.roomPrices?.deluxe || 0}</p>
+                              </div>
+                              <div className="text-center">
+                                <p className="text-muted-foreground">Suite</p>
+                                <p className="font-bold text-primary">₺{service.roomPrices?.suite || 0}</p>
+                              </div>
+                            </div>
                           </div>
                         )}
                         
