@@ -275,7 +275,7 @@ export function HotelBookingGuest() {
             <Calendar className="w-5 h-5 text-blue-600" />
             <span className="font-semibold">Tarihler</span>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <div className="space-y-2">
               <Label>Giriş Tarihi</Label>
               <Input 
