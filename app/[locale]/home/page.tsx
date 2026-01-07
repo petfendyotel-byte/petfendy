@@ -613,7 +613,7 @@ export default function HomePage() {
             <div className="relative">
               <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-orange-50 to-yellow-50">
                 <Image
-                  src="/images/hero-pets.webp"
+                  src="/images/petfendy-services.png"
                   alt={tNew('safetyBannerAlt')}
                   width={600}
                   height={600}
