@@ -101,7 +101,9 @@
     "refundPolicy": "İptal ve İade Politikası",
     "distancePolicy": "Mesafeli Satış Politikası",
     "preliminaryInfo": "Ön Bilgilendirme Formu",
-    "cookiePolicy": "Çerez Politikası"
+    "cookiePolicy": "Çerez Politikası",
+    "workingHours": "Çalışma Saatleri",
+    "hours": "Pzt-Paz 08:00-20:00"
   },
   "common": {
     "appName": "Petfendy",
@@ -558,4 +560,3 @@
     "noImages": "Henüz galeri görseli bulunmuyor."
   }
 }
-

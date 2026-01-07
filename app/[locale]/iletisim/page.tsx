@@ -78,7 +78,7 @@ export default function ContactPage() {
       <section className="py-12 px-4">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl font-bold text-center mb-8">{t.contactInfo}</h2>
-          
+
           <div className="grid sm:grid-cols-2 gap-6 mb-8">
             {/* Phone */}
             <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
@@ -155,8 +155,8 @@ export default function ContactPage() {
                 <h3 className="font-bold text-gray-900 mb-4">{t.socialMedia}</h3>
                 <p className="text-gray-500 text-sm mb-4">{t.followUs}</p>
                 <div className="flex gap-3">
-                  <a href="https://www.instagram.com/petfendy/" target="_blank" rel="noopener noreferrer" 
-                     className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white hover:scale-110 transition-transform">
+                  <a href="https://www.instagram.com/petfendy/" target="_blank" rel="noopener noreferrer"
+                    className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white hover:scale-110 transition-transform">
                     <Instagram className="w-5 h-5" />
                   </a>
                 </div>
@@ -185,7 +185,7 @@ export default function ContactPage() {
               <h3 className="font-bold text-gray-900 p-6 pb-0">{t.mapTitle}</h3>
               <div className="aspect-video w-full">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3059.2850054395776!2d32.65409731098484!3d39.93501417140238!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14d339c491d74a59%3A0x32fac543504168e2!2s%C4%B0stasyon%2C%20Hikmet%20%C3%96zer%20Cd.%20No%3A101%2C%2006100%20Etimesgut%2FAnkara!5e0!3m2!1str!2str!4v1767725979106!5m2!1str!2str"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3059.2850041612564!2d32.6566776!3d39.9350142!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14d33d243489a9c1%3A0x7de56ccc70ce972!2sPetfendy%20%7C%20Pet%20Otel%20%26%20Kre%C5%9F%20%7C%20Pet%20Taksi!5e0!3m2!1str!2str!4v1767809651351!5m2!1str!2str"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
@@ -193,6 +193,7 @@ export default function ContactPage() {
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
                   className="rounded-b-2xl"
+                  title="Petfendy Konum Haritası"
                 ></iframe>
               </div>
             </CardContent>

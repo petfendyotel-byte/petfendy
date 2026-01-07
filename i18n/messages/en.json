@@ -101,7 +101,9 @@
     "refundPolicy": "Cancellation and Refund Policy",
     "distancePolicy": "Distance Sales Agreement",
     "preliminaryInfo": "Preliminary Information Form",
-    "cookiePolicy": "Cookie Policy"
+    "cookiePolicy": "Cookie Policy",
+    "workingHours": "Working Hours",
+    "hours": "Mon-Sun 08:00-20:00"
   },
   "common": {
     "appName": "Petfendy",
