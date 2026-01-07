@@ -215,27 +215,27 @@ export default function HomePage() {
           
           <div className="grid md:grid-cols-3 gap-8">
             {/* Pet Otel Card */}
-            <Card className="border-0 shadow-xl hover-scale rounded-3xl overflow-hidden group cursor-pointer bg-white">
-              <div className="gradient-orange-pink p-8 relative overflow-hidden">
+            <Card className="border-0 shadow-xl hover-scale rounded-3xl overflow-hidden group cursor-pointer bg-white flex flex-col h-full">
+              <div className="gradient-orange-pink p-8 relative overflow-hidden flex-1 flex flex-col min-h-[280px]">
                 {/* Decorative Pet Icons */}
                 <PawPrint className="absolute top-4 right-4 w-20 h-20 text-white/20 group-hover:scale-110 transition-transform duration-300" />
                 <PawPrint className="absolute bottom-4 left-4 w-16 h-16 text-white/15 group-hover:scale-110 transition-transform duration-300" />
                 
-                <div className="relative z-10">
-                  <div className="w-20 h-20 bg-white/30 backdrop-blur-sm rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                    <HomeIcon className="w-10 h-10 text-white" />
+                <div className="relative z-10 flex flex-col flex-1">
+                  <div className="w-16 h-16 bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                    <HomeIcon className="w-8 h-8 text-white" />
                   </div>
-                  <CardTitle className="text-3xl text-white mb-3 font-bold drop-shadow-lg">
+                  <CardTitle className="text-2xl text-white mb-3 font-bold drop-shadow-lg">
                     {tNew('petHotelTitle')}
                   </CardTitle>
-                  <CardDescription className="text-white/90 text-lg leading-relaxed">
+                  <CardDescription className="text-white/90 text-base leading-relaxed flex-1">
                     {tNew('petHotelDesc')}
                   </CardDescription>
                 </div>
               </div>
-              <CardContent className="p-8 bg-white">
+              <CardContent className="p-6 bg-white mt-auto">
                 <Button 
-                  className="w-full gradient-orange-pink hover:opacity-90 text-white py-6 text-lg rounded-2xl font-semibold hover-scale shadow-lg"
+                  className="w-full gradient-orange-pink hover:opacity-90 text-white py-5 text-base rounded-xl font-semibold hover-scale shadow-lg"
                   onClick={() => router.push(`/${locale}/booking/hotel`)}
                 >
                   <HomeIcon className="w-5 h-5 mr-2" />
@@ -245,27 +245,27 @@ export default function HomePage() {
             </Card>
 
             {/* Pet Taksi Card */}
-            <Card className="border-0 shadow-xl hover-scale rounded-3xl overflow-hidden group cursor-pointer bg-white">
-              <div className="gradient-warm p-8 relative overflow-hidden">
+            <Card className="border-0 shadow-xl hover-scale rounded-3xl overflow-hidden group cursor-pointer bg-white flex flex-col h-full">
+              <div className="gradient-warm p-8 relative overflow-hidden flex-1 flex flex-col min-h-[280px]">
                 {/* Decorative Pet Icons */}
                 <PawPrint className="absolute top-4 right-4 w-20 h-20 text-white/20 group-hover:scale-110 transition-transform duration-300" />
                 <PawPrint className="absolute bottom-4 left-4 w-16 h-16 text-white/15 group-hover:scale-110 transition-transform duration-300" />
                 
-                <div className="relative z-10">
-                  <div className="w-20 h-20 bg-white/30 backdrop-blur-sm rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                    <Car className="w-10 h-10 text-white" />
+                <div className="relative z-10 flex flex-col flex-1">
+                  <div className="w-16 h-16 bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                    <Car className="w-8 h-8 text-white" />
                   </div>
-                  <CardTitle className="text-3xl text-white mb-3 font-bold drop-shadow-lg">
+                  <CardTitle className="text-2xl text-white mb-3 font-bold drop-shadow-lg">
                     {tNew('petTaxiTitle')}
                   </CardTitle>
-                  <CardDescription className="text-white/90 text-lg leading-relaxed">
+                  <CardDescription className="text-white/90 text-base leading-relaxed flex-1">
                     {tNew('petTaxiDesc')}
                   </CardDescription>
                 </div>
               </div>
-              <CardContent className="p-8 bg-white">
+              <CardContent className="p-6 bg-white mt-auto">
                 <Button 
-                  className="w-full gradient-warm hover:opacity-90 text-white py-6 text-lg rounded-2xl font-semibold hover-scale shadow-lg"
+                  className="w-full gradient-warm hover:opacity-90 text-white py-5 text-base rounded-xl font-semibold hover-scale shadow-lg"
                   onClick={() => router.push(`/${locale}/booking/taxi`)}
                 >
                   <Car className="w-5 h-5 mr-2" />
@@ -275,27 +275,27 @@ export default function HomePage() {
             </Card>
 
             {/* Pet Kreş Card */}
-            <Card className="border-0 shadow-xl hover-scale rounded-3xl overflow-hidden group cursor-pointer bg-white">
-              <div className="bg-gradient-to-br from-purple-500 to-indigo-600 p-8 relative overflow-hidden">
+            <Card className="border-0 shadow-xl hover-scale rounded-3xl overflow-hidden group cursor-pointer bg-white flex flex-col h-full">
+              <div className="bg-gradient-to-br from-purple-500 to-indigo-600 p-8 relative overflow-hidden flex-1 flex flex-col min-h-[280px]">
                 {/* Decorative Pet Icons */}
                 <PawPrint className="absolute top-4 right-4 w-20 h-20 text-white/20 group-hover:scale-110 transition-transform duration-300" />
                 <PawPrint className="absolute bottom-4 left-4 w-16 h-16 text-white/15 group-hover:scale-110 transition-transform duration-300" />
                 
-                <div className="relative z-10">
-                  <div className="w-20 h-20 bg-white/30 backdrop-blur-sm rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                    <Heart className="w-10 h-10 text-white" />
+                <div className="relative z-10 flex flex-col flex-1">
+                  <div className="w-16 h-16 bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                    <Heart className="w-8 h-8 text-white" />
                   </div>
-                  <CardTitle className="text-3xl text-white mb-3 font-bold drop-shadow-lg">
+                  <CardTitle className="text-2xl text-white mb-3 font-bold drop-shadow-lg">
                     {tNew('petDaycareTitle')}
                   </CardTitle>
-                  <CardDescription className="text-white/90 text-lg leading-relaxed">
+                  <CardDescription className="text-white/90 text-base leading-relaxed flex-1">
                     {tNew('petDaycareDesc')}
                   </CardDescription>
                 </div>
               </div>
-              <CardContent className="p-8 bg-white">
+              <CardContent className="p-6 bg-white mt-auto">
                 <Button 
-                  className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white py-6 text-lg rounded-2xl font-semibold hover-scale shadow-lg"
+                  className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white py-5 text-base rounded-xl font-semibold hover-scale shadow-lg"
                   onClick={() => router.push(`/${locale}/booking/daycare`)}
                 >
                   <Heart className="w-5 h-5 mr-2" />
@@ -310,9 +310,9 @@ export default function HomePage() {
       {/* Security Cards */}
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-3 gap-8">
             {/* Pet Otel Güvenliği */}
-            <Card className="border-2 hover:border-purple-300 transition-colors">
+            <Card className="border-2 hover:border-orange-300 transition-colors h-full">
               <CardHeader>
                 <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mb-4">
                   <Building2 className="w-8 h-8 text-orange-600" />
@@ -327,16 +327,31 @@ export default function HomePage() {
             </Card>
 
             {/* Pet Taksi Güvenliği */}
-            <Card className="border-2 hover:border-purple-300 transition-colors">
+            <Card className="border-2 hover:border-pink-300 transition-colors h-full">
               <CardHeader>
-                <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-4">
-                  <Car className="w-8 h-8 text-purple-600" />
+                <div className="w-16 h-16 bg-pink-100 rounded-2xl flex items-center justify-center mb-4">
+                  <Car className="w-8 h-8 text-pink-600" />
                 </div>
                 <CardTitle className="text-xl">{tNew('taxiSecurityTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600">
                   {tNew('taxiSecurityDesc')}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Pet Kreş Güvenliği */}
+            <Card className="border-2 hover:border-purple-300 transition-colors h-full">
+              <CardHeader>
+                <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-4">
+                  <Heart className="w-8 h-8 text-purple-600" />
+                </div>
+                <CardTitle className="text-xl">{tNew('daycareSecurityTitle')}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  {tNew('daycareSecurityDesc')}
                 </p>
               </CardContent>
             </Card>
