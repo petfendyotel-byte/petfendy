@@ -27,7 +27,6 @@ export function TaxiBooking() {
   const [selectedVehicle, setSelectedVehicle] = useState<TaxiVehicle | null>(null)
   const [fromCity, setFromCity] = useState("")
   const [toCity, setToCity] = useState("")
-  const [isRoundTrip, setIsRoundTrip] = useState(false)
   const [scheduledDate, setScheduledDate] = useState("")
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
@@ -48,6 +47,7 @@ export function TaxiBooking() {
   }, [])
 
   // Calculate distance based on city pairs or use default
+  // Distance automatically includes round trip (x2) since vehicle starts from Ankara
   const getDistance = (): number => {
     if (!fromCity || !toCity) return 0
     
@@ -58,13 +58,20 @@ export function TaxiBooking() {
         (cp.fromCity === toCity && cp.toCity === fromCity)
     )
     
+    let oneWayDistance: number
     if (cityPricing) {
-      return cityPricing.distanceKm
+      oneWayDistance = cityPricing.distanceKm
+    } else {
+      // Default distance for same city or unknown pairs
+      if (fromCity === toCity) {
+        oneWayDistance = 20
+      } else {
+        oneWayDistance = 100 // Default distance for unknown city pairs
+      }
     }
     
-    // Default distance for same city or unknown pairs
-    if (fromCity === toCity) return 20
-    return 100 // Default distance for unknown city pairs
+    // Return round trip distance (x2) since vehicle needs to return to Ankara
+    return oneWayDistance * 2
   }
 
   const getCityPricing = (): CityPricing | null => {
@@ -86,13 +93,9 @@ export function TaxiBooking() {
     // Use vehicle's pricePerKm if selected, otherwise use service's pricePerKm
     const pricePerKm = selectedVehicle ? selectedVehicle.pricePerKm : selectedService.pricePerKm
 
-    // Calculate base price: basePrice + (distance * pricePerKm)
+    // Distance already includes round trip calculation (x2)
+    // Calculate total price: basePrice + (distance * pricePerKm)
     let totalPrice = selectedService.basePrice + (pricePerKm * distance)
-
-    // Apply round trip multiplier (2x for return journey)
-    if (isRoundTrip) {
-      totalPrice *= 2
-    }
 
     // Apply city-specific additional fees
     if (cityPricing) {
@@ -145,7 +148,6 @@ export function TaxiBooking() {
       dropoffCity: toCity,
       distance,
       scheduledDate,
-      isRoundTrip,
       basePrice: selectedService.basePrice,
       pricePerKm: selectedVehicle.pricePerKm,
       additionalFee: cityPricing?.additionalFee || 0,
@@ -251,13 +253,6 @@ export function TaxiBooking() {
               </select>
             </div>
 
-            <div className="flex items-center space-x-2 p-3 bg-muted rounded-lg">
-              <Switch id="roundtrip" checked={isRoundTrip} onCheckedChange={setIsRoundTrip} />
-              <Label htmlFor="roundtrip" className="cursor-pointer">
-                Gidiş-Dönüş (2x fiyat)
-              </Label>
-            </div>
-
             {/* Vehicle Selection */}
             {fromCity && toCity && (
               <div className="space-y-3">
@@ -332,29 +327,13 @@ export function TaxiBooking() {
             {fromCity && toCity && (
               <div className="bg-muted p-4 rounded-lg space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>Mesafe:</span>
-                  <span className="font-semibold">{getDistance()} km</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Başlangıç Ücreti:</span>
-                  <span className="font-semibold">₺{selectedService.basePrice}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Mesafe Ücreti ({getDistance()} km):</span>
-                  <span className="font-semibold">
-                    ₺{((selectedVehicle ? selectedVehicle.pricePerKm : selectedService.pricePerKm) * getDistance()).toFixed(2)}
-                  </span>
+                  <span>Güzergah:</span>
+                  <span className="font-semibold">{fromCity} → {toCity}</span>
                 </div>
                 {selectedVehicle && (
                   <div className="flex justify-between text-sm text-primary">
                     <span>Seçilen Araç:</span>
-                    <span className="font-semibold">{selectedVehicle.name} (₺{selectedVehicle.pricePerKm}/km)</span>
-                  </div>
-                )}
-                {isRoundTrip && (
-                  <div className="flex justify-between text-sm text-blue-600">
-                    <span>Gidiş-Dönüş:</span>
-                    <span className="font-semibold">x2</span>
+                    <span className="font-semibold">{selectedVehicle.name}</span>
                   </div>
                 )}
                 {getCityPricing() && getCityPricing()!.additionalFee > 0 && (

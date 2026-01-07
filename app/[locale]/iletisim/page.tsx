@@ -1,9 +1,9 @@
 "use client"
 
 import { useParams } from "next/navigation"
+import { useState, useEffect } from "react"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
-import { Card, CardContent } from "@/components/ui/card"
 import { Phone, Mail, MapPin, Clock, MessageCircle, Building2, Send, Instagram } from "lucide-react"
 
 const content = {
@@ -51,8 +51,14 @@ const content = {
 
 export default function ContactPage() {
   const params = useParams()
-  const locale = (params?.locale as string) || 'tr'
-  const t = content[locale as keyof typeof content] || content.tr
+  const [locale, setLocale] = useState('tr')
+  const [t, setT] = useState(content.tr)
+
+  useEffect(() => {
+    const currentLocale = (params?.locale as string) || 'tr'
+    setLocale(currentLocale)
+    setT(content[currentLocale as keyof typeof content] || content.tr)
+  }, [params?.locale])
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -81,8 +87,8 @@ export default function ContactPage() {
 
           <div className="grid sm:grid-cols-2 gap-6 mb-8">
             {/* Phone */}
-            <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
-              <CardContent className="p-6">
+            <div className="border-0 shadow-lg rounded-2xl overflow-hidden bg-white">
+              <div className="p-6">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center shrink-0">
                     <Phone className="w-6 h-6" />
@@ -95,12 +101,12 @@ export default function ContactPage() {
                     </a>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Email */}
-            <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
-              <CardContent className="p-6">
+            <div className="border-0 shadow-lg rounded-2xl overflow-hidden bg-white">
+              <div className="p-6">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center shrink-0">
                     <Mail className="w-6 h-6" />
@@ -113,12 +119,12 @@ export default function ContactPage() {
                     </a>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Address */}
-            <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
-              <CardContent className="p-6">
+            <div className="border-0 shadow-lg rounded-2xl overflow-hidden bg-white">
+              <div className="p-6">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center shrink-0">
                     <MapPin className="w-6 h-6" />
@@ -128,12 +134,12 @@ export default function ContactPage() {
                     <p className="text-gray-600 text-sm whitespace-pre-line mt-2">{t.addressValue}</p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Working Hours */}
-            <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
-              <CardContent className="p-6">
+            <div className="border-0 shadow-lg rounded-2xl overflow-hidden bg-white">
+              <div className="p-6">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center shrink-0">
                     <Clock className="w-6 h-6" />
@@ -143,15 +149,15 @@ export default function ContactPage() {
                     <p className="text-gray-600 text-sm whitespace-pre-line mt-2">{t.workingHoursValue}</p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
 
           {/* Social Media & Company Info */}
           <div className="grid sm:grid-cols-2 gap-6">
             {/* Social Media */}
-            <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
-              <CardContent className="p-6">
+            <div className="border-0 shadow-lg rounded-2xl overflow-hidden bg-white">
+              <div className="p-6">
                 <h3 className="font-bold text-gray-900 mb-4">{t.socialMedia}</h3>
                 <p className="text-gray-500 text-sm mb-4">{t.followUs}</p>
                 <div className="flex gap-3">
@@ -160,12 +166,12 @@ export default function ContactPage() {
                     <Instagram className="w-5 h-5" />
                   </a>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Company Info */}
-            <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
-              <CardContent className="p-6">
+            <div className="border-0 shadow-lg rounded-2xl overflow-hidden bg-white">
+              <div className="p-6">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center shrink-0">
                     <Building2 className="w-6 h-6" />
@@ -175,29 +181,29 @@ export default function ContactPage() {
                     <p className="text-gray-600 text-sm">{t.companyName}</p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
 
           {/* Map */}
-          <Card className="border-0 shadow-lg rounded-2xl overflow-hidden mt-8">
-            <CardContent className="p-0">
-              <h3 className="font-bold text-gray-900 p-6 pb-0">{t.mapTitle}</h3>
-              <div className="aspect-video w-full">
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3059.2850041612564!2d32.6566776!3d39.9350142!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14d33d243489a9c1%3A0x7de56ccc70ce972!2sPetfendy%20%7C%20Pet%20Otel%20%26%20Kre%C5%9F%20%7C%20Pet%20Taksi!5e0!3m2!1str!2str!4v1767809651351!5m2!1str!2str"
-                  width="100%"
-                  height="100%"
+          <div className="border-0 shadow-lg rounded-2xl overflow-hidden mt-8 bg-white">
+            <h3 className="font-bold text-gray-900 p-6 pb-4">{locale === 'tr' ? 'Konum' : 'Location'}</h3>
+            <div className="px-6 pb-6">
+              <div className="rounded-2xl overflow-hidden">
+                <iframe 
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3059.285005434268!2d32.6541026759872!3d39.93501417152116!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14d33d243489a9c1%3A0x7de56ccc70ce972!2sPetfendy%20%7C%20Pet%20Otel%20%26%20Kre%C5%9F%20%7C%20Pet%20Taksi!5e0!3m2!1str!2str!4v1749289200000!5m2!1str!2str"
+                  width="100%" 
+                  height="400"
                   style={{ border: 0 }}
                   allowFullScreen
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  className="rounded-b-2xl"
-                  title="Petfendy Konum Haritası"
-                ></iframe>
+                  title="Petfendy Konum"
+                  className="w-full"
+                />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </section>
 

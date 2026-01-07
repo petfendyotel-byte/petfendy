@@ -88,7 +88,7 @@ export function securityMiddleware(request: NextRequest) {
     "img-src 'self' data: https: blob:",
     "font-src 'self' data: https://*.googleapis.com https://*.gstatic.com",
     "connect-src 'self' https: wss:",
-    "frame-src 'self' https://*.google.com https://www.google.com https://*.paytr.com",
+    "frame-src 'self' https://*.google.com https://www.google.com https://maps.google.com https://maps.googleapis.com https://*.paytr.com https://*.openstreetmap.org https://www.openstreetmap.org",
     "frame-ancestors 'self'",
     "base-uri 'self'",
     "form-action 'self' https://*.paytr.com",
@@ -106,9 +106,17 @@ export function securityMiddleware(request: NextRequest) {
   );
 
   // Cross-Origin headers for additional security
-  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
-  response.headers.set('Cross-Origin-Resource-Policy', 'same-origin');
-  response.headers.set('Cross-Origin-Embedder-Policy', 'credentialless');
+  // Note: Cross-Origin-Embedder-Policy is relaxed for pages with Google Maps iframe
+  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  response.headers.set('Cross-Origin-Resource-Policy', 'cross-origin');
+  
+  // Only apply strict COEP on payment pages, not on pages with external embeds like maps
+  const isPaymentPage = request.url.includes('/checkout') || request.url.includes('/payment');
+  if (isPaymentPage) {
+    response.headers.set('Cross-Origin-Embedder-Policy', 'credentialless');
+  } else {
+    response.headers.set('Cross-Origin-Embedder-Policy', 'unsafe-none');
+  }
 
   // 2. CORS Headers - Only allow specific origins (no wildcard!)
   if (origin && isOriginAllowed(origin)) {
@@ -370,9 +378,9 @@ export function logSecurityEvent(event: {
     high: '🔴',
     critical: '🚨',
   };
-  
+
   const emoji = event.severity ? severityEmoji[event.severity] : '🚨';
-  
+
   console.warn(`${emoji} [SECURITY] ${timestamp} - ${event.type}`, {
     ip: event.ip,
     userAgent: event.userAgent,
@@ -391,7 +399,7 @@ export function logSecurityEvent(event: {
  */
 export function sanitizeInput(input: string): string {
   if (!input) return '';
-  
+
   return input
     .replace(/[<>]/g, '') // Remove HTML brackets
     .replace(/javascript:/gi, '') // Remove javascript protocol
@@ -410,7 +418,7 @@ export function isPaymentEndpoint(url: string): boolean {
     '/api/checkout',
     '/api/order',
   ];
-  
+
   return paymentPaths.some(path => url.includes(path));
 }
 

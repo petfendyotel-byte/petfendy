@@ -160,8 +160,17 @@ export function AdminDashboard() {
 
   // Taksi km fiyat ayarları
   const [taxiPrices, setTaxiPrices] = useState({
-    vipPricePerKm: 15,
-    sharedPricePerKm: 8
+    vipPricePerKm: 0,
+    sharedPricePerKm: 0
+  })
+
+  // Paylaşımlı taksi sefer takvimi
+  const [sharedTaxiSchedules, setSharedTaxiSchedules] = useState<any[]>([])
+  const [newSharedTaxiSchedule, setNewSharedTaxiSchedule] = useState({
+    route: '',
+    date: '',
+    time: '',
+    capacity: 4
   })
 
   const [newGateway, setNewGateway] = useState<{
@@ -322,6 +331,12 @@ export function AdminDashboard() {
       setTaxiPrices(JSON.parse(storedTaxiPrices))
     }
 
+    // Paylaşımlı taksi seferlerini yükle
+    const storedSchedules = localStorage.getItem("petfendy_shared_taxi_schedules")
+    if (storedSchedules) {
+      setSharedTaxiSchedules(JSON.parse(storedSchedules))
+    }
+
     if (storedAbout) {
       setAboutPage(JSON.parse(storedAbout))
     } else {
@@ -369,6 +384,96 @@ export function AdminDashboard() {
     toast({
       title: "✅ Fiyatlar Güncellendi",
       description: `VIP: ₺${taxiPrices.vipPricePerKm}/km, Paylaşımlı: ₺${taxiPrices.sharedPricePerKm}/km`,
+    })
+  }
+
+  // Paylaşımlı taksi sefer yönetimi
+  const saveSharedTaxiSchedules = (schedules: any[]) => {
+    localStorage.setItem("petfendy_shared_taxi_schedules", JSON.stringify(schedules))
+    setSharedTaxiSchedules(schedules)
+    
+    // Trigger custom event for same-page updates
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('sharedTaxiSchedulesUpdated'))
+    }
+  }
+
+  const handleAddSharedTaxiSchedule = () => {
+    if (!newSharedTaxiSchedule.route || !newSharedTaxiSchedule.date || !newSharedTaxiSchedule.time) {
+      toast({
+        title: "Hata",
+        description: "Lütfen tüm alanları doldurun",
+        variant: "destructive"
+      })
+      return
+    }
+
+    // Aynı tarih ve saatte sefer var mı kontrol et
+    const existingSchedule = sharedTaxiSchedules.find(s => 
+      s.route === newSharedTaxiSchedule.route && 
+      s.date === newSharedTaxiSchedule.date && 
+      s.time === newSharedTaxiSchedule.time
+    )
+
+    if (existingSchedule) {
+      toast({
+        title: "Hata",
+        description: "Bu tarih ve saatte zaten bir sefer planlanmış",
+        variant: "destructive"
+      })
+      return
+    }
+
+    const schedule = {
+      id: `schedule-${Date.now()}`,
+      route: newSharedTaxiSchedule.route,
+      date: newSharedTaxiSchedule.date,
+      time: newSharedTaxiSchedule.time,
+      capacity: newSharedTaxiSchedule.capacity,
+      bookedSeats: 0,
+      isActive: true,
+      createdAt: new Date().toISOString()
+    }
+
+    saveSharedTaxiSchedules([...sharedTaxiSchedules, schedule])
+    setNewSharedTaxiSchedule({route: '', date: '', time: '', capacity: 4})
+
+    toast({
+      title: "✅ Sefer Eklendi",
+      description: `${schedule.route} - ${schedule.date} ${schedule.time}`,
+    })
+  }
+
+  const handleToggleScheduleStatus = (scheduleId: string) => {
+    const updatedSchedules = sharedTaxiSchedules.map(s =>
+      s.id === scheduleId ? { ...s, isActive: !s.isActive } : s
+    )
+    saveSharedTaxiSchedules(updatedSchedules)
+
+    const schedule = sharedTaxiSchedules.find(s => s.id === scheduleId)
+    toast({
+      title: "✅ Durum Güncellendi",
+      description: `${schedule?.route} seferi ${schedule?.isActive ? 'pasif' : 'aktif'} yapıldı`,
+    })
+  }
+
+  const handleDeleteSchedule = (scheduleId: string) => {
+    const schedule = sharedTaxiSchedules.find(s => s.id === scheduleId)
+    
+    if (schedule && schedule.bookedSeats > 0) {
+      toast({
+        title: "Hata",
+        description: "Rezervasyonu olan sefer silinemez",
+        variant: "destructive"
+      })
+      return
+    }
+
+    saveSharedTaxiSchedules(sharedTaxiSchedules.filter(s => s.id !== scheduleId))
+    
+    toast({
+      title: "🗑️ Sefer Silindi",
+      description: `${schedule?.route} seferi silindi`,
     })
   }
 
@@ -539,10 +644,10 @@ export function AdminDashboard() {
 
   // Service management
   const handleAddService = () => {
-    if (!newService.name || newService.basePrice <= 0) {
+    if (!newService.name || newService.basePrice < 0) {
       toast({
         title: "Hata",
-        description: "Lütfen tüm alanları doldurun",
+        description: "Lütfen tüm alanları doldurun ve fiyat 0 veya pozitif olmalıdır",
         variant: "destructive"
       })
       return
@@ -592,10 +697,10 @@ export function AdminDashboard() {
 
   // Taxi vehicle management
   const handleAddVehicle = () => {
-    if (!newVehicle.name || newVehicle.pricePerKm <= 0) {
+    if (!newVehicle.name || newVehicle.pricePerKm < 0) {
       toast({
         title: "Hata",
-        description: "Lütfen tüm alanları doldurun",
+        description: "Lütfen tüm alanları doldurun ve fiyat 0 veya pozitif olmalıdır",
         variant: "destructive"
       })
       return
@@ -696,19 +801,19 @@ export function AdminDashboard() {
       return
     }
 
-    if (newAdditionalService.pricingType === "fixed" && newAdditionalService.basePrice <= 0) {
+    if (newAdditionalService.pricingType === "fixed" && newAdditionalService.basePrice < 0) {
       toast({
         title: "Hata", 
-        description: "Sabit fiyat 0'dan büyük olmalıdır",
+        description: "Sabit fiyat 0 veya pozitif olmalıdır",
         variant: "destructive",
       })
       return
     }
 
-    if (newAdditionalService.pricingType === "weight" && newAdditionalService.pricePerKg <= 0) {
+    if (newAdditionalService.pricingType === "weight" && newAdditionalService.pricePerKg < 0) {
       toast({
         title: "Hata",
-        description: "Kg başına fiyat 0'dan büyük olmalıdır", 
+        description: "Kg başına fiyat 0 veya pozitif olmalıdır", 
         variant: "destructive",
       })
       return
@@ -2382,6 +2487,123 @@ export function AdminDashboard() {
               <Button onClick={saveTaxiPrices} className="mt-4 w-full">
                 Fiyatları Kaydet
               </Button>
+            </CardContent>
+          </Card>
+
+          {/* Paylaşımlı Taksi Sefer Takvimi */}
+          <Card className="border-2 border-green-200 bg-green-50/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-green-600" />
+                Paylaşımlı Taksi Sefer Takvimi
+              </CardTitle>
+              <CardDescription>
+                Paylaşımlı taksi seferleri için belirli tarih ve saatleri ayarlayın. Müşteriler sadece bu tarihleri seçebilir.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {/* Sefer Ekleme Formu */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-white rounded-lg border">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Güzergah</label>
+                    <Select value={newSharedTaxiSchedule.route} onValueChange={(value) => setNewSharedTaxiSchedule({...newSharedTaxiSchedule, route: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Güzergah seçin" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ankara-istanbul">Ankara → İstanbul</SelectItem>
+                        <SelectItem value="ankara-izmir">Ankara → İzmir</SelectItem>
+                        <SelectItem value="ankara-antalya">Ankara → Antalya</SelectItem>
+                        <SelectItem value="ankara-bursa">Ankara → Bursa</SelectItem>
+                        <SelectItem value="ankara-konya">Ankara → Konya</SelectItem>
+                        <SelectItem value="custom">Özel Güzergah</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Tarih</label>
+                    <Input 
+                      type="date" 
+                      value={newSharedTaxiSchedule.date}
+                      onChange={(e) => setNewSharedTaxiSchedule({...newSharedTaxiSchedule, date: e.target.value})}
+                      min={new Date().toISOString().split('T')[0]}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Saat</label>
+                    <Input 
+                      type="time" 
+                      value={newSharedTaxiSchedule.time}
+                      onChange={(e) => setNewSharedTaxiSchedule({...newSharedTaxiSchedule, time: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Kapasite</label>
+                    <Input 
+                      type="number" 
+                      value={newSharedTaxiSchedule.capacity}
+                      onChange={(e) => setNewSharedTaxiSchedule({...newSharedTaxiSchedule, capacity: parseInt(e.target.value) || 4})}
+                      placeholder="4"
+                      min="1"
+                      max="8"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button onClick={handleAddSharedTaxiSchedule} className="flex-1">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Sefer Ekle
+                  </Button>
+                  <Button variant="outline" onClick={() => setNewSharedTaxiSchedule({route: '', date: '', time: '', capacity: 4})}>
+                    Temizle
+                  </Button>
+                </div>
+
+                {/* Mevcut Seferler */}
+                <div className="space-y-2">
+                  <h4 className="font-medium">Planlanan Seferler</h4>
+                  {sharedTaxiSchedules.length === 0 ? (
+                    <p className="text-muted-foreground text-sm">Henüz sefer planlanmamış</p>
+                  ) : (
+                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                      {sharedTaxiSchedules
+                        .sort((a, b) => new Date(a.date + 'T' + a.time).getTime() - new Date(b.date + 'T' + b.time).getTime())
+                        .map((schedule) => (
+                        <div key={schedule.id} className="flex items-center justify-between p-3 bg-white rounded border">
+                          <div className="flex-1">
+                            <div className="font-medium">{schedule.route}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {new Date(schedule.date).toLocaleDateString('tr-TR')} - {schedule.time}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              Kapasite: {schedule.bookedSeats}/{schedule.capacity} | 
+                              Durum: {schedule.isActive ? 'Aktif' : 'Pasif'}
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant={schedule.isActive ? "destructive" : "default"}
+                              onClick={() => handleToggleScheduleStatus(schedule.id)}
+                            >
+                              {schedule.isActive ? 'Pasif Yap' : 'Aktif Yap'}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDeleteSchedule(schedule.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
             </CardContent>
           </Card>
 
