@@ -176,22 +176,30 @@ export default function HomePage() {
           </p>
 
           {/* Buttons */}
-          <div className="flex flex-col sm:flex-row gap-5 justify-center items-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center flex-wrap">
             <Button
               size="lg"
-              className="bg-white text-gray-900 hover:bg-gray-50 gap-3 px-8 py-6 text-lg rounded-2xl hover-scale shadow-2xl font-semibold"
+              className="bg-white text-gray-900 hover:bg-gray-50 gap-3 px-6 py-5 text-base rounded-2xl hover-scale shadow-2xl font-semibold"
               onClick={() => router.push(`/${locale}/booking/hotel`)}
             >
-              <HomeIcon className="w-6 h-6" />
+              <HomeIcon className="w-5 h-5" />
               {tNew('hotelButton')}
             </Button>
             <Button
               size="lg"
-              className="gradient-orange-pink hover:opacity-90 gap-3 px-8 py-6 text-lg rounded-2xl hover-scale shadow-2xl font-semibold text-white border-2 border-white/30"
+              className="gradient-orange-pink hover:opacity-90 gap-3 px-6 py-5 text-base rounded-2xl hover-scale shadow-2xl font-semibold text-white border-2 border-white/30"
               onClick={() => router.push(`/${locale}/booking/taxi`)}
             >
-              <Car className="w-6 h-6" />
+              <Car className="w-5 h-5" />
               {tNew('taxiButton')}
+            </Button>
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 gap-3 px-6 py-5 text-base rounded-2xl hover-scale shadow-2xl font-semibold text-white border-2 border-white/30"
+              onClick={() => router.push(`/${locale}/booking/daycare`)}
+            >
+              <Heart className="w-5 h-5" />
+              {tNew('daycareButton')}
             </Button>
           </div>
         </div>
