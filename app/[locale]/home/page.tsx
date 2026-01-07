@@ -612,13 +612,13 @@ export default function HomePage() {
             {/* Image */}
             <div className="relative">
               <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-orange-50 to-yellow-50">
-                <Image
+                <img
                   src="/images/petfendy-services.png"
-                  alt={tNew('safetyBannerAlt')}
+                  alt="Pet Otel, Pet Kreş ve Pet Taksi Hizmetleri"
                   width={600}
                   height={600}
                   className="w-full h-auto"
-                  priority={false}
+                  loading="lazy"
                 />
               </div>
               {/* Decorative elements */}
