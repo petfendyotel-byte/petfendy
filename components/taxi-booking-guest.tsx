@@ -142,7 +142,7 @@ export function TaxiBookingGuest() {
     setCalculatedDistance(totalDistance)
     toast({ 
       title: "âœ… Fiyat HesaplandÄ±", 
-      description: `Toplam mesafe: ${totalDistance} km`,
+      description: `Tahmini Ücret: ${totalDistance} km`,
       duration: 3000 
     })
   }
@@ -372,8 +372,8 @@ export function TaxiBookingGuest() {
           {calculatedDistance && (
             <div className="p-4 bg-green-50 rounded-xl border border-green-200">
               <div className="flex justify-between items-center">
-                <span className="text-green-700 font-medium">Toplam Mesafe:</span>
-                <span className="text-2xl font-bold text-green-700">{calculatedDistance} km</span>
+                <span className="text-green-700 font-medium">Tahmini Ücret:</span>
+                <span className="text-2xl font-bold text-green-700">?{calculatedPrice?.toFixed(2)}</span>
               </div>
               <div className="flex justify-between items-center mt-2">
                 <span className="text-green-700 font-medium">Tahmini Ãœcret:</span>
