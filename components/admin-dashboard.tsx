@@ -2484,7 +2484,7 @@ export function AdminDashboard() {
                   />
                 </div>
               </div>
-              <Button onClick={saveTaxiPrices} className="mt-4 w-full">
+              <Button type="button" onClick={() => saveTaxiPrices()} className="mt-4 w-full">
                 Fiyatları Kaydet
               </Button>
             </CardContent>

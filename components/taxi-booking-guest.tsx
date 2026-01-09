@@ -51,7 +51,10 @@ export function TaxiBookingGuest() {
     const storedPrices = localStorage.getItem("petfendy_taxi_prices")
     if (storedPrices) {
       const prices = JSON.parse(storedPrices)
-      setPricePerKm({ vip: prices.vipPricePerKm || 0, shared: prices.sharedPricePerKm || 0 })
+      setPricePerKm({ vip: prices.vipPricePerKm || 15, shared: prices.sharedPricePerKm || 8 })
+    } else {
+      // Varsayilan fiyatlar
+      setPricePerKm({ vip: 15, shared: 8 })
     }
     const storedSchedules = localStorage.getItem("petfendy_shared_taxi_schedules")
     if (storedSchedules) {
@@ -290,3 +293,4 @@ export function TaxiBookingGuest() {
     </div>
   )
 }
+
