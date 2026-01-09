@@ -116,7 +116,7 @@ export function TaxiBookingGuest() {
     setDropoffDistrict("")
   }, [dropoffProvince])
 
-  // Mesafe hesaplama
+  // Fiyat Hesaplama
   const calculateDistance = () => {
     if (!pickupProvince || !dropoffProvince) {
       toast({ title: "Hata", description: "Lütfen kalkış ve varış illerini seçin", variant: "destructive" })
@@ -141,7 +141,7 @@ export function TaxiBookingGuest() {
 
     setCalculatedDistance(totalDistance)
     toast({ 
-      title: "✅ Mesafe Hesaplandı", 
+      title: "✅ Fiyat Hesaplandı", 
       description: `Toplam mesafe: ${totalDistance} km`,
       duration: 3000 
     })
@@ -164,7 +164,7 @@ export function TaxiBookingGuest() {
       return
     }
     if (!calculatedDistance) {
-      toast({ title: "Hata", description: "Lütfen önce mesafe hesaplayın", variant: "destructive" })
+      toast({ title: "Hata", description: "Lütfen önce Fiyat Hesaplayın", variant: "destructive" })
       return
     }
     if (!petName || !petBreed) {
@@ -358,14 +358,14 @@ export function TaxiBookingGuest() {
             />
           </div>
 
-          {/* Mesafe Hesapla Butonu */}
+          {/* Fiyat Hesapla Butonu */}
           <Button 
             onClick={calculateDistance}
             className="w-full bg-blue-600 hover:bg-blue-700"
             disabled={!pickupProvince || !dropoffProvince}
           >
             <Calculator className="w-4 h-4 mr-2" />
-            Mesafe Hesapla
+            Fiyat Hesapla
           </Button>
 
           {/* Hesaplanan Mesafe */}
