@@ -91,9 +91,10 @@ export interface TaxiReservationData {
   dropoffProvince: string
   dropoffDistrict: string
   dropoffAddress?: string
-  distance: number
+  distance?: number | null
   pricePerKm: number
   scheduledDate: string
+  scheduleId?: string | null
   totalPrice: number
   petInfo?: {
     name: string
