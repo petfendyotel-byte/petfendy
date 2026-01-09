@@ -53,15 +53,9 @@ export function Footer({ locale }: FooterProps) {
                 </a>
               </li>
               <li>
-                <a href={`/${locale}/hakkimda`} className="text-gray-300 hover:text-orange-400 transition-colors flex items-center gap-2 group">
+                <a href={`/${locale}/booking/daycare`} className="text-gray-300 hover:text-orange-400 transition-colors flex items-center gap-2 group">
                   <PawPrint className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <span>{t('aboutUs')}</span>
-                </a>
-              </li>
-              <li>
-                <a href={`/${locale}/blog`} className="text-gray-300 hover:text-orange-400 transition-colors flex items-center gap-2 group">
-                  <PawPrint className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <span>{t('blog')}</span>
+                  <span>{t('petDaycare')}</span>
                 </a>
               </li>
             </ul>

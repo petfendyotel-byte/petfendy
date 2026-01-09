@@ -419,28 +419,15 @@ export default function CheckoutPage() {
                       {taxiReservation.pickupCity} → {taxiReservation.dropoffCity}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {taxiReservation.distance} km {taxiReservation.isRoundTrip && "(Gidiş-Dönüş)"}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
                       Tarih: {new Date(taxiReservation.scheduledDate).toLocaleString('tr-TR')}
                     </p>
                   </div>
                   <Separator />
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>Başlangıç Ücreti:</span>
-                      <span className="font-medium">₺{taxiReservation.basePrice.toFixed(2)}</span>
+                      <span>Taşıma Ücreti:</span>
+                      <span className="font-medium">₺{taxiReservation.totalPrice?.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Mesafe Ücreti ({taxiReservation.distance} km):</span>
-                      <span className="font-medium">₺{(taxiReservation.pricePerKm * taxiReservation.distance).toFixed(2)}</span>
-                    </div>
-                    {taxiReservation.isRoundTrip && (
-                      <div className="flex justify-between text-sm text-blue-600">
-                        <span>Gidiş-Dönüş:</span>
-                        <span className="font-medium">x2</span>
-                      </div>
-                    )}
                     {taxiReservation.additionalFee > 0 && (
                       <div className="flex justify-between text-sm text-amber-600">
                         <span>Ek Ücret:</span>

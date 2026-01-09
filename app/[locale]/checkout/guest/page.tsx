@@ -239,9 +239,6 @@ export default function GuestCheckoutPage() {
                     <p>🎯 Varış: {reservation.dropoffProvince}/{reservation.dropoffDistrict}</p>
                     {reservation.dropoffAddress && <p className="pl-5 text-xs">{reservation.dropoffAddress}</p>}
                   </div>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    🚗 {reservation.distance} km
-                  </p>
                   {reservation.petInfo && (
                     <p className="text-sm text-muted-foreground mt-1">
                       🐾 {reservation.petInfo.name} ({reservation.petInfo.breed})
@@ -251,16 +248,8 @@ export default function GuestCheckoutPage() {
 
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span>Mesafe:</span>
-                    <span className="font-medium">{reservation.distance} km</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Km Başı Ücret:</span>
-                    <span className="font-medium">₺{reservation.pricePerKm}/km</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Toplam Mesafe Ücreti:</span>
-                    <span className="font-medium">₺{(reservation.pricePerKm * reservation.distance).toFixed(2)}</span>
+                    <span>Taşıma Ücreti:</span>
+                    <span className="font-medium">₺{reservation.totalPrice?.toFixed(2)}</span>
                   </div>
                 </div>
               </>

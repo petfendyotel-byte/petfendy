@@ -302,9 +302,6 @@ export function TaxiBooking() {
                                 )}
                               </div>
                               <div className="text-right">
-                                <div className="text-sm font-medium text-primary">
-                                  ₺{vehicle.pricePerKm}/km
-                                </div>
                                 <div className="text-xs text-muted-foreground">
                                   {vehicle.capacity} kişi
                                 </div>
