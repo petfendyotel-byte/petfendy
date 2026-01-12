@@ -1277,98 +1277,123 @@ export function AdminDashboard() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold">Yönetim Paneli</h2>
-        <div className="flex gap-2 items-center">
-          <Select value={dateFilter} onValueChange={(v) => setDateFilter(v as any)}>
-            <SelectTrigger className="w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="daily">Günlük</SelectItem>
-              <SelectItem value="weekly">Haftalık</SelectItem>
-              <SelectItem value="monthly">Aylık</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+    <div className="space-y-4 md:space-y-6">
+      {/* Header - Mobile Optimized */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+          Yönetim Paneli
+        </h2>
+        <Select value={dateFilter} onValueChange={(v) => setDateFilter(v as any)}>
+          <SelectTrigger className="w-full sm:w-36 h-9 text-sm">
+            <Filter className="w-4 h-4 mr-2" />
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="daily">Günlük</SelectItem>
+            <SelectItem value="weekly">Haftalık</SelectItem>
+            <SelectItem value="monthly">Aylık</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      {/* Revenue Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription className="flex items-center gap-2">
-              <ShoppingBag className="w-4 h-4" />
-              Toplam Sipariş
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{totalStats.count}</p>
-            <p className="text-xs text-muted-foreground mt-1">
+      {/* Revenue Cards - Mobile: 2 columns, Desktop: 4 columns */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/50 dark:to-blue-900/30 border-blue-200/50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-2 bg-blue-500/10 rounded-lg">
+                <ShoppingBag className="w-4 h-4 text-blue-600" />
+              </div>
+              <span className="text-xs text-muted-foreground">Sipariş</span>
+            </div>
+            <p className="text-2xl md:text-3xl font-bold text-blue-700 dark:text-blue-400">{totalStats.count}</p>
+            <p className="text-[10px] md:text-xs text-muted-foreground mt-1">
               {dateFilter === "daily" ? "Bugün" : dateFilter === "weekly" ? "Bu Hafta" : "Bu Ay"}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription className="flex items-center gap-2">
-              <DollarSign className="w-4 h-4" />
-              Toplam Ciro
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-primary">₺{totalStats.revenue.toFixed(2)}</p>
-            <p className="text-xs text-muted-foreground mt-1">
+        <Card className="bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/50 dark:to-green-900/30 border-green-200/50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-2 bg-green-500/10 rounded-lg">
+                <DollarSign className="w-4 h-4 text-green-600" />
+              </div>
+              <span className="text-xs text-muted-foreground">Ciro</span>
+            </div>
+            <p className="text-2xl md:text-3xl font-bold text-green-700 dark:text-green-400">₺{totalStats.revenue.toFixed(0)}</p>
+            <p className="text-[10px] md:text-xs text-muted-foreground mt-1">
               {dateFilter === "daily" ? "Bugün" : dateFilter === "weekly" ? "Bu Hafta" : "Bu Ay"}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription className="flex items-center gap-2">
-              <Hotel className="w-4 h-4" />
-              Otel Cirosu
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-blue-600">₺{hotelStats.revenue.toFixed(2)}</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {hotelStats.count} rezervasyon
-            </p>
+        <Card className="bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/50 dark:to-orange-900/30 border-orange-200/50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-2 bg-orange-500/10 rounded-lg">
+                <Hotel className="w-4 h-4 text-orange-600" />
+              </div>
+              <span className="text-xs text-muted-foreground">Otel</span>
+            </div>
+            <p className="text-2xl md:text-3xl font-bold text-orange-700 dark:text-orange-400">₺{hotelStats.revenue.toFixed(0)}</p>
+            <p className="text-[10px] md:text-xs text-muted-foreground mt-1">{hotelStats.count} rezervasyon</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription className="flex items-center gap-2">
-              <Car className="w-4 h-4" />
-              Pet Taksi Cirosu
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-green-600">₺{taxiStats.revenue.toFixed(2)}</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {taxiStats.count} rezervasyon
-            </p>
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-950/50 dark:to-purple-900/30 border-purple-200/50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-2 bg-purple-500/10 rounded-lg">
+                <Car className="w-4 h-4 text-purple-600" />
+              </div>
+              <span className="text-xs text-muted-foreground">Taksi</span>
+            </div>
+            <p className="text-2xl md:text-3xl font-bold text-purple-700 dark:text-purple-400">₺{taxiStats.revenue.toFixed(0)}</p>
+            <p className="text-[10px] md:text-xs text-muted-foreground mt-1">{taxiStats.count} rezervasyon</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Main Tabs */}
+      {/* Main Tabs - Mobile First Design */}
       <Tabs defaultValue="orders" className="w-full">
-        <TabsList className="flex flex-wrap w-full h-auto gap-1 p-1">
-          <TabsTrigger value="orders" className="flex-1 min-w-[100px] text-xs sm:text-sm">Siparişler</TabsTrigger>
-          <TabsTrigger value="rooms" className="flex-1 min-w-[80px] text-xs sm:text-sm">Odalar</TabsTrigger>
-          <TabsTrigger value="additional-services" className="flex-1 min-w-[100px] text-xs sm:text-sm">Ek Hizmetler</TabsTrigger>
-          <TabsTrigger value="vehicles" className="flex-1 min-w-[90px] text-xs sm:text-sm">Pet Taksi</TabsTrigger>
-          <TabsTrigger value="pricing" className="flex-1 min-w-[100px] text-xs sm:text-sm">Fiyatlandırma</TabsTrigger>
-          <TabsTrigger value="payment" className="flex-1 min-w-[80px] text-xs sm:text-sm">Ödeme</TabsTrigger>
-          <TabsTrigger value="pages" className="flex-1 min-w-[80px] text-xs sm:text-sm">Sayfalar</TabsTrigger>
-          <TabsTrigger value="reports" className="flex-1 min-w-[80px] text-xs sm:text-sm">Raporlar</TabsTrigger>
-        </TabsList>
+        {/* Mobile: Horizontal scroll tabs, Desktop: Grid */}
+        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm pb-2 -mx-4 px-4 md:mx-0 md:px-0">
+          <TabsList className="flex overflow-x-auto gap-1 p-1 h-auto bg-muted/50 rounded-xl md:grid md:grid-cols-4 lg:grid-cols-8 md:overflow-visible">
+            <TabsTrigger value="orders" className="flex-shrink-0 gap-1.5 px-3 py-2.5 text-xs font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <ShoppingBag className="w-4 h-4" />
+              <span>Siparişler</span>
+            </TabsTrigger>
+            <TabsTrigger value="rooms" className="flex-shrink-0 gap-1.5 px-3 py-2.5 text-xs font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Hotel className="w-4 h-4" />
+              <span>Odalar</span>
+            </TabsTrigger>
+            <TabsTrigger value="additional-services" className="flex-shrink-0 gap-1.5 px-3 py-2.5 text-xs font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Plus className="w-4 h-4" />
+              <span>Ek Hizmetler</span>
+            </TabsTrigger>
+            <TabsTrigger value="vehicles" className="flex-shrink-0 gap-1.5 px-3 py-2.5 text-xs font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Car className="w-4 h-4" />
+              <span>Pet Taksi</span>
+            </TabsTrigger>
+            <TabsTrigger value="pricing" className="flex-shrink-0 gap-1.5 px-3 py-2.5 text-xs font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <DollarSign className="w-4 h-4" />
+              <span>Fiyatlandırma</span>
+            </TabsTrigger>
+            <TabsTrigger value="payment" className="flex-shrink-0 gap-1.5 px-3 py-2.5 text-xs font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <CreditCard className="w-4 h-4" />
+              <span>Ödeme</span>
+            </TabsTrigger>
+            <TabsTrigger value="pages" className="flex-shrink-0 gap-1.5 px-3 py-2.5 text-xs font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <FileText className="w-4 h-4" />
+              <span>Sayfalar</span>
+            </TabsTrigger>
+            <TabsTrigger value="reports" className="flex-shrink-0 gap-1.5 px-3 py-2.5 text-xs font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <TrendingUp className="w-4 h-4" />
+              <span>Raporlar</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Orders Tab */}
         <TabsContent value="orders" className="space-y-4">
