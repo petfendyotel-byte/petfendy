@@ -1359,15 +1359,15 @@ export function AdminDashboard() {
 
       {/* Main Tabs */}
       <Tabs defaultValue="orders" className="w-full">
-        <TabsList className="grid w-full grid-cols-8">
-          <TabsTrigger value="orders">Siparişler</TabsTrigger>
-          <TabsTrigger value="rooms">Odalar</TabsTrigger>
-          <TabsTrigger value="additional-services">Ek Hizmetler</TabsTrigger>
-          <TabsTrigger value="vehicles">Pet Taksi</TabsTrigger>
-          <TabsTrigger value="pricing">Fiyatlandırma</TabsTrigger>
-          <TabsTrigger value="payment">Ödeme</TabsTrigger>
-          <TabsTrigger value="pages">Sayfalar</TabsTrigger>
-          <TabsTrigger value="reports">Raporlar</TabsTrigger>
+        <TabsList className="flex flex-wrap w-full h-auto gap-1 p-1">
+          <TabsTrigger value="orders" className="flex-1 min-w-[100px] text-xs sm:text-sm">Siparişler</TabsTrigger>
+          <TabsTrigger value="rooms" className="flex-1 min-w-[80px] text-xs sm:text-sm">Odalar</TabsTrigger>
+          <TabsTrigger value="additional-services" className="flex-1 min-w-[100px] text-xs sm:text-sm">Ek Hizmetler</TabsTrigger>
+          <TabsTrigger value="vehicles" className="flex-1 min-w-[90px] text-xs sm:text-sm">Pet Taksi</TabsTrigger>
+          <TabsTrigger value="pricing" className="flex-1 min-w-[100px] text-xs sm:text-sm">Fiyatlandırma</TabsTrigger>
+          <TabsTrigger value="payment" className="flex-1 min-w-[80px] text-xs sm:text-sm">Ödeme</TabsTrigger>
+          <TabsTrigger value="pages" className="flex-1 min-w-[80px] text-xs sm:text-sm">Sayfalar</TabsTrigger>
+          <TabsTrigger value="reports" className="flex-1 min-w-[80px] text-xs sm:text-sm">Raporlar</TabsTrigger>
         </TabsList>
 
         {/* Orders Tab */}
