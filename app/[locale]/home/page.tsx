@@ -22,12 +22,12 @@ import {
   Heart,
   MapPin,
   Clock,
-  Instagram,
   PawPrint,
   Sparkles,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
+import { InstagramFeed } from "@/components/instagram-feed"
 
 // Slider images - optimized with smaller sizes and quality
 const sliderImages = [
@@ -503,80 +503,10 @@ export default function HomePage() {
       </section>
 
       {/* Instagram Section */}
-      <section className="py-16 px-4 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-8">{tNew('instagramTitle')}</h2>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 mb-8">
-            {/* Instagram Post 1 */}
-            <Card className="overflow-hidden border-0 shadow-lg">
-              <div className="relative h-64">
-                <Image
-                  src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&h=400&fit=crop&q=75"
-                  alt="Petfendy oyun anları"
-                  fill
-                  className="object-cover"
-                  loading="lazy"
-                  placeholder="blur"
-                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAIhAAAgEDAwUBAAAAAAAAAAAAAQIDAAQRBRIhBhMiMUFR/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAZEQACAwEAAAAAAAAAAAAAAAABAgADESH/2gAMAwEAAhEDEQA/ANF6d1qC+0+3uLiNYZJEDMqnIBPsZ+1Kp0xqVxqF5cXE8jSSyMzMx9kk5J/aUqhZYwJBuf/2Q=="
-                />
-              </div>
-              <CardContent className="p-4">
-                <p className="text-sm text-gray-600">Petfendy oyun anları 🐾</p>
-              </CardContent>
-            </Card>
-
-            {/* Instagram Post 2 */}
-            <Card className="overflow-hidden border-0 shadow-lg">
-              <div className="relative h-64">
-                <Image
-                  src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=400&fit=crop&q=75"
-                  alt="Petfendy'de kedi ve köpek sevgisi"
-                  fill
-                  className="object-cover"
-                  loading="lazy"
-                  placeholder="blur"
-                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAIhAAAgEDAwUBAAAAAAAAAAAAAQIDAAQRBRIhBhMiMUFR/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAZEQACAwEAAAAAAAAAAAAAAAABAgADESH/2gAMAwEAAhEDEQA/ANF6d1qC+0+3uLiNYZJEDMqnIBPsZ+1Kp0xqVxqF5cXE8jSSyMzMx9kk5J/aUqhZYwJBuf/2Q=="
-                />
-              </div>
-              <CardContent className="p-4">
-                <p className="text-sm text-gray-600">Petfendy'de kedi ve köpek sevgisi 🐱😺</p>
-              </CardContent>
-            </Card>
-
-            {/* Instagram Post 3 */}
-            <Card className="overflow-hidden border-0 shadow-lg">
-              <div className="relative h-64">
-                <Image
-                  src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=400&fit=crop&q=75"
-                  alt="Petfendy ailesiyle beraber"
-                  fill
-                  className="object-cover"
-                  loading="lazy"
-                  placeholder="blur"
-                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAIhAAAgEDAwUBAAAAAAAAAAAAAQIDAAQRBRIhBhMiMUFR/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAZEQACAwEAAAAAAAAAAAAAAAABAgADESH/2gAMAwEAAhEDEQA/ANF6d1qC+0+3uLiNYZJEDMqnIBPsZ+1Kp0xqVxqF5cXE8jSSyMzMx9kk5J/aUqhZYwJBuf/2Q=="
-                />
-              </div>
-              <CardContent className="p-4">
-                <p className="text-sm text-gray-600">Petfendy ailesiyle beraber 🐾✨</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="text-center">
-            <Button
-              size="lg"
-              className="gradient-orange-pink hover:opacity-90 text-white font-semibold shadow-lg hover-scale rounded-2xl px-8 py-6 text-lg gap-3"
-              onClick={() => window.open('https://www.instagram.com/petfendy/', '_blank')}
-            >
-              <Instagram className="w-6 h-6" />
-              {tNew('instagramButton')}
-            </Button>
-          </div>
-        </div>
-      </section>
+      <InstagramFeed 
+        title={tNew('instagramTitle')} 
+        buttonText={tNew('instagramButton')} 
+      />
 
       {/* Safety Banner Section */}
       <section className="py-16 px-4 bg-white">

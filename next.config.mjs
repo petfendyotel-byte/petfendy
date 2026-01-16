@@ -14,6 +14,9 @@ const nextConfig = {
   reactStrictMode: false,
   swcMinify: true,
   
+  // Docker deployment
+  output: 'standalone',
+  
   // Modern browser support - remove polyfills for modern JS features
   compiler: {
     // Remove polyfills for modern JavaScript features
