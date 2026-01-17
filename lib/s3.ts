@@ -3,7 +3,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 // S3 Configuration
 const s3Config = {
-  region: process.env.AWS_REGION || 'eu-central-1',
+  region: process.env.AWS_REGION || 'us-east-1',
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
@@ -22,41 +22,69 @@ export const S3_PUBLIC_URL = process.env.S3_PUBLIC_URL || `https://${S3_BUCKET}.
 
 // Check if S3 is configured
 export function isS3Configured(): boolean {
-  return !!(
+  const configured = !!(
     process.env.AWS_ACCESS_KEY_ID &&
     process.env.AWS_SECRET_ACCESS_KEY &&
     process.env.S3_BUCKET
   )
+  
+  console.log('🔧 S3/MinIO Configuration Check:')
+  console.log(`   AWS_ACCESS_KEY_ID: ${process.env.AWS_ACCESS_KEY_ID ? '✅ Set' : '❌ Missing'}`)
+  console.log(`   AWS_SECRET_ACCESS_KEY: ${process.env.AWS_SECRET_ACCESS_KEY ? '✅ Set' : '❌ Missing'}`)
+  console.log(`   S3_BUCKET: ${process.env.S3_BUCKET || '❌ Missing'}`)
+  console.log(`   S3_ENDPOINT: ${process.env.S3_ENDPOINT || '❌ Missing (using AWS S3)'}`)
+  console.log(`   S3_PUBLIC_URL: ${S3_PUBLIC_URL}`)
+  console.log(`   Configured: ${configured ? '✅ Yes' : '❌ No'}`)
+  
+  return configured
 }
 
-// Upload file to S3
+// Upload file to S3/MinIO
 export async function uploadToS3(
   buffer: Buffer,
   key: string,
   contentType: string
 ): Promise<string> {
+  console.log(`☁️  Uploading to S3/MinIO: ${key} (${contentType})`)
+  
   const command = new PutObjectCommand({
     Bucket: S3_BUCKET,
     Key: key,
     Body: buffer,
     ContentType: contentType,
     ACL: 'public-read', // Make file publicly accessible
+    CacheControl: 'max-age=31536000', // 1 year cache for CDN
   })
 
-  await s3Client.send(command)
-  
-  // Return public URL
-  return `${S3_PUBLIC_URL}/${key}`
+  try {
+    await s3Client.send(command)
+    
+    // Return public URL
+    const publicUrl = `${S3_PUBLIC_URL}/${key}`
+    console.log(`✅ Upload successful: ${publicUrl}`)
+    return publicUrl
+  } catch (error) {
+    console.error('❌ S3/MinIO upload error:', error)
+    throw error
+  }
 }
 
-// Delete file from S3
+// Delete file from S3/MinIO
 export async function deleteFromS3(key: string): Promise<void> {
+  console.log(`🗑️  Deleting from S3/MinIO: ${key}`)
+  
   const command = new DeleteObjectCommand({
     Bucket: S3_BUCKET,
     Key: key,
   })
 
-  await s3Client.send(command)
+  try {
+    await s3Client.send(command)
+    console.log(`✅ Delete successful: ${key}`)
+  } catch (error) {
+    console.error('❌ S3/MinIO delete error:', error)
+    throw error
+  }
 }
 
 // Get signed URL for private files (optional)
@@ -72,17 +100,34 @@ export async function getSignedS3Url(key: string, expiresIn = 3600): Promise<str
 // Extract S3 key from URL
 export function getS3KeyFromUrl(url: string): string | null {
   try {
-    // Handle both S3 URL formats
-    // https://bucket.s3.region.amazonaws.com/key
-    // https://s3.region.amazonaws.com/bucket/key
-    // Custom endpoint: https://custom.endpoint/bucket/key
+    console.log(`🔍 Extracting S3 key from URL: ${url}`)
     
+    // Handle MinIO URL format: http://46.224.248.228:9000/petfendy/uploads/images/file.jpg
+    if (url.includes('46.224.248.228:9000') || url.includes(S3_BUCKET)) {
+      const urlObj = new URL(url)
+      let pathname = urlObj.pathname
+      
+      // Remove bucket name from path if present
+      if (pathname.startsWith(`/${S3_BUCKET}/`)) {
+        pathname = pathname.substring(`/${S3_BUCKET}/`.length)
+      } else if (pathname.startsWith('/')) {
+        pathname = pathname.substring(1)
+      }
+      
+      console.log(`✅ Extracted key: ${pathname}`)
+      return pathname
+    }
+    
+    // Handle standard S3 URL formats
     const urlObj = new URL(url)
     const pathname = urlObj.pathname
     
     // Remove leading slash
-    return pathname.startsWith('/') ? pathname.slice(1) : pathname
-  } catch {
+    const key = pathname.startsWith('/') ? pathname.slice(1) : pathname
+    console.log(`✅ Extracted key: ${key}`)
+    return key
+  } catch (error) {
+    console.error('❌ Failed to extract S3 key from URL:', error)
     return null
   }
 }

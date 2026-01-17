@@ -72,6 +72,8 @@ export function FileUpload({ type, existingFiles, onFilesChange, maxFiles = 10 }
 
       // Upload files one by one
       for (const file of Array.from(files)) {
+        console.log(`📤 Uploading file: ${file.name} (${file.type}, ${file.size} bytes)`)
+        
         const formData = new FormData()
         formData.append('file', file)
         formData.append('type', type)
@@ -83,11 +85,20 @@ export function FileUpload({ type, existingFiles, onFilesChange, maxFiles = 10 }
 
         if (!response.ok) {
           const error = await response.json()
+          console.error('❌ Upload failed:', error)
           throw new Error(error.error || 'Upload failed')
         }
 
         const data = await response.json()
+        console.log('✅ Upload successful:', data)
+        
         uploadedUrls.push(data.file.url)
+        
+        // Show progress for each file
+        toast({
+          title: "📤 Yükleniyor",
+          description: `${file.name} yüklendi (${uploadedUrls.length}/${files.length})`,
+        })
       }
 
       const newUrls = [...previews, ...uploadedUrls]
@@ -96,13 +107,13 @@ export function FileUpload({ type, existingFiles, onFilesChange, maxFiles = 10 }
 
       toast({
         title: "✅ Başarılı",
-        description: `${files.length} dosya yüklendi`
+        description: `${files.length} dosya MinIO CDN'e yüklendi`
       })
 
       // Reset input
       e.target.value = ''
     } catch (error) {
-      console.error('Upload error:', error)
+      console.error('❌ Upload error:', error)
       toast({
         title: "Hata",
         description: error instanceof Error ? error.message : "Dosya yükleme başarısız",

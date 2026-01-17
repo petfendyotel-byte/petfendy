@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { uploadToS3, deleteFromS3, isS3Configured, getS3KeyFromUrl } from '@/lib/s3'
 
 // Allowed file types
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/jpg']
 const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime']
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
 const MAX_VIDEO_SIZE = 100 * 1024 * 1024 // 100MB
@@ -20,6 +20,8 @@ export async function POST(request: NextRequest) {
     if (!file) {
       return NextResponse.json({ error: 'Dosya bulunamadı' }, { status: 400 })
     }
+
+    console.log(`📁 File upload request: ${file.name} (${file.type}, ${file.size} bytes)`)
 
     const mimeType = file.type
     const isImage = ALLOWED_IMAGE_TYPES.includes(mimeType)
@@ -53,9 +55,10 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Generate unique filename
+    // Generate unique filename with timestamp
+    const timestamp = Date.now()
     const ext = path.extname(file.name) || (isImage ? '.jpg' : '.mp4')
-    const filename = `${uuidv4()}${ext}`
+    const filename = `${timestamp}-${uuidv4()}${ext}`
     
     // Get file buffer
     const bytes = await file.arrayBuffer()
@@ -64,26 +67,45 @@ export async function POST(request: NextRequest) {
     let url: string
     let storageType: 's3' | 'local' = 'local'
 
-    // Try S3 first if configured
-    if (isS3Configured()) {
+    // Check S3/MinIO configuration
+    const s3Configured = isS3Configured()
+    console.log(`🔧 S3/MinIO configured: ${s3Configured}`)
+
+    if (s3Configured) {
       try {
         const folder = isImage ? 'images' : 'videos'
         const s3Key = `uploads/${folder}/${filename}`
+        
+        console.log(`☁️  Uploading to MinIO: ${s3Key}`)
         url = await uploadToS3(buffer, s3Key, mimeType)
         storageType = 's3'
-        console.log('File uploaded to S3:', url)
+        
+        console.log(`✅ File uploaded to MinIO: ${url}`)
       } catch (s3Error) {
-        console.error('S3 upload failed, falling back to local:', s3Error)
+        console.error('❌ MinIO upload failed, falling back to local:', s3Error)
+        
+        // Provide more specific error information
+        if (s3Error.code === 'ECONNREFUSED') {
+          console.error('🔌 MinIO server is not accessible. Check if MinIO service is running on Coolify.')
+        } else if (s3Error.code === 'InvalidAccessKeyId') {
+          console.error('🔑 Invalid MinIO credentials. Check AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.')
+        } else if (s3Error.code === 'NoSuchBucket') {
+          console.error('🪣 Bucket "petfendy" does not exist. Create it in MinIO Console.')
+        }
+        
         // Fall back to local storage
         url = await saveToLocal(buffer, filename, isImage)
+        console.log(`💾 File saved locally: ${url}`)
       }
     } else {
+      console.log('⚠️  MinIO not configured, using local storage')
       // Use local storage
       url = await saveToLocal(buffer, filename, isImage)
+      console.log(`💾 File saved locally: ${url}`)
     }
 
     // Try to save to database (optional)
-    let fileId = `file-${Date.now()}`
+    let fileId = `file-${timestamp}`
     try {
       const prisma = (await import('@/lib/prisma')).default
       const uploadedFile = await prisma.uploadedFile.create({
@@ -97,8 +119,9 @@ export async function POST(request: NextRequest) {
         }
       })
       fileId = uploadedFile.id
+      console.log(`💾 File record saved to database: ${fileId}`)
     } catch (dbError) {
-      console.warn('Database save skipped:', dbError)
+      console.warn('⚠️  Database save skipped:', dbError)
     }
 
     return NextResponse.json({
@@ -115,9 +138,9 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Upload error:', error)
+    console.error('❌ Upload error:', error)
     return NextResponse.json({ 
-      error: 'Dosya yüklenirken bir hata oluştu' 
+      error: 'Dosya yüklenirken bir hata oluştu: ' + (error instanceof Error ? error.message : 'Bilinmeyen hata')
     }, { status: 500 })
   }
 }
@@ -144,23 +167,26 @@ export async function DELETE(request: NextRequest) {
     const fileId = searchParams.get('id')
     const fileUrl = searchParams.get('url')
 
+    console.log(`🗑️  Delete request: ID=${fileId}, URL=${fileUrl}`)
+
     if (!fileId && !fileUrl) {
       return NextResponse.json({ error: 'Dosya ID veya URL gerekli' }, { status: 400 })
     }
 
     // Check if it's an S3 URL
     const isS3Url = fileUrl?.includes('.s3.') || fileUrl?.includes('s3.amazonaws.com') || 
-                   (process.env.S3_PUBLIC_URL && fileUrl?.startsWith(process.env.S3_PUBLIC_URL))
+                   (process.env.S3_PUBLIC_URL && fileUrl?.startsWith(process.env.S3_PUBLIC_URL)) ||
+                   fileUrl?.includes('46.224.248.228:9000') // MinIO specific
 
     if (isS3Url && fileUrl) {
-      // Delete from S3
+      // Delete from S3/MinIO
       const s3Key = getS3KeyFromUrl(fileUrl)
       if (s3Key) {
         try {
           await deleteFromS3(s3Key)
-          console.log('File deleted from S3:', s3Key)
+          console.log(`✅ File deleted from MinIO: ${s3Key}`)
         } catch (s3Error) {
-          console.error('S3 delete error:', s3Error)
+          console.error('❌ MinIO delete error:', s3Error)
         }
       }
     }
@@ -177,17 +203,19 @@ export async function DELETE(request: NextRequest) {
         if (!file.path.startsWith('s3:')) {
           try {
             await unlink(file.path)
+            console.log(`✅ Local file deleted: ${file.path}`)
           } catch (e) {
-            console.warn('File not found on disk:', file.path)
+            console.warn('⚠️  File not found on disk:', file.path)
           }
         }
 
         // Delete from database
         await prisma.uploadedFile.delete({ where: { id: file.id } })
+        console.log(`✅ Database record deleted: ${file.id}`)
         return NextResponse.json({ success: true })
       }
     } catch (dbError) {
-      console.warn('Database delete skipped:', dbError)
+      console.warn('⚠️  Database delete skipped:', dbError)
     }
 
     // If no database record, try to delete file directly from URL (local only)
@@ -195,16 +223,17 @@ export async function DELETE(request: NextRequest) {
       const filePath = path.join(process.cwd(), 'public', fileUrl)
       try {
         await unlink(filePath)
+        console.log(`✅ Local file deleted directly: ${filePath}`)
         return NextResponse.json({ success: true })
       } catch (e) {
-        console.warn('File not found:', filePath)
+        console.warn('⚠️  File not found:', filePath)
       }
     }
 
     return NextResponse.json({ success: true, message: 'File may have been already deleted' })
 
   } catch (error) {
-    console.error('Delete error:', error)
+    console.error('❌ Delete error:', error)
     return NextResponse.json({ 
       error: 'Dosya silinirken bir hata oluştu' 
     }, { status: 500 })
