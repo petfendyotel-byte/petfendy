@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -78,37 +77,55 @@ export function FileUpload({ type, existingFiles, onFilesChange, maxFiles = 10 }
         formData.append('file', file)
         formData.append('type', type)
 
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData
-        })
+        try {
+          const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+          })
 
-        if (!response.ok) {
-          const error = await response.json()
-          console.error('❌ Upload failed:', error)
-          throw new Error(error.error || 'Upload failed')
+          console.log(`📡 Response status: ${response.status}`)
+
+          if (!response.ok) {
+            const errorText = await response.text()
+            console.error('❌ Upload response not ok:', response.status, errorText)
+            throw new Error(`Upload failed: ${response.status} - ${errorText}`)
+          }
+
+          const data = await response.json()
+          console.log('✅ Upload successful:', data)
+          
+          if (!data.success) {
+            throw new Error(data.error || 'Upload failed')
+          }
+          
+          uploadedUrls.push(data.file.url)
+          
+          // Show progress for each file
+          toast({
+            title: "📤 Yükleniyor",
+            description: `${file.name} yüklendi (${uploadedUrls.length}/${files.length})`,
+          })
+        } catch (fileError) {
+          console.error(`❌ Failed to upload ${file.name}:`, fileError)
+          toast({
+            title: "Hata",
+            description: `${file.name} yüklenemedi: ${fileError.message}`,
+            variant: "destructive"
+          })
+          // Continue with other files
         }
-
-        const data = await response.json()
-        console.log('✅ Upload successful:', data)
-        
-        uploadedUrls.push(data.file.url)
-        
-        // Show progress for each file
-        toast({
-          title: "📤 Yükleniyor",
-          description: `${file.name} yüklendi (${uploadedUrls.length}/${files.length})`,
-        })
       }
 
-      const newUrls = [...previews, ...uploadedUrls]
-      setPreviews(newUrls)
-      onFilesChange(newUrls)
+      if (uploadedUrls.length > 0) {
+        const newUrls = [...previews, ...uploadedUrls]
+        setPreviews(newUrls)
+        onFilesChange(newUrls)
 
-      toast({
-        title: "✅ Başarılı",
-        description: `${files.length} dosya MinIO CDN'e yüklendi`
-      })
+        toast({
+          title: "✅ Başarılı",
+          description: `${uploadedUrls.length}/${files.length} dosya yüklendi`
+        })
+      }
 
       // Reset input
       e.target.value = ''
@@ -186,11 +203,10 @@ export function FileUpload({ type, existingFiles, onFilesChange, maxFiles = 10 }
             <div key={index} className="relative group rounded-lg overflow-hidden border bg-muted">
               {type === "image" ? (
                 <div className="relative h-32 w-full">
-                  <Image
+                  <img
                     src={url}
                     alt={`Upload ${index + 1}`}
-                    fill
-                    className="object-cover"
+                    className="w-full h-full object-cover rounded"
                   />
                 </div>
               ) : (

@@ -48,6 +48,11 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'minio-cksc8csw0888w084gcg040sk.46.62.236.59.sslip.io',
       },
+      // MinIO CDN hostname
+      {
+        protocol: 'https',
+        hostname: 'minio-c44o8cow04s804ss48soc4w4.46.224.248.228.sslip.io',
+      },
     ],
   },
   
