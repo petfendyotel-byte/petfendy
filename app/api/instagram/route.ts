@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
-// Instagram Basic Display API - Canlı gönderi çekme
-// Docs: https://developers.facebook.com/docs/instagram-basic-display-api
+// Instagram Graph API - Business/Creator hesaplar için
+// Docs: https://developers.facebook.com/docs/instagram-api
 
 interface InstagramPost {
   id: string
@@ -13,7 +13,7 @@ interface InstagramPost {
   timestamp: string
 }
 
-interface InstagramResponse {
+interface InstagramGraphResponse {
   data: InstagramPost[]
   paging?: {
     cursors: { before: string; after: string }
@@ -28,10 +28,11 @@ const CACHE_DURATION = 10 * 60 * 1000 // 10 dakika
 
 export async function GET() {
   try {
-    const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN
+    const accessToken = process.env.INSTAGRAM_GRAPH_ACCESS_TOKEN
+    const instagramBusinessId = process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID
     
-    if (!accessToken) {
-      console.warn('Instagram Access Token bulunamadı')
+    if (!accessToken || !instagramBusinessId) {
+      console.warn('Instagram Graph API yapılandırılmamış')
       return NextResponse.json({ 
         success: false, 
         error: 'Instagram yapılandırılmamış',
@@ -49,8 +50,8 @@ export async function GET() {
       })
     }
 
-    // Instagram API'den son 6 gönderiyi çek
-    const url = `https://graph.instagram.com/me/media?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp&limit=6&access_token=${accessToken}`
+    // Instagram Graph API'den son 6 gönderiyi çek
+    const url = `https://graph.facebook.com/v18.0/${instagramBusinessId}/media?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp&limit=6&access_token=${accessToken}`
     
     const response = await fetch(url, {
       next: { revalidate: 600 } // 10 dakika cache
@@ -58,7 +59,7 @@ export async function GET() {
 
     if (!response.ok) {
       const errorData = await response.json()
-      console.error('Instagram API hatası:', errorData)
+      console.error('Instagram Graph API hatası:', errorData)
       
       // Token süresi dolmuş olabilir
       if (errorData.error?.code === 190) {
@@ -76,7 +77,7 @@ export async function GET() {
       })
     }
 
-    const data: InstagramResponse = await response.json()
+    const data: InstagramGraphResponse = await response.json()
     
     // Sadece resim ve carousel gönderilerini al (video hariç)
     const posts = data.data
@@ -103,7 +104,7 @@ export async function GET() {
     })
 
   } catch (error) {
-    console.error('Instagram API hatası:', error)
+    console.error('Instagram Graph API hatası:', error)
     return NextResponse.json({ 
       success: false, 
       error: 'Bir hata oluştu',

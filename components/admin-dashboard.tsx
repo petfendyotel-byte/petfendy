@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { AdminDashboardMobile } from "./admin-dashboard-mobile"
+import { useIsMobile } from "@/hooks/use-mobile"
 import Image from "next/image"
 import type { Order, HotelRoom, TaxiService, TaxiVehicle, RoomPricing, AboutPage, PaymentGateway, PayTRConfig, ParatikaConfig } from "@/lib/types"
 import { mockHotelRooms, mockTaxiServices } from "@/lib/mock-data"
@@ -69,6 +71,12 @@ interface Booking {
 }
 
 export function AdminDashboard() {
+  const isMobile = useIsMobile()
+
+  // Mobile cihazlarda mobil versiyonu göster
+  if (isMobile) {
+    return <AdminDashboardMobile />
+  }
   // State management
   const [orders, setOrders] = useState<Order[]>([])
   const [bookings, setBookings] = useState<Booking[]>([])

@@ -189,17 +189,51 @@ class EmailService {
 
   async sendContactFormEmail(data: { name: string; email: string; phone: string; message: string }): Promise<boolean> {
     const htmlContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <h2>🐾 Yeni İletişim Mesajı</h2>
-        <p><strong>Gönderen:</strong> ${data.name}</p>
-        <p><strong>E-posta:</strong> ${data.email}</p>
-        <p><strong>Telefon:</strong> ${data.phone || 'Belirtilmedi'}</p>
-        <p><strong>Mesaj:</strong></p>
-        <div style="background: #f5f5f5; padding: 15px; border-left: 4px solid #8B5CF6;">${data.message}</div>
-        <p style="font-size: 12px; color: #999;">Gönderim: ${new Date().toLocaleString('tr-TR')}</p>
-      </div>
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: #4F46E5; color: white; padding: 20px; text-align: center; border-radius: 12px 12px 0 0; }
+          .content { padding: 30px; background: #f9fafb; }
+          .contact-card { background: white; padding: 20px; border-radius: 12px; border-left: 4px solid #4F46E5; margin: 20px 0; }
+          .info-row { padding: 8px 0; border-bottom: 1px solid #eee; }
+          .message-box { background: #f8f9ff; padding: 15px; border-radius: 8px; margin: 15px 0; }
+          .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>📧 Yeni İletişim Mesajı</h1>
+            <p>Petfendy Web Sitesi</p>
+          </div>
+          <div class="content">
+            <div class="contact-card">
+              <div class="info-row">👤 <strong>Gönderen:</strong> ${data.name}</div>
+              <div class="info-row">📧 <strong>E-posta:</strong> ${data.email}</div>
+              <div class="info-row">📱 <strong>Telefon:</strong> ${data.phone || 'Belirtilmedi'}</div>
+              <div class="info-row">📅 <strong>Tarih:</strong> ${new Date().toLocaleString('tr-TR')}</div>
+            </div>
+            <div class="message-box">
+              <h3>💬 Mesaj İçeriği:</h3>
+              <p>${data.message}</p>
+            </div>
+            <p><em>Bu mesaj Petfendy web sitesi iletişim formu üzerinden gönderilmiştir.</em></p>
+          </div>
+          <div class="footer">
+            <p>© 2025 Petfendy | Otomatik Bildirim</p>
+          </div>
+        </div>
+      </body>
+      </html>
     `
-    return this.sendEmail({ to: "petfendyotel@gmail.com", subject: `Yeni İletişim Mesajı - ${data.name}`, html: htmlContent })
+    return this.sendEmail({ 
+      to: "info@petfendy.com", 
+      subject: `📧 Yeni İletişim Mesajı - ${data.name}`, 
+      html: htmlContent 
+    })
   }
 
   async sendWelcomeEmail(email: string, name: string): Promise<boolean> {

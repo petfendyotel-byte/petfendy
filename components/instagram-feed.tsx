@@ -93,6 +93,9 @@ export function InstagramFeed({ title, buttonText }: InstagramFeedProps) {
           {!error && (
             <p className="text-gray-600">@petfendy hesabından son paylaşımlar</p>
           )}
+          {error && (
+            <p className="text-amber-600">Instagram API yapılandırılıyor...</p>
+          )}
         </div>
 
         {loading ? (

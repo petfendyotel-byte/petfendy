@@ -45,6 +45,10 @@ export const metadata = {
       'en-US': '/en',
     },
   },
+  // Facebook Domain Verification
+  verification: {
+    facebook: 'qbbtfhzhlsy8o3ypu4m0bjz99rwnph',
+  },
   openGraph: {
     title: "Ankara Pet Otel & Pet Taksi | Petfendy Hayvan Oteli",
     description: "Ankara'nın en güvenilir pet oteli ve pet taksi hizmeti. Kedi, köpek ve tüm evcil hayvanlarınız için 7/24 profesyonel bakım ve ulaşım.",
@@ -194,6 +198,9 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
+        {/* Facebook Domain Verification */}
+        <meta name="facebook-domain-verification" content="qbbtfhzhlsy8o3ypu4m0bjz99rwnph" />
+        
         {/* Preload critical resources */}
         <link
           rel="preload"
