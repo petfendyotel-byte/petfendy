@@ -64,10 +64,15 @@ export function RoomDetailModal({ room, isOpen, onClose, onSelect, locale = 'tr'
   }
 
   const getYouTubeEmbedUrl = (url: string) => {
+    // Eğer zaten embed URL ise, direkt kullan
+    if (url.includes('youtube-nocookie.com/embed/') || url.includes('youtube.com/embed/')) {
+      return url
+    }
+    
     // YouTube URL'lerini embed formatına çevir
     const videoId = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)?.[1]
     if (videoId) {
-      return `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1`
+      return `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1&autoplay=0&controls=1`
     }
     return url
   }
@@ -268,10 +273,11 @@ export function RoomDetailModal({ room, isOpen, onClose, onSelect, locale = 'tr'
                   <iframe
                     src={getYouTubeEmbedUrl(videos[currentVideoIndex].url)}
                     className="w-full h-full rounded-lg"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen
                     referrerPolicy="no-referrer-when-downgrade"
-                    sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
+                    loading="lazy"
+                    title="YouTube video player"
                   />
                 </div>
               ) : (
@@ -279,7 +285,12 @@ export function RoomDetailModal({ room, isOpen, onClose, onSelect, locale = 'tr'
                   src={videos[currentVideoIndex].url}
                   controls
                   autoPlay
+                  preload="metadata"
                   className="w-full rounded-lg"
+                  controlsList="nodownload"
+                  onError={(e) => {
+                    console.error('Video load error:', e)
+                  }}
                 />
               )}
 

@@ -109,6 +109,19 @@ const nextConfig = {
         ],
       },
       {
+        source: '/:all*(mp4|webm|ogg|avi|mov)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400', // 1 day for videos
+          },
+          {
+            key: 'Accept-Ranges',
+            value: 'bytes', // Enable range requests for video streaming
+          },
+        ],
+      },
+      {
         source: '/:all*(js|css)',
         headers: [
           {

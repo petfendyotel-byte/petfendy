@@ -7,9 +7,9 @@ import { uploadToS3, deleteFromS3, isS3Configured, getS3KeyFromUrl } from '@/lib
 
 // Allowed file types
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/jpg']
-const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime']
+const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime', 'video/avi', 'video/ogg']
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
-const MAX_VIDEO_SIZE = 100 * 1024 * 1024 // 100MB
+const MAX_VIDEO_SIZE = 200 * 1024 * 1024 // 200MB
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 
     if (type === 'video' && !isVideo) {
       return NextResponse.json({ 
-        error: 'Geçersiz video formatı. Desteklenen formatlar: MP4, WebM, MOV' 
+        error: 'Geçersiz video formatı. Desteklenen formatlar: MP4, WebM, MOV, AVI, OGG' 
       }, { status: 400 })
     }
 

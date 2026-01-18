@@ -47,13 +47,25 @@ export async function uploadToS3(
 ): Promise<string> {
   console.log(`☁️  Uploading to S3/MinIO: ${key} (${contentType})`)
   
+  // Set appropriate cache control based on file type
+  const isVideo = contentType.startsWith('video/')
+  const cacheControl = isVideo ? 'max-age=86400' : 'max-age=31536000' // 1 day for videos, 1 year for images
+  
   const command = new PutObjectCommand({
     Bucket: S3_BUCKET,
     Key: key,
     Body: buffer,
     ContentType: contentType,
     ACL: 'public-read', // Make file publicly accessible
-    CacheControl: 'max-age=31536000', // 1 year cache for CDN
+    CacheControl: cacheControl,
+    // Add metadata for videos
+    ...(isVideo && {
+      Metadata: {
+        'uploaded-by': 'petfendy-app',
+        'file-type': 'video',
+        'upload-timestamp': Date.now().toString()
+      }
+    })
   })
 
   try {

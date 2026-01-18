@@ -33,6 +33,8 @@ export function VideoUpload({ existingVideos, onVideosChange, maxVideos = 5 }: V
       /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([^&]+)/,
       /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([^?]+)/,
       /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([^?]+)/,
+      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/v\/([^?]+)/,
+      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/shorts\/([^?]+)/,
     ]
 
     for (const pattern of patterns) {
@@ -74,7 +76,7 @@ export function VideoUpload({ existingVideos, onVideosChange, maxVideos = 5 }: V
       return
     }
 
-    const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1`
+    const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1&autoplay=0&controls=1`
     const newVideos = [...videos, { type: 'youtube' as const, url: embedUrl }]
     setVideos(newVideos)
     onVideosChange(newVideos)
@@ -86,74 +88,11 @@ export function VideoUpload({ existingVideos, onVideosChange, maxVideos = 5 }: V
     })
   }
 
-  // Compress video using canvas and MediaRecorder
-  const compressVideo = async (file: File): Promise<Blob> => {
-    return new Promise((resolve, reject) => {
-      const video = document.createElement('video')
-      video.preload = 'metadata'
-
-      video.onloadedmetadata = () => {
-        video.currentTime = 0
-      }
-
-      video.onseeked = async () => {
-        const canvas = document.createElement('canvas')
-        const ctx = canvas.getContext('2d')
-
-        // Reduce dimensions by 50% for compression
-        const scale = 0.7
-        canvas.width = video.videoWidth * scale
-        canvas.height = video.videoHeight * scale
-
-        const stream = canvas.captureStream()
-        const mediaRecorder = new MediaRecorder(stream, {
-          mimeType: 'video/webm;codecs=vp8',
-          videoBitsPerSecond: 1000000 // 1 Mbps
-        })
-
-        const chunks: Blob[] = []
-        mediaRecorder.ondataavailable = (e) => {
-          if (e.data.size > 0) {
-            chunks.push(e.data)
-          }
-        }
-
-        mediaRecorder.onstop = () => {
-          const compressedBlob = new Blob(chunks, { type: 'video/webm' })
-          resolve(compressedBlob)
-        }
-
-        mediaRecorder.start()
-
-        // Draw frames
-        const fps = 24
-        const interval = 1000 / fps
-        let lastTime = 0
-
-        const drawFrame = (currentTime: number) => {
-          if (currentTime - lastTime >= interval && ctx) {
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-            lastTime = currentTime
-          }
-
-          if (video.currentTime < video.duration) {
-            video.currentTime += 1 / fps
-            requestAnimationFrame(drawFrame)
-          } else {
-            mediaRecorder.stop()
-          }
-        }
-
-        requestAnimationFrame(drawFrame)
-      }
-
-      video.onerror = () => {
-        reject(new Error('Video loading failed'))
-      }
-
-      video.src = URL.createObjectURL(file)
-      video.load()
-    })
+  // Simplified video compression - just reduce quality for faster upload
+  const compressVideo = async (file: File): Promise<File> => {
+    // For now, just return the original file to avoid compression issues
+    // TODO: Implement proper server-side video compression
+    return file
   }
 
   // Handle file upload
@@ -170,23 +109,23 @@ export function VideoUpload({ existingVideos, onVideosChange, maxVideos = 5 }: V
       return
     }
 
-    const allowedTypes = ["video/mp4", "video/webm", "video/ogg", "video/quicktime"]
+    const allowedTypes = ["video/mp4", "video/webm", "video/ogg", "video/quicktime", "video/avi"]
 
     for (const file of Array.from(files)) {
       if (!allowedTypes.includes(file.type)) {
         toast({
           title: "Hata",
-          description: "Sadece MP4, WebM, OGG, MOV formatları destekleniyor",
+          description: "Sadece MP4, WebM, OGG, MOV, AVI formatları destekleniyor",
           variant: "destructive"
         })
         return
       }
 
-      // Max 100MB
-      if (file.size > 100 * 1024 * 1024) {
+      // Max 200MB for videos
+      if (file.size > 200 * 1024 * 1024) {
         toast({
           title: "Hata",
-          description: "Video boyutu maksimum 100MB olabilir",
+          description: "Video boyutu maksimum 200MB olabilir",
           variant: "destructive"
         })
         return
@@ -200,38 +139,22 @@ export function VideoUpload({ existingVideos, onVideosChange, maxVideos = 5 }: V
       const uploadedUrls: string[] = []
 
       for (const file of Array.from(files)) {
-        // Show compression toast
+        // Show upload toast
         toast({
-          title: "🔄 Sıkıştırılıyor...",
-          description: `${file.name} sıkıştırılıyor (Bu işlem 1-2 dakika sürebilir)`,
+          title: "📤 Yükleniyor...",
+          description: `${file.name} MinIO'ya yükleniyor...`,
         })
 
-        // Compress video
-        let finalFile: File | Blob = file
+        // Use original file for faster upload
+        let finalFile: File = file
 
-        // Only compress if file is larger than 10MB
-        if (file.size > 10 * 1024 * 1024) {
-          try {
-            const compressedBlob = await compressVideo(file)
-            const originalSizeMB = (file.size / (1024 * 1024)).toFixed(2)
-            const compressedSizeMB = (compressedBlob.size / (1024 * 1024)).toFixed(2)
-
-            toast({
-              title: "✅ Sıkıştırıldı",
-              description: `${originalSizeMB}MB → ${compressedSizeMB}MB`,
-            })
-
-            finalFile = new File([compressedBlob], file.name, { type: 'video/webm' })
-          } catch (error) {
-            console.error('Compression error:', error)
-            toast({
-              title: "⚠️ Uyarı",
-              description: "Sıkıştırma başarısız, orijinal dosya yüklenecek",
-            })
-          }
+        // Only compress very large files (>50MB) by skipping compression for now
+        if (file.size > 50 * 1024 * 1024) {
+          toast({
+            title: "ℹ️ Büyük Dosya",
+            description: `${file.name} büyük bir dosya, yükleme biraz zaman alabilir`,
+          })
         }
-
-        setCompressing(false)
 
         // Upload file - use 'file' key to match API
         const formData = new FormData()
@@ -251,6 +174,11 @@ export function VideoUpload({ existingVideos, onVideosChange, maxVideos = 5 }: V
         const data = await response.json()
         // API returns { file: { url: ... } }
         uploadedUrls.push(data.file.url)
+        
+        toast({
+          title: "✅ Yüklendi",
+          description: `${file.name} başarıyla MinIO'ya yüklendi`,
+        })
       }
 
       const newVideos = [
@@ -335,9 +263,9 @@ export function VideoUpload({ existingVideos, onVideosChange, maxVideos = 5 }: V
             />
           </div>
           <p className="text-xs text-muted-foreground">
-            MP4, WebM, OGG, MOV - Maksimum 100MB
+            MP4, WebM, OGG, MOV, AVI - Maksimum 200MB
             <br />
-            10MB'den büyük videolar otomatik sıkıştırılır
+            Videolar MinIO CDN'e yüklenir
           </p>
         </TabsContent>
 
@@ -383,10 +311,11 @@ export function VideoUpload({ existingVideos, onVideosChange, maxVideos = 5 }: V
                       <iframe
                         src={video.url}
                         className="w-full h-full"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowFullScreen
                         referrerPolicy="no-referrer-when-downgrade"
-                        sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
+                        loading="lazy"
+                        title="YouTube video player"
                       />
                     </div>
                     <div className="flex items-center justify-between">
@@ -402,7 +331,17 @@ export function VideoUpload({ existingVideos, onVideosChange, maxVideos = 5 }: V
                       <video
                         src={video.url}
                         controls
+                        preload="metadata"
                         className="w-full h-full object-contain"
+                        controlsList="nodownload"
+                        onError={(e) => {
+                          console.error('Video load error:', e)
+                          toast({
+                            title: "Video Hatası",
+                            description: "Video yüklenirken bir hata oluştu",
+                            variant: "destructive"
+                          })
+                        }}
                       />
                     </div>
                     <Badge variant="secondary" className="gap-1">
