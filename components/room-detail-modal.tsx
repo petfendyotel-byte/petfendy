@@ -65,14 +65,15 @@ export function RoomDetailModal({ room, isOpen, onClose, onSelect, locale = 'tr'
 
   const getYouTubeEmbedUrl = (url: string) => {
     // Eğer zaten embed URL ise, direkt kullan
-    if (url.includes('youtube-nocookie.com/embed/') || url.includes('youtube.com/embed/')) {
+    if (url.includes('youtube.com/embed/') || url.includes('youtube-nocookie.com/embed/')) {
       return url
     }
     
     // YouTube URL'lerini embed formatına çevir
     const videoId = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)?.[1]
     if (videoId) {
-      return `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1&autoplay=0&controls=1`
+      const origin = typeof window !== 'undefined' ? window.location.origin : 'https://petfendy.com'
+      return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1&autoplay=0&controls=1&origin=${origin}`
     }
     return url
   }
@@ -275,9 +276,11 @@ export function RoomDetailModal({ room, isOpen, onClose, onSelect, locale = 'tr'
                     className="w-full h-full rounded-lg"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen
-                    referrerPolicy="no-referrer-when-downgrade"
+                    referrerPolicy="strict-origin-when-cross-origin"
                     loading="lazy"
                     title="YouTube video player"
+                    sandbox="allow-scripts allow-same-origin allow-presentation"
+                    frameBorder="0"
                   />
                 </div>
               ) : (

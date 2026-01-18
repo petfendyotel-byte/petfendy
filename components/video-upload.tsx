@@ -76,7 +76,7 @@ export function VideoUpload({ existingVideos, onVideosChange, maxVideos = 5 }: V
       return
     }
 
-    const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1&autoplay=0&controls=1`
+    const embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1&autoplay=0&controls=1&origin=${typeof window !== 'undefined' ? window.location.origin : 'https://petfendy.com'}`
     const newVideos = [...videos, { type: 'youtube' as const, url: embedUrl }]
     setVideos(newVideos)
     onVideosChange(newVideos)
@@ -313,9 +313,27 @@ export function VideoUpload({ existingVideos, onVideosChange, maxVideos = 5 }: V
                         className="w-full h-full"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowFullScreen
-                        referrerPolicy="no-referrer-when-downgrade"
+                        referrerPolicy="strict-origin-when-cross-origin"
                         loading="lazy"
                         title="YouTube video player"
+                        sandbox="allow-scripts allow-same-origin allow-presentation"
+                        frameBorder="0"
+                        onError={(e) => {
+                          console.error('YouTube iframe error:', e)
+                          // Fallback: YouTube linkini yeni sekmede aç
+                          const fallbackDiv = e.currentTarget.parentElement
+                          if (fallbackDiv) {
+                            fallbackDiv.innerHTML = `
+                              <div class="flex flex-col items-center justify-center h-full bg-gray-100 text-center p-4">
+                                <div class="text-red-500 mb-2">Video yüklenemedi</div>
+                                <a href="${video.url.replace('/embed/', '/watch?v=')}" target="_blank" rel="noopener noreferrer" 
+                                   class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                                  YouTube'da İzle
+                                </a>
+                              </div>
+                            `
+                          }
+                        }}
                       />
                     </div>
                     <div className="flex items-center justify-between">
