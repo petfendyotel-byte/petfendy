@@ -252,7 +252,7 @@ export function initSMSService(): void {
       password: process.env.NETGSM_PASSWORD,
       sender: process.env.NETGSM_SENDER || 'PETFENDY'
     })
-    console.log('📱 SMS Service: NetGSM configured')
+    console.log('📱 SMS Service: NetGSM configured with username:', process.env.NETGSM_USERNAME)
   } else if (provider === 'twilio') {
     smsService.configure({
       provider: 'twilio',
