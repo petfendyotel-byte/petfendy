@@ -40,10 +40,30 @@ export async function POST(request: NextRequest) {
         result = await smsService.sendBookingConfirmationSMS(
           phone, 
           'hotel', 
-          'Test Otel Rezervasyonu - 25 Ocak 2026, Saat: 14:00'
+          '25-27 Ocak 2026'
         )
-        message = 'Rezervasyon onay SMS\'i gönderildi'
-        testData = { bookingType: 'hotel', details: 'Test Otel Rezervasyonu - 25 Ocak 2026, Saat: 14:00' }
+        message = 'Pet Otel rezervasyon onay SMS\'i gönderildi'
+        testData = { bookingType: 'hotel', details: '25-27 Ocak 2026' }
+        break
+      
+      case 'booking-daycare':
+        result = await smsService.sendBookingConfirmationSMS(
+          phone, 
+          'daycare', 
+          'Pazartesi-Cuma 09:00-17:00'
+        )
+        message = 'Pet Kreş kayıt onay SMS\'i gönderildi'
+        testData = { bookingType: 'daycare', details: 'Pazartesi-Cuma 09:00-17:00' }
+        break
+      
+      case 'booking-taxi':
+        result = await smsService.sendBookingConfirmationSMS(
+          phone, 
+          'taxi', 
+          '25 Ocak 2026, Saat: 14:00'
+        )
+        message = 'Pet Taksi rezervasyon onay SMS\'i gönderildi'
+        testData = { bookingType: 'taxi', details: '25 Ocak 2026, Saat: 14:00' }
         break
       
       case 'new-booking':
@@ -51,16 +71,40 @@ export async function POST(request: NextRequest) {
           'hotel',
           name,
           phone,
-          'Test Otel Rezervasyonu - 25 Ocak 2026, Saat: 14:00'
+          '25-27 Ocak 2026'
         )
         result = bookingResult.userSMS && bookingResult.adminSMS
-        message = `Rezervasyon bildirimleri gönderildi - Kullanıcı: ${bookingResult.userSMS ? '✅' : '❌'}, Admin: ${bookingResult.adminSMS ? '✅' : '❌'}`
+        message = `Pet Otel rezervasyon bildirimleri gönderildi - Kullanıcı: ${bookingResult.userSMS ? '✅' : '❌'}, Admin: ${bookingResult.adminSMS ? '✅' : '❌'}`
         testData = { userSMS: bookingResult.userSMS, adminSMS: bookingResult.adminSMS }
+        break
+      
+      case 'new-booking-daycare':
+        const daycareResult = await smsService.sendNewBookingNotifications(
+          'daycare',
+          name,
+          phone,
+          'Pazartesi-Cuma 09:00-17:00'
+        )
+        result = daycareResult.userSMS && daycareResult.adminSMS
+        message = `Pet Kreş kayıt bildirimleri gönderildi - Kullanıcı: ${daycareResult.userSMS ? '✅' : '❌'}, Admin: ${daycareResult.adminSMS ? '✅' : '❌'}`
+        testData = { userSMS: daycareResult.userSMS, adminSMS: daycareResult.adminSMS }
+        break
+      
+      case 'new-booking-taxi':
+        const taxiResult = await smsService.sendNewBookingNotifications(
+          'taxi',
+          name,
+          phone,
+          '25 Ocak 2026, Saat: 14:00'
+        )
+        result = taxiResult.userSMS && taxiResult.adminSMS
+        message = `Pet Taksi rezervasyon bildirimleri gönderildi - Kullanıcı: ${taxiResult.userSMS ? '✅' : '❌'}, Admin: ${taxiResult.adminSMS ? '✅' : '❌'}`
+        testData = { userSMS: taxiResult.userSMS, adminSMS: taxiResult.adminSMS }
         break
       
       default:
         return NextResponse.json(
-          { success: false, error: 'Geçersiz SMS türü. Geçerli türler: welcome, new-user, booking, new-booking' },
+          { success: false, error: 'Geçersiz SMS türü. Geçerli türler: welcome, new-user, booking, booking-daycare, booking-taxi, new-booking, new-booking-daycare, new-booking-taxi' },
           { status: 400 }
         )
     }
@@ -101,15 +145,19 @@ export async function GET() {
       endpoint: '/api/test-sms',
       body: {
         phone: '05321234567 (zorunlu)',
-        type: 'welcome | new-user | booking | new-booking',
+        type: 'welcome | new-user | booking | booking-daycare | booking-taxi | new-booking | new-booking-daycare | new-booking-taxi',
         name: 'Test Kullanıcı (opsiyonel)'
       }
     },
     smsTypes: {
       welcome: 'Sadece kullanıcıya hoş geldin SMS\'i',
       'new-user': 'Hem kullanıcıya hem admin\'e yeni üye bildirimi',
-      booking: 'Sadece kullanıcıya rezervasyon onay SMS\'i',
-      'new-booking': 'Hem kullanıcıya hem admin\'e rezervasyon bildirimi'
+      booking: 'Sadece kullanıcıya Pet Otel rezervasyon onay SMS\'i',
+      'booking-daycare': 'Sadece kullanıcıya Pet Kreş kayıt onay SMS\'i',
+      'booking-taxi': 'Sadece kullanıcıya Pet Taksi rezervasyon onay SMS\'i',
+      'new-booking': 'Hem kullanıcıya hem admin\'e Pet Otel rezervasyon bildirimi',
+      'new-booking-daycare': 'Hem kullanıcıya hem admin\'e Pet Kreş kayıt bildirimi',
+      'new-booking-taxi': 'Hem kullanıcıya hem admin\'e Pet Taksi rezervasyon bildirimi'
     },
     examples: [
       {
@@ -121,12 +169,28 @@ export async function GET() {
         body: { phone: '05321234567', type: 'new-user', name: 'Ahmet Yılmaz' }
       },
       {
-        description: 'Rezervasyon onay SMS\'i test et',
+        description: 'Pet Otel rezervasyon onay SMS\'i test et',
         body: { phone: '05321234567', type: 'booking' }
       },
       {
-        description: 'Rezervasyon bildirimleri test et (kullanıcı + admin)',
+        description: 'Pet Kreş kayıt onay SMS\'i test et',
+        body: { phone: '05321234567', type: 'booking-daycare' }
+      },
+      {
+        description: 'Pet Taksi rezervasyon onay SMS\'i test et',
+        body: { phone: '05321234567', type: 'booking-taxi' }
+      },
+      {
+        description: 'Pet Otel rezervasyon bildirimleri test et (kullanıcı + admin)',
         body: { phone: '05321234567', type: 'new-booking', name: 'Ahmet Yılmaz' }
+      },
+      {
+        description: 'Pet Kreş kayıt bildirimleri test et (kullanıcı + admin)',
+        body: { phone: '05321234567', type: 'new-booking-daycare', name: 'Ahmet Yılmaz' }
+      },
+      {
+        description: 'Pet Taksi rezervasyon bildirimleri test et (kullanıcı + admin)',
+        body: { phone: '05321234567', type: 'new-booking-taxi', name: 'Ahmet Yılmaz' }
       }
     ],
     adminPhone: process.env.ADMIN_PHONE || 'Tanımlı değil',

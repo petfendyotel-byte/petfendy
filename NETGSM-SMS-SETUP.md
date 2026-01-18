@@ -46,6 +46,7 @@ curl -X POST http://localhost:3000/api/test-sms \
 
 #### 2. Rezervasyon Bildirimleri Test Et (Kullanıcı + Admin)
 ```bash
+# Pet Otel
 curl -X POST http://localhost:3000/api/test-sms \
   -H "Content-Type: application/json" \
   -d '{
@@ -53,26 +54,50 @@ curl -X POST http://localhost:3000/api/test-sms \
     "type": "new-booking",
     "name": "Ahmet Yılmaz"
   }'
-```
 
-#### 3. Sadece Hoş Geldin SMS'i Test Et
-```bash
+# Pet Kreş
 curl -X POST http://localhost:3000/api/test-sms \
   -H "Content-Type: application/json" \
   -d '{
     "phone": "05321234567",
-    "type": "welcome",
+    "type": "new-booking-daycare",
+    "name": "Ahmet Yılmaz"
+  }'
+
+# Pet Taksi
+curl -X POST http://localhost:3000/api/test-sms \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phone": "05321234567",
+    "type": "new-booking-taxi",
     "name": "Ahmet Yılmaz"
   }'
 ```
 
-#### 4. Sadece Rezervasyon Onay SMS'i Test Et
+#### 3. Sadece Rezervasyon Onay SMS'leri Test Et
 ```bash
+# Pet Otel
 curl -X POST http://localhost:3000/api/test-sms \
   -H "Content-Type: application/json" \
   -d '{
     "phone": "05321234567",
     "type": "booking"
+  }'
+
+# Pet Kreş
+curl -X POST http://localhost:3000/api/test-sms \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phone": "05321234567",
+    "type": "booking-daycare"
+  }'
+
+# Pet Taksi
+curl -X POST http://localhost:3000/api/test-sms \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phone": "05321234567",
+    "type": "booking-taxi"
   }'
 ```
 
@@ -85,8 +110,10 @@ curl -X POST http://localhost:3000/api/test-sms \
 - **Admin'e:** Yeni üye bildirimi (Bilgilendirme - İYS kontrolsüz)
 
 #### 2. 📅 Rezervasyon Yapıldığında
-- **Kullanıcıya:** Rezervasyon onay mesajı (Ticari - İYS kontrollü)
-- **Admin'e:** Yeni rezervasyon bildirimi (Bilgilendirme - İYS kontrolsüz)
+- **Pet Otel:** "Bu tarihler arasında rezervasyonunuz yapıldı" (Ticari - İYS kontrollü)
+- **Pet Kreş:** "Kreş kaydınız yapıldı" (Ticari - İYS kontrollü)  
+- **Pet Taksi:** "Taksi rezervasyonunuz yapıldı" (Ticari - İYS kontrollü)
+- **Admin'e:** Hizmet türüne göre özel bildirim mesajları (Bilgilendirme - İYS kontrolsüz)
 
 ### 🎯 Toplu Bildirim Fonksiyonları
 

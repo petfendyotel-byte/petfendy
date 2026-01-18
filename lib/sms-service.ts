@@ -175,9 +175,20 @@ class SMSService {
     bookingType: 'hotel' | 'taxi' | 'daycare',
     details: string
   ): Promise<boolean> {
-    const typeText = bookingType === 'hotel' ? 'Pet Otel' : 
-                     bookingType === 'taxi' ? 'Pet Taksi' : 'Pet Kreş'
-    const message = `✅ ${typeText} rezervasyonunuz onaylandı! ${details} - Petfendy`
+    let message = ''
+    
+    switch (bookingType) {
+      case 'hotel':
+        message = `✅ Pet Otel rezervasyonunuz onaylandı! ${details} Bu tarihler arasında rezervasyonunuz yapıldı. Sorularınız için: 0532 307 32 64 - Petfendy`
+        break
+      case 'daycare':
+        message = `✅ Pet Kreş kaydınız yapıldı! ${details} Sorularınız için: 0532 307 32 64 - Petfendy`
+        break
+      case 'taxi':
+        message = `✅ Pet Taksi rezervasyonunuz yapıldı! ${details} Sorularınız için: 0532 307 32 64 - Petfendy`
+        break
+    }
+    
     return this.sendSMS({ to: phone, message }, true) // Ticari SMS - İYS kontrollü
   }
 
@@ -194,9 +205,20 @@ class SMSService {
       return false
     }
 
-    const typeText = bookingType === 'hotel' ? 'Otel' : 
-                     bookingType === 'taxi' ? 'Taksi' : 'Kreş'
-    const message = `🔔 Yeni ${typeText} Rezervasyonu! Müşteri: ${customerName} (${customerPhone}). ${details}`
+    let message = ''
+    
+    switch (bookingType) {
+      case 'hotel':
+        message = `🔔 Yeni Pet Otel Rezervasyonu! Müşteri: ${customerName} (${customerPhone}). ${details}`
+        break
+      case 'daycare':
+        message = `🔔 Yeni Pet Kreş Kaydı! Müşteri: ${customerName} (${customerPhone}). ${details}`
+        break
+      case 'taxi':
+        message = `🔔 Yeni Pet Taksi Rezervasyonu! Müşteri: ${customerName} (${customerPhone}). ${details}`
+        break
+    }
+    
     return this.sendSMS({ to: adminPhone, message }, false) // Admin bildirimi
   }
 
