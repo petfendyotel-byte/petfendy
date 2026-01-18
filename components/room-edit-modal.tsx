@@ -61,8 +61,9 @@ export function RoomEditModal({ isOpen, onClose, room, onSave, isLoading = false
     console.log('Amenities input value:', value)
     console.log('Current editedRoom.amenities:', editedRoom.amenities)
     
-    // Allow any input, don't filter yet
-    const amenities = value ? value.split(",").map((a) => a.trim()) : []
+    // Support both comma and semicolon as separators
+    const separators = /[,;]/
+    const amenities = value ? value.split(separators).map((a) => a.trim()).filter(a => a) : []
     console.log('Parsed amenities:', amenities)
     
     setEditedRoom({ ...editedRoom, amenities })
@@ -71,7 +72,9 @@ export function RoomEditModal({ isOpen, onClose, room, onSave, isLoading = false
   const handleFeaturesChange = (value: string) => {
     if (!editedRoom) return
     console.log('Features input value:', value)
-    const features = value ? value.split(",").map((f) => f.trim()) : []
+    // Support both comma and semicolon as separators
+    const separators = /[,;]/
+    const features = value ? value.split(separators).map((f) => f.trim()).filter(f => f) : []
     console.log('Parsed features:', features)
     setEditedRoom({ ...editedRoom, features })
   }
@@ -236,7 +239,7 @@ export function RoomEditModal({ isOpen, onClose, room, onSave, isLoading = false
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="amenities">Olanaklar (virgülle ayırın)</Label>
+                  <Label htmlFor="amenities">Olanaklar (virgül veya noktalı virgül ile ayırın)</Label>
                   <textarea
                     id="amenities"
                     defaultValue={editedRoom.amenities?.join(", ") || ""}
@@ -247,18 +250,40 @@ export function RoomEditModal({ isOpen, onClose, room, onSave, isLoading = false
                     onInput={(e) => {
                       console.log('Textarea onInput triggered:', e.currentTarget.value)
                     }}
-                    placeholder="Yatak, Klima, Oyuncak, Kamera, 7/24 Bakım"
+                    onKeyDown={(e) => {
+                      console.log('KeyDown event:', e.key, e.keyCode, e.which)
+                      if (e.key === ',' || e.keyCode === 188) {
+                        console.log('Comma key detected! Preventing default...')
+                        e.preventDefault()
+                        e.stopPropagation()
+                        // Manually insert comma
+                        const target = e.currentTarget
+                        const start = target.selectionStart
+                        const end = target.selectionEnd
+                        const value = target.value
+                        const newValue = value.slice(0, start) + ',' + value.slice(end)
+                        target.value = newValue
+                        target.setSelectionRange(start + 1, start + 1)
+                        // Trigger change event
+                        const changeEvent = new Event('input', { bubbles: true })
+                        target.dispatchEvent(changeEvent)
+                      }
+                    }}
+                    onKeyPress={(e) => {
+                      console.log('KeyPress event:', e.key, e.keyCode, e.which)
+                    }}
+                    placeholder="Yatak; Klima; Oyuncak; Kamera; 7/24 Bakım (virgül veya noktalı virgül kullanın)"
                     className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                     rows={2}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="features">Özellikler (virgülle ayırın)</Label>
+                  <Label htmlFor="features">Özellikler (virgül veya noktalı virgül ile ayırın)</Label>
                   <textarea
                     id="features"
                     value={editedRoom.features?.join(", ") || ""}
                     onChange={(e) => handleFeaturesChange(e.target.value)}
-                    placeholder="Günlük temizlik, Doğal ışık, Ses yalıtımı"
+                    placeholder="Günlük temizlik; Doğal ışık; Ses yalıtımı (virgül veya noktalı virgül kullanın)"
                     className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                     rows={2}
                   />
