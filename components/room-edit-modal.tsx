@@ -59,14 +59,20 @@ export function RoomEditModal({ isOpen, onClose, room, onSave, isLoading = false
   const handleAmenitiesChange = (value: string) => {
     if (!editedRoom) return
     console.log('Amenities input value:', value)
-    const amenities = value.split(",").map((a) => a.trim()).filter(a => a)
+    console.log('Current editedRoom.amenities:', editedRoom.amenities)
+    
+    // Allow any input, don't filter yet
+    const amenities = value ? value.split(",").map((a) => a.trim()) : []
     console.log('Parsed amenities:', amenities)
+    
     setEditedRoom({ ...editedRoom, amenities })
   }
 
   const handleFeaturesChange = (value: string) => {
     if (!editedRoom) return
-    const features = value.split(",").map((f) => f.trim()).filter(f => f)
+    console.log('Features input value:', value)
+    const features = value ? value.split(",").map((f) => f.trim()) : []
+    console.log('Parsed features:', features)
     setEditedRoom({ ...editedRoom, features })
   }
 
@@ -233,10 +239,13 @@ export function RoomEditModal({ isOpen, onClose, room, onSave, isLoading = false
                   <Label htmlFor="amenities">Olanaklar (virgülle ayırın)</Label>
                   <textarea
                     id="amenities"
-                    value={editedRoom.amenities?.join(", ") || ""}
+                    defaultValue={editedRoom.amenities?.join(", ") || ""}
                     onChange={(e) => {
                       console.log('Textarea onChange triggered:', e.target.value)
                       handleAmenitiesChange(e.target.value)
+                    }}
+                    onInput={(e) => {
+                      console.log('Textarea onInput triggered:', e.currentTarget.value)
                     }}
                     placeholder="Yatak, Klima, Oyuncak, Kamera, 7/24 Bakım"
                     className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"

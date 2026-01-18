@@ -377,12 +377,8 @@ export function VideoUpload({ existingVideos, onVideosChange, maxVideos = 5 }: V
                         className="w-full h-full object-contain"
                         controlsList="nodownload"
                         onError={(e) => {
-                          console.error('Video load error:', e)
-                          toast({
-                            title: "Video Hatası",
-                            description: "Video yüklenirken bir hata oluştu",
-                            variant: "destructive"
-                          })
+                          // Silently handle video load errors - don't spam console
+                          // console.error('Video load error:', e)
                         }}
                       />
                     </div>
