@@ -119,9 +119,9 @@ export function AdminDashboard() {
     type: "standard" as const,
     capacity: 1,
     pricePerNight: 0,
-    amenities: "",
+    amenities: [] as string[],
     description: "",
-    features: "",
+    features: [] as string[],
   })
   const [newRoomImages, setNewRoomImages] = useState<string[]>([])
   const [newRoomVideos, setNewRoomVideos] = useState<Array<{ type: 'upload' | 'youtube', url: string }>>([])
@@ -559,8 +559,8 @@ export function AdminDashboard() {
       capacity: Math.floor(newRoom.capacity),
       pricePerNight: Math.round(newRoom.pricePerNight * 100) / 100,
       description: sanitizedDescription,
-      amenities: newRoom.amenities.split(",").map((a) => sanitizeInput(a)).filter(a => a),
-      features: newRoom.features.split(",").map((f) => sanitizeInput(f)).filter(f => f),
+      amenities: newRoom.amenities.filter(a => a.trim()),
+      features: newRoom.features.filter(f => f.trim()),
       images: newRoomImages || [],
       videos: newRoomVideos || [],
     }
@@ -581,7 +581,7 @@ export function AdminDashboard() {
       saveRooms([...rooms, room])
     }
 
-    setNewRoom({ name: "", type: "standard", capacity: 1, pricePerNight: 0, amenities: "", description: "", features: "" })
+    setNewRoom({ name: "", type: "standard", capacity: 1, pricePerNight: 0, amenities: [], description: "", features: [] })
     setNewRoomImages([])
     setNewRoomVideos([])
     setShowAddRoom(false)
@@ -1729,16 +1729,22 @@ export function AdminDashboard() {
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Olanaklar (virgülle ayırın)</label>
                       <Input
-                        value={newRoom.amenities}
-                        onChange={(e) => setNewRoom({ ...newRoom, amenities: e.target.value })}
+                        value={newRoom.amenities.join(", ")}
+                        onChange={(e) => setNewRoom({ 
+                          ...newRoom, 
+                          amenities: e.target.value.split(",").map((a) => a.trim()).filter(a => a)
+                        })}
                         placeholder="Yatak, Klima, Oyuncak, Kamera, 7/24 Bakım"
                       />
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Özellikler (virgülle ayırın)</label>
                       <Input
-                        value={newRoom.features}
-                        onChange={(e) => setNewRoom({ ...newRoom, features: e.target.value })}
+                        value={newRoom.features.join(", ")}
+                        onChange={(e) => setNewRoom({ 
+                          ...newRoom, 
+                          features: e.target.value.split(",").map((f) => f.trim()).filter(f => f)
+                        })}
                         placeholder="Günlük temizlik, Doğal ışık, Ses yalıtımı"
                       />
                     </div>
