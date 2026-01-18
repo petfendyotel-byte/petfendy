@@ -141,10 +141,10 @@ class SMSService {
     }
   }
 
-  // Yeni üyelik bildirimi - Kullanıcıya (Bilgilendirme)
+  // Yeni üyelik bildirimi - Kullanıcıya (Ticari - İYS Kontrollü)
   async sendWelcomeSMS(phone: string, name: string): Promise<boolean> {
     const message = `Merhaba ${name}! Petfendy'ye hoş geldiniz 🐾 Evcil dostlarınız için en iyi hizmeti sunmak için buradayız. Sorularınız için: 0532 307 32 64`
-    return this.sendSMS({ to: phone, message }, false) // Bilgilendirme SMS'i
+    return this.sendSMS({ to: phone, message }, true) // Ticari SMS - İYS kontrollü
   }
 
   // Yeni üyelik bildirimi - İşletme sahibine (Bilgilendirme)
@@ -155,16 +155,16 @@ class SMSService {
     userPhone: string
   ): Promise<boolean> {
     const message = `🆕 Yeni Üye! Ad: ${userName}, Tel: ${userPhone}, E-posta: ${userEmail} - Petfendy`
-    return this.sendSMS({ to: ownerPhone, message }, false) // Bilgilendirme SMS'i
+    return this.sendSMS({ to: ownerPhone, message }, false) // İşletme içi bilgilendirme
   }
 
-  // Doğrulama kodu SMS (Bilgilendirme)
+  // Doğrulama kodu SMS (Bilgilendirme - İYS Kontrolsüz)
   async sendVerificationCodeSMS(phone: string, code: string): Promise<boolean> {
     const message = `Petfendy doğrulama kodunuz: ${code}. Bu kod 15 dakika geçerlidir.`
-    return this.sendSMS({ to: phone, message }, false) // Bilgilendirme SMS'i
+    return this.sendSMS({ to: phone, message }, false) // Güvenlik bildirimi - İYS kontrolsüz
   }
 
-  // Rezervasyon onay SMS - Kullanıcıya (Bilgilendirme)
+  // Rezervasyon onay SMS - Kullanıcıya (Ticari - İYS Kontrollü)
   async sendBookingConfirmationSMS(
     phone: string,
     bookingType: 'hotel' | 'taxi',
@@ -172,7 +172,7 @@ class SMSService {
   ): Promise<boolean> {
     const typeText = bookingType === 'hotel' ? 'Pet Otel' : 'Pet Taksi'
     const message = `✅ ${typeText} rezervasyonunuz onaylandı! ${details} - Petfendy`
-    return this.sendSMS({ to: phone, message }, false) // Bilgilendirme SMS'i
+    return this.sendSMS({ to: phone, message }, true) // Ticari SMS - İYS kontrollü
   }
 
   // Rezervasyon bildirimi - İşletme sahibine (Bilgilendirme)
@@ -185,14 +185,14 @@ class SMSService {
   ): Promise<boolean> {
     const typeText = bookingType === 'hotel' ? 'Otel' : 'Taksi'
     const message = `🔔 Yeni ${typeText} Rezervasyonu! Müşteri: ${customerName} (${customerPhone}). ${details}`
-    return this.sendSMS({ to: ownerPhone, message }, false) // Bilgilendirme SMS'i
+    return this.sendSMS({ to: ownerPhone, message }, false) // İşletme içi bilgilendirme
   }
 
   // =============================================
   // ÖDEME BİLDİRİMLERİ
   // =============================================
 
-  // Ödeme başarılı - Müşteriye
+  // Ödeme başarılı - Müşteriye (Ticari - İYS Kontrollü)
   async sendPaymentSuccessSMS(
     phone: string,
     amount: string,
@@ -201,10 +201,10 @@ class SMSService {
   ): Promise<boolean> {
     const typeText = bookingType === 'hotel' ? 'Pet Otel' : 'Pet Taksi'
     const message = `✅ Ödemeniz alındı! ${typeText} - ${amount} TL. Ref: ${bookingRef}. Detaylar için: petfendy.com - Petfendy`
-    return this.sendSMS({ to: phone, message })
+    return this.sendSMS({ to: phone, message }, true) // Ticari SMS - İYS kontrollü
   }
 
-  // Ödeme başarılı - İşletme sahibine
+  // Ödeme başarılı - İşletme sahibine (Bilgilendirme)
   async sendPaymentReceivedNotificationSMS(
     ownerPhone: string,
     customerName: string,
@@ -214,20 +214,20 @@ class SMSService {
   ): Promise<boolean> {
     const typeText = bookingType === 'hotel' ? 'Otel' : 'Taksi'
     const message = `💰 Ödeme Alındı! ${typeText} - ${amount} TL. Müşteri: ${customerName}. Ref: ${bookingRef}`
-    return this.sendSMS({ to: ownerPhone, message })
+    return this.sendSMS({ to: ownerPhone, message }, false) // İşletme içi bilgilendirme
   }
 
-  // Ödeme başarısız - Müşteriye
+  // Ödeme başarısız - Müşteriye (Ticari - İYS Kontrollü)
   async sendPaymentFailedSMS(
     phone: string,
     bookingType: 'hotel' | 'taxi'
   ): Promise<boolean> {
     const typeText = bookingType === 'hotel' ? 'Pet Otel' : 'Pet Taksi'
     const message = `❌ ${typeText} ödemeniz başarısız oldu. Lütfen tekrar deneyin veya farklı bir kart kullanın. Destek: 0532 307 32 64 - Petfendy`
-    return this.sendSMS({ to: phone, message })
+    return this.sendSMS({ to: phone, message }, true) // Ticari SMS - İYS kontrollü
   }
 
-  // Rezervasyon hatırlatma - Müşteriye (Bilgilendirme)
+  // Rezervasyon hatırlatma - Müşteriye (Ticari - İYS Kontrollü)
   async sendBookingReminderSMS(
     phone: string,
     bookingType: 'hotel' | 'taxi',
@@ -236,10 +236,10 @@ class SMSService {
   ): Promise<boolean> {
     const typeText = bookingType === 'hotel' ? 'Pet Otel' : 'Pet Taksi'
     const message = `⏰ Hatırlatma: ${typeText} rezervasyonunuz yarın ${date} saat ${time}'de. Sorularınız için: 0532 307 32 64 - Petfendy`
-    return this.sendSMS({ to: phone, message }, false) // Bilgilendirme SMS'i
+    return this.sendSMS({ to: phone, message }, true) // Ticari SMS - İYS kontrollü
   }
 
-  // İptal bildirimi - Müşteriye
+  // İptal bildirimi - Müşteriye (Ticari - İYS Kontrollü)
   async sendBookingCancelledSMS(
     phone: string,
     bookingType: 'hotel' | 'taxi',
@@ -248,17 +248,17 @@ class SMSService {
     const typeText = bookingType === 'hotel' ? 'Pet Otel' : 'Pet Taksi'
     const refundText = refundAmount ? ` ${refundAmount} TL iade edilecektir.` : ''
     const message = `🚫 ${typeText} rezervasyonunuz iptal edildi.${refundText} Sorularınız için: 0532 307 32 64 - Petfendy`
-    return this.sendSMS({ to: phone, message })
+    return this.sendSMS({ to: phone, message }, true) // Ticari SMS - İYS kontrollü
   }
 
-  // İade bildirimi - Müşteriye
+  // İade bildirimi - Müşteriye (Ticari - İYS Kontrollü)
   async sendRefundProcessedSMS(
     phone: string,
     amount: string,
     bookingRef: string
   ): Promise<boolean> {
     const message = `💳 İadeniz işleme alındı! ${amount} TL, 7-14 iş günü içinde kartınıza yansıyacaktır. Ref: ${bookingRef} - Petfendy`
-    return this.sendSMS({ to: phone, message })
+    return this.sendSMS({ to: phone, message }, true) // Ticari SMS - İYS kontrollü
   }
 }
 

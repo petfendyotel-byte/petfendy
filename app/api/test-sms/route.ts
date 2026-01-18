@@ -135,10 +135,15 @@ export async function GET() {
     ],
     netgsmInfo: {
       altKullanici: 'bilge.corumlu@gmail.com',
+      apiYetkilisi: 'BİLGE GÜLER (petfendyotel@gmail.com)',
       gondericiAdi: 'PETFENDY',
       apiEndpoint: 'https://api.netgsm.com.tr/sms/send/xml',
       encoding: 'TR (Türkçe karakter desteği)',
-      iysFilter: 'Bilgilendirme SMS\'leri için 0 (İYS kontrolsüz)'
+      iysUyumluluk: {
+        ticariSMS: 'iysfilter=11 (İYS kontrollü)',
+        bilgilendirmeSMS: 'iysfilter=0 (İYS kontrolsüz)',
+        uyari: 'Ticari SMS\'ler sadece İYS\'de kayıtlı numaralara gönderilir'
+      }
     }
   })
 }

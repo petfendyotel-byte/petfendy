@@ -2,11 +2,13 @@
 
 ## ✅ Yapılandırma Tamamlandı
 
-### NetGSM Alt Kullanıcı Bilgileri
-- **Alt Kullanıcı Adı:** bilge.corumlu@gmail.com
-- **Alt Kullanıcı Şifresi:** Netgsm.petfendy52707.
-- **Gönderici Adı:** PETFENDY
-- **API Yetkisi:** Aktif (Alt kullanıcıya API yetkisi verilmiş)
+### NetGSM API Yetkilisi Bilgileri
+- **Ad Soyad:** BİLGE GÜLER
+- **Telefon:** 5053921293
+- **E-posta:** petfendyotel@gmail.com
+- **Kullanım Amacı:** Rezervasyon bildirimi, üyelik bildirimleri
+- **İçerik Türü:** Sadece ticari içerik gönderir (Bireysel Alıcılarınıza)
+- **Kayıt Tarihi:** 18.01.2026 20:39:20
 
 ### Environment Variables (.env.local)
 ```env
@@ -19,6 +21,7 @@ NETGSM_SENDER=PETFENDY
 ### NetGSM Panel Durumu
 ✅ **Alt Kullanıcı Oluşturuldu:** bilge.corumlu@gmail.com  
 ✅ **API Yetkisi Verildi:** Alt kullanıcıya SMS API yetkisi tanımlandı  
+✅ **IP Erişimi Verildi:** 46.224.248.228 (Coolify sunucusu) - 18.01.2026 22:59:46  
 ⏳ **Gönderici Adı Durumu:** "PETFENDY" onay durumu kontrol edilmeli  
 ⏳ **Kredi Durumu:** SMS kredisi kontrol edilmeli
 
@@ -70,28 +73,39 @@ curl -X POST http://localhost:3000/api/test-sms \
   }'
 ```
 
-## SMS Türleri
+## SMS Türleri ve İYS Uyumluluğu
 
-### Müşteri SMS'leri
-1. **Hoş Geldin Mesajı** - Yeni üyelik
-2. **Doğrulama Kodu** - Telefon doğrulama (15 dk geçerli)
-3. **Rezervasyon Onayı** - Pet otel/taksi rezervasyonu
-4. **Ödeme Bildirimleri** - Başarılı/başarısız ödeme
-5. **Hatırlatma** - Rezervasyon hatırlatması
-6. **İptal/İade** - Rezervasyon iptali ve iade bildirimleri
+### 🔴 Ticari SMS'ler (İYS Kontrollü - iysfilter=11)
+Bu SMS'ler müşterilere gönderilir ve İYS'de kayıtlı olmayan numaralara gönderilmez:
 
-### İşletme Bildirimleri
-1. **Yeni Üye** - İşletme sahibine bildirim
-2. **Yeni Rezervasyon** - İşletme sahibine bildirim
-3. **Ödeme Alındı** - İşletme sahibine bildirim
+1. **Hoş Geldin Mesajı** - Yeni üyelik (Ticari içerik)
+2. **Rezervasyon Onayı** - Pet otel/taksi rezervasyonu (Ticari içerik)
+3. **Ödeme Bildirimleri** - Başarılı/başarısız ödeme (Ticari içerik)
+4. **Hatırlatma** - Rezervasyon hatırlatması (Ticari içerik)
+5. **İptal/İade** - Rezervasyon iptali ve iade bildirimleri (Ticari içerik)
+
+### 🟢 Bilgilendirme SMS'leri (İYS Kontrolsüz - iysfilter=0)
+Bu SMS'ler güvenlik/bilgilendirme amaçlı olup İYS kontrolü yapılmaz:
+
+1. **Doğrulama Kodu** - Telefon doğrulama (Güvenlik)
+2. **İşletme Bildirimleri** - İşletme sahibine gönderilen bildirimler
+
+### ⚠️ İYS Uyarısı
+- Müşterilere gönderilen ticari SMS'ler İYS'de kayıtlı olmayan numaralara GÖNDERİLMEZ
+- Müşterilerinizin İYS'de "Petfendy" markası için izin vermiş olması gerekir
+- İYS kaydı olmayan müşteriler SMS alamayacaktır
 
 ## NetGSM Panel Kontrolleri
 
-### Gerekli Kontroller
-1. **API Erişimi:** XML API aktif olmalı
-2. **Gönderici Adı:** "PETFENDY" onaylanmalı
-3. **Kredi/Bakiye:** Yeterli SMS kredisi olmalı
-4. **IP Kısıtlaması:** Gerekirse sunucu IP'si eklenmiş olmalı
+### ✅ Tamamlanan Ayarlar
+1. **Alt Kullanıcı Hesabı:** bilge.corumlu@gmail.com oluşturuldu
+2. **API Yetkisi:** Alt kullanıcıya SMS API yetkisi verildi
+3. **IP Kısıtlaması:** 46.224.248.228 (Coolify sunucusu) erişim verildi
+
+### ⏳ Kontrol Edilmesi Gerekenler
+1. **Gönderici Adı:** "PETFENDY" onaylanmış mı?
+2. **SMS Kredisi:** Yeterli bakiye var mı?
+3. **Test Gönderimi:** İlk SMS testi yapıldı mı?
 
 ### API Detayları
 - **Endpoint:** https://api.netgsm.com.tr/sms/send/xml
