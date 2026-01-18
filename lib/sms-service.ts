@@ -36,7 +36,7 @@ class SMSService {
     return cleaned
   }
 
-  private async sendWithNetGSM(to: string, message: string): Promise<boolean> {
+  private async sendWithNetGSM(to: string, message: string, isCommercial: boolean = false): Promise<boolean> {
     const { username, password, sender } = this.config
     
     if (!username || !password) {
@@ -45,7 +45,7 @@ class SMSService {
     }
 
     try {
-      // NetGSM XML API - daha güvenilir
+      // NetGSM XML API - Resmi dokümantasyona uygun
       const xmlBody = `<?xml version="1.0" encoding="UTF-8"?>
         <mainbody>
           <header>
@@ -54,6 +54,9 @@ class SMSService {
             <password>${password}</password>
             <type>1:n</type>
             <msgheader>${sender || 'PETFENDY'}</msgheader>
+            <encoding>TR</encoding>
+            <iysfilter>${isCommercial ? '11' : '0'}</iysfilter>
+            <appname>PETFENDY</appname>
           </header>
           <body>
             <msg><![CDATA[${message}]]></msg>
@@ -61,20 +64,40 @@ class SMSService {
           </body>
         </mainbody>`
 
+      console.log(`📱 [NetGSM] Sending SMS to ${to}, Commercial: ${isCommercial}`)
+
       const response = await fetch('https://api.netgsm.com.tr/sms/send/xml', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/xml' },
+        headers: { 
+          'Content-Type': 'application/xml',
+          'User-Agent': 'PETFENDY-SMS-Service/1.0'
+        },
         body: xmlBody
       })
 
       const result = await response.text()
+      console.log(`📱 [NetGSM] Response: ${result}`)
       
-      // NetGSM başarı kodları: 00, 01, 02
-      if (result.startsWith('00') || result.startsWith('01') || result.startsWith('02')) {
-        console.log(`✅ [NetGSM] SMS sent to ${to}`)
+      // NetGSM başarı kodları ve jobid kontrolü
+      if (result.startsWith('00') || result.startsWith('01') || result.startsWith('02') || /^\d{17,}$/.test(result)) {
+        console.log(`✅ [NetGSM] SMS sent successfully to ${to}. JobID: ${result}`)
         return true
       } else {
-        console.error(`❌ [NetGSM] Error: ${result}`)
+        // Hata kodları açıklaması
+        const errorMessages: { [key: string]: string } = {
+          '20': 'Mesaj metni problemi veya karakter sınırı aşımı',
+          '30': 'Geçersiz kullanıcı adı/şifre veya API erişim izni yok',
+          '40': 'Mesaj başlığı (gönderici adı) sistemde tanımlı değil',
+          '50': 'İYS kontrollü gönderim yapılamıyor',
+          '51': 'İYS Marka bilgisi bulunamadı',
+          '70': 'Hatalı parametre veya eksik zorunlu alan',
+          '80': 'Gönderim sınır aşımı',
+          '85': 'Mükerrer gönderim sınır aşımı'
+        }
+        
+        const errorCode = result.trim()
+        const errorMessage = errorMessages[errorCode] || `Bilinmeyen hata: ${result}`
+        console.error(`❌ [NetGSM] Error ${errorCode}: ${errorMessage}`)
         return false
       }
     } catch (error) {
@@ -100,13 +123,13 @@ class SMSService {
     return true
   }
 
-  async sendSMS(data: SMSMessage): Promise<boolean> {
+  async sendSMS(data: SMSMessage, isCommercial: boolean = false): Promise<boolean> {
     const formattedPhone = this.formatPhoneNumber(data.to)
     
     try {
       switch (this.config.provider) {
         case 'netgsm':
-          return await this.sendWithNetGSM(formattedPhone, data.message)
+          return await this.sendWithNetGSM(formattedPhone, data.message, isCommercial)
         case 'twilio':
           return await this.sendWithTwilio(formattedPhone, data.message)
         default:
@@ -118,13 +141,13 @@ class SMSService {
     }
   }
 
-  // Yeni üyelik bildirimi - Kullanıcıya
+  // Yeni üyelik bildirimi - Kullanıcıya (Bilgilendirme)
   async sendWelcomeSMS(phone: string, name: string): Promise<boolean> {
-    const message = `Merhaba ${name}! Petfendy'ye hoş geldiniz 🐾 Evcil dostlarınız için en iyi hizmeti sunmak için buradayız. Sorularınız için: 0850 XXX XX XX`
-    return this.sendSMS({ to: phone, message })
+    const message = `Merhaba ${name}! Petfendy'ye hoş geldiniz 🐾 Evcil dostlarınız için en iyi hizmeti sunmak için buradayız. Sorularınız için: 0532 307 32 64`
+    return this.sendSMS({ to: phone, message }, false) // Bilgilendirme SMS'i
   }
 
-  // Yeni üyelik bildirimi - İşletme sahibine
+  // Yeni üyelik bildirimi - İşletme sahibine (Bilgilendirme)
   async sendNewUserNotificationSMS(
     ownerPhone: string,
     userName: string,
@@ -132,16 +155,16 @@ class SMSService {
     userPhone: string
   ): Promise<boolean> {
     const message = `🆕 Yeni Üye! Ad: ${userName}, Tel: ${userPhone}, E-posta: ${userEmail} - Petfendy`
-    return this.sendSMS({ to: ownerPhone, message })
+    return this.sendSMS({ to: ownerPhone, message }, false) // Bilgilendirme SMS'i
   }
 
-  // Doğrulama kodu SMS
+  // Doğrulama kodu SMS (Bilgilendirme)
   async sendVerificationCodeSMS(phone: string, code: string): Promise<boolean> {
     const message = `Petfendy doğrulama kodunuz: ${code}. Bu kod 15 dakika geçerlidir.`
-    return this.sendSMS({ to: phone, message })
+    return this.sendSMS({ to: phone, message }, false) // Bilgilendirme SMS'i
   }
 
-  // Rezervasyon onay SMS - Kullanıcıya
+  // Rezervasyon onay SMS - Kullanıcıya (Bilgilendirme)
   async sendBookingConfirmationSMS(
     phone: string,
     bookingType: 'hotel' | 'taxi',
@@ -149,10 +172,10 @@ class SMSService {
   ): Promise<boolean> {
     const typeText = bookingType === 'hotel' ? 'Pet Otel' : 'Pet Taksi'
     const message = `✅ ${typeText} rezervasyonunuz onaylandı! ${details} - Petfendy`
-    return this.sendSMS({ to: phone, message })
+    return this.sendSMS({ to: phone, message }, false) // Bilgilendirme SMS'i
   }
 
-  // Rezervasyon bildirimi - İşletme sahibine
+  // Rezervasyon bildirimi - İşletme sahibine (Bilgilendirme)
   async sendNewBookingNotificationSMS(
     ownerPhone: string,
     bookingType: 'hotel' | 'taxi',
@@ -162,7 +185,7 @@ class SMSService {
   ): Promise<boolean> {
     const typeText = bookingType === 'hotel' ? 'Otel' : 'Taksi'
     const message = `🔔 Yeni ${typeText} Rezervasyonu! Müşteri: ${customerName} (${customerPhone}). ${details}`
-    return this.sendSMS({ to: ownerPhone, message })
+    return this.sendSMS({ to: ownerPhone, message }, false) // Bilgilendirme SMS'i
   }
 
   // =============================================
@@ -204,7 +227,7 @@ class SMSService {
     return this.sendSMS({ to: phone, message })
   }
 
-  // Rezervasyon hatırlatma - Müşteriye
+  // Rezervasyon hatırlatma - Müşteriye (Bilgilendirme)
   async sendBookingReminderSMS(
     phone: string,
     bookingType: 'hotel' | 'taxi',
@@ -213,7 +236,7 @@ class SMSService {
   ): Promise<boolean> {
     const typeText = bookingType === 'hotel' ? 'Pet Otel' : 'Pet Taksi'
     const message = `⏰ Hatırlatma: ${typeText} rezervasyonunuz yarın ${date} saat ${time}'de. Sorularınız için: 0532 307 32 64 - Petfendy`
-    return this.sendSMS({ to: phone, message })
+    return this.sendSMS({ to: phone, message }, false) // Bilgilendirme SMS'i
   }
 
   // İptal bildirimi - Müşteriye

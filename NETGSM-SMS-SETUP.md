@@ -2,10 +2,11 @@
 
 ## ✅ Yapılandırma Tamamlandı
 
-### NetGSM Hesap Bilgileri
-- **Kullanıcı Adı:** bilge.corumlu@gmail.com
-- **Şifre:** Netgsm.petfendy52707.
+### NetGSM Alt Kullanıcı Bilgileri
+- **Alt Kullanıcı Adı:** bilge.corumlu@gmail.com
+- **Alt Kullanıcı Şifresi:** Netgsm.petfendy52707.
 - **Gönderici Adı:** PETFENDY
+- **API Yetkisi:** Aktif (Alt kullanıcıya API yetkisi verilmiş)
 
 ### Environment Variables (.env.local)
 ```env
@@ -14,6 +15,12 @@ NETGSM_USERNAME=bilge.corumlu@gmail.com
 NETGSM_PASSWORD=Netgsm.petfendy52707.
 NETGSM_SENDER=PETFENDY
 ```
+
+### NetGSM Panel Durumu
+✅ **Alt Kullanıcı Oluşturuldu:** bilge.corumlu@gmail.com  
+✅ **API Yetkisi Verildi:** Alt kullanıcıya SMS API yetkisi tanımlandı  
+⏳ **Gönderici Adı Durumu:** "PETFENDY" onay durumu kontrol edilmeli  
+⏳ **Kredi Durumu:** SMS kredisi kontrol edilmeli
 
 ## SMS Test API
 
