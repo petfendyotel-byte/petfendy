@@ -8,18 +8,33 @@ import { toast } from "@/components/ui/use-toast"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
-import { Upload, X, Video, Loader2, Youtube, Link as LinkIcon } from "lucide-react"
+import { Upload, X, Video, Loader2, Youtube, Link as LinkIcon, Play } from "lucide-react"
 
 interface VideoUploadProps {
-  existingVideos: Array<{ type: 'upload' | 'youtube', url: string }>
-  onVideosChange: (videos: Array<{ type: 'upload' | 'youtube', url: string }>) => void
+  existingVideos: Array<{ 
+    type: 'upload' | 'youtube', 
+    url: string,
+    thumbnail?: string,
+    watchUrl?: string
+  }>
+  onVideosChange: (videos: Array<{ 
+    type: 'upload' | 'youtube', 
+    url: string,
+    thumbnail?: string,
+    watchUrl?: string
+  }>) => void
   maxVideos?: number
 }
 
 export function VideoUpload({ existingVideos, onVideosChange, maxVideos = 5 }: VideoUploadProps) {
   const [uploading, setUploading] = useState(false)
   const [compressing, setCompressing] = useState(false)
-  const [videos, setVideos] = useState<Array<{ type: 'upload' | 'youtube', url: string }>>(existingVideos || [])
+  const [videos, setVideos] = useState<Array<{ 
+    type: 'upload' | 'youtube', 
+    url: string,
+    thumbnail?: string,
+    watchUrl?: string
+  }>>(existingVideos || [])
   const [youtubeUrl, setYoutubeUrl] = useState("")
 
   // Sync with external changes (important for edit mode)
@@ -44,6 +59,16 @@ export function VideoUpload({ existingVideos, onVideosChange, maxVideos = 5 }: V
       }
     }
     return null
+  }
+
+  // Get YouTube thumbnail URL
+  const getYouTubeThumbnail = (videoId: string): string => {
+    return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
+  }
+
+  // Get YouTube watch URL
+  const getYouTubeWatchUrl = (videoId: string): string => {
+    return `https://www.youtube.com/watch?v=${videoId}`
   }
 
   // Handle YouTube URL
@@ -76,8 +101,13 @@ export function VideoUpload({ existingVideos, onVideosChange, maxVideos = 5 }: V
       return
     }
 
-    const embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1&autoplay=0&controls=1&origin=${typeof window !== 'undefined' ? window.location.origin : 'https://petfendy.com'}`
-    const newVideos = [...videos, { type: 'youtube' as const, url: embedUrl }]
+    // Store the video ID instead of embed URL for better handling
+    const newVideos = [...videos, { 
+      type: 'youtube' as const, 
+      url: videoId, // Store just the video ID
+      thumbnail: getYouTubeThumbnail(videoId),
+      watchUrl: getYouTubeWatchUrl(videoId)
+    }]
     setVideos(newVideos)
     onVideosChange(newVideos)
     setYoutubeUrl("")
@@ -307,40 +337,34 @@ export function VideoUpload({ existingVideos, onVideosChange, maxVideos = 5 }: V
               <CardContent className="p-3">
                 {video.type === 'youtube' ? (
                   <div className="space-y-2">
-                    <div className="relative aspect-video rounded-lg overflow-hidden bg-black">
-                      <iframe
-                        src={video.url}
-                        className="w-full h-full"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                        referrerPolicy="strict-origin-when-cross-origin"
-                        loading="lazy"
-                        title="YouTube video player"
-                        sandbox="allow-scripts allow-same-origin allow-presentation"
-                        frameBorder="0"
+                    <div className="relative aspect-video rounded-lg overflow-hidden bg-black group cursor-pointer"
+                         onClick={() => window.open(video.watchUrl || `https://www.youtube.com/watch?v=${video.url}`, '_blank')}>
+                      <img
+                        src={video.thumbnail || `https://img.youtube.com/vi/${video.url}/maxresdefault.jpg`}
+                        alt="YouTube Video Thumbnail"
+                        className="w-full h-full object-cover"
                         onError={(e) => {
-                          console.error('YouTube iframe error:', e)
-                          // Fallback: YouTube linkini yeni sekmede aç
-                          const fallbackDiv = e.currentTarget.parentElement
-                          if (fallbackDiv) {
-                            fallbackDiv.innerHTML = `
-                              <div class="flex flex-col items-center justify-center h-full bg-gray-100 text-center p-4">
-                                <div class="text-red-500 mb-2">Video yüklenemedi</div>
-                                <a href="${video.url.replace('/embed/', '/watch?v=')}" target="_blank" rel="noopener noreferrer" 
-                                   class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
-                                  YouTube'da İzle
-                                </a>
-                              </div>
-                            `
-                          }
+                          // Fallback to smaller thumbnail
+                          e.currentTarget.src = `https://img.youtube.com/vi/${video.url}/hqdefault.jpg`
                         }}
                       />
+                      {/* Play Button Overlay */}
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
+                        <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center group-hover:bg-red-700 transition-colors">
+                          <Play className="w-6 h-6 text-white ml-1" fill="currentColor" />
+                        </div>
+                      </div>
+                      {/* YouTube Logo */}
+                      <div className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">
+                        YouTube
+                      </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <Badge variant="destructive" className="gap-1">
                         <Youtube className="w-3 h-3" />
                         YouTube
                       </Badge>
+                      <span className="text-xs text-muted-foreground">Tıkla ve izle</span>
                     </div>
                   </div>
                 ) : (

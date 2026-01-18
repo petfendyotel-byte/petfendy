@@ -270,18 +270,35 @@ export function RoomDetailModal({ room, isOpen, onClose, onSelect, locale = 'tr'
               </button>
               
               {videos[currentVideoIndex].type === 'youtube' ? (
-                <div className="aspect-video">
-                  <iframe
-                    src={getYouTubeEmbedUrl(videos[currentVideoIndex].url)}
-                    className="w-full h-full rounded-lg"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                    referrerPolicy="strict-origin-when-cross-origin"
-                    loading="lazy"
-                    title="YouTube video player"
-                    sandbox="allow-scripts allow-same-origin allow-presentation"
-                    frameBorder="0"
+                <div className="aspect-video relative cursor-pointer group"
+                     onClick={() => {
+                       const videoId = videos[currentVideoIndex].url
+                       const watchUrl = `https://www.youtube.com/watch?v=${videoId}`
+                       window.open(watchUrl, '_blank')
+                     }}>
+                  <img
+                    src={`https://img.youtube.com/vi/${videos[currentVideoIndex].url}/maxresdefault.jpg`}
+                    alt="YouTube Video Thumbnail"
+                    className="w-full h-full object-cover rounded-lg"
+                    onError={(e) => {
+                      // Fallback to smaller thumbnail
+                      e.currentTarget.src = `https://img.youtube.com/vi/${videos[currentVideoIndex].url}/hqdefault.jpg`
+                    }}
                   />
+                  {/* Play Button Overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/50 transition-colors rounded-lg">
+                    <div className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center group-hover:bg-red-700 transition-colors">
+                      <Play className="w-8 h-8 text-white ml-1" fill="currentColor" />
+                    </div>
+                  </div>
+                  {/* YouTube Logo */}
+                  <div className="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 rounded text-sm font-bold">
+                    YouTube
+                  </div>
+                  {/* Click to watch text */}
+                  <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded text-sm">
+                    YouTube'da İzlemek İçin Tıkla
+                  </div>
                 </div>
               ) : (
                 <video
