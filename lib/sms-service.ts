@@ -240,6 +240,12 @@ class SMSService {
     return { userSMS, adminSMS }
   }
 
+  // Test için bilgilendirme SMS'i (İYS kontrolsüz)
+  async sendTestInformationalSMS(phone: string): Promise<boolean> {
+    const message = `Petfendy test mesajı. Bu bir bilgilendirme SMS'idir. Test: ${new Date().toLocaleTimeString('tr-TR')}`
+    return this.sendSMS({ to: phone, message }, false) // Bilgilendirme - İYS kontrolsüz
+  }
+
   // Yeni rezervasyon - Hem kullanıcıya hem admin'e bildirim gönder
   async sendNewBookingNotifications(
     bookingType: 'hotel' | 'taxi' | 'daycare',

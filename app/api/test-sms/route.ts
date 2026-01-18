@@ -102,6 +102,12 @@ export async function POST(request: NextRequest) {
         testData = { userSMS: taxiResult.userSMS, adminSMS: taxiResult.adminSMS }
         break
       
+      case 'test-info':
+        result = await smsService.sendTestInformationalSMS(phone)
+        message = 'Bilgilendirme test SMS\'i gönderildi (İYS kontrolsüz)'
+        testData = { type: 'informational', iysControl: false }
+        break
+      
       default:
         return NextResponse.json(
           { success: false, error: 'Geçersiz SMS türü. Geçerli türler: welcome, new-user, booking, booking-daycare, booking-taxi, new-booking, new-booking-daycare, new-booking-taxi' },
