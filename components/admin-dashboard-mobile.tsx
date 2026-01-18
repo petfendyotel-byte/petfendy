@@ -1045,7 +1045,6 @@ export function AdminDashboardMobile({ className }: MobileAdminProps) {
             </Card>
           </div>
         )}
-                <div>
       </div>
     </div>
   )

@@ -13,14 +13,31 @@ export default function robots(): MetadataRoute.Robots {
           '/admin/',
           '/_next/',
           '/checkout/',
+          '/private/',
+          '/*.json$',
+          '/temp/',
         ],
       },
       {
         userAgent: 'Googlebot',
         allow: '/',
-        disallow: ['/api/', '/admin/', '/checkout/'],
+        disallow: ['/api/', '/admin/', '/checkout/', '/private/'],
+        crawlDelay: 1,
+      },
+      {
+        userAgent: 'Bingbot',
+        allow: '/',
+        disallow: ['/api/', '/admin/', '/checkout/', '/private/'],
+        crawlDelay: 1,
+      },
+      {
+        userAgent: 'YandexBot',
+        allow: '/',
+        disallow: ['/api/', '/admin/', '/checkout/', '/private/'],
+        crawlDelay: 2,
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
+    host: baseUrl,
   }
 }
