@@ -58,7 +58,9 @@ export function RoomEditModal({ isOpen, onClose, room, onSave, isLoading = false
 
   const handleAmenitiesChange = (value: string) => {
     if (!editedRoom) return
+    console.log('Amenities input value:', value)
     const amenities = value.split(",").map((a) => a.trim()).filter(a => a)
+    console.log('Parsed amenities:', amenities)
     setEditedRoom({ ...editedRoom, amenities })
   }
 
@@ -229,20 +231,27 @@ export function RoomEditModal({ isOpen, onClose, room, onSave, isLoading = false
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="amenities">Olanaklar (virgülle ayırın)</Label>
-                  <Input
+                  <textarea
                     id="amenities"
                     value={editedRoom.amenities?.join(", ") || ""}
-                    onChange={(e) => handleAmenitiesChange(e.target.value)}
+                    onChange={(e) => {
+                      console.log('Textarea onChange triggered:', e.target.value)
+                      handleAmenitiesChange(e.target.value)
+                    }}
                     placeholder="Yatak, Klima, Oyuncak, Kamera, 7/24 Bakım"
+                    className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                    rows={2}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="features">Özellikler (virgülle ayırın)</Label>
-                  <Input
+                  <textarea
                     id="features"
                     value={editedRoom.features?.join(", ") || ""}
                     onChange={(e) => handleFeaturesChange(e.target.value)}
                     placeholder="Günlük temizlik, Doğal ışık, Ses yalıtımı"
+                    className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                    rows={2}
                   />
                 </div>
               </CardContent>
