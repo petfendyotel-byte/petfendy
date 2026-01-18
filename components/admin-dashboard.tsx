@@ -2297,6 +2297,183 @@ export function AdminDashboard() {
           </Card>
         </TabsContent>
 
+        {/* Edit Additional Service Modal */}
+        {editingAdditionalService && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <CardHeader>
+                <CardTitle>Ek Hizmet Düzenle</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium">Hizmet Adı</label>
+                    <Input
+                      value={editingAdditionalService.name}
+                      onChange={(e) => setEditingAdditionalService({
+                        ...editingAdditionalService,
+                        name: e.target.value
+                      })}
+                      placeholder="Hizmet adı"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Hizmet Türü</label>
+                    <select
+                      value={editingAdditionalService.type}
+                      onChange={(e) => setEditingAdditionalService({
+                        ...editingAdditionalService,
+                        type: e.target.value
+                      })}
+                      className="w-full px-3 py-2 border border-input rounded-md"
+                    >
+                      <option value="grooming">Traş ve Bakım</option>
+                      <option value="training">Eğitim</option>
+                      <option value="veterinary">Veteriner</option>
+                      <option value="transport">Ulaşım</option>
+                      <option value="other">Diğer</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium">Fiyatlandırma Türü</label>
+                    <select
+                      value={editingAdditionalService.pricingType}
+                      onChange={(e) => setEditingAdditionalService({
+                        ...editingAdditionalService,
+                        pricingType: e.target.value
+                      })}
+                      className="w-full px-3 py-2 border border-input rounded-md"
+                    >
+                      <option value="fixed">Sabit Fiyat</option>
+                      <option value="weight">Ağırlık Bazlı (kg)</option>
+                      <option value="hourly">Saatlik</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">
+                      {editingAdditionalService.pricingType === 'weight' ? 'KG Başına Fiyat (₺)' : 
+                       editingAdditionalService.pricingType === 'hourly' ? 'Saatlik Fiyat (₺)' : 
+                       'Sabit Fiyat (₺)'}
+                    </label>
+                    <Input
+                      type="number"
+                      value={editingAdditionalService.pricingType === 'weight' ? 
+                             editingAdditionalService.pricePerKg : 
+                             editingAdditionalService.pricingType === 'hourly' ?
+                             editingAdditionalService.pricePerHour :
+                             editingAdditionalService.basePrice}
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value) || 0
+                        if (editingAdditionalService.pricingType === 'weight') {
+                          setEditingAdditionalService({
+                            ...editingAdditionalService,
+                            pricePerKg: value
+                          })
+                        } else if (editingAdditionalService.pricingType === 'hourly') {
+                          setEditingAdditionalService({
+                            ...editingAdditionalService,
+                            pricePerHour: value
+                          })
+                        } else {
+                          setEditingAdditionalService({
+                            ...editingAdditionalService,
+                            basePrice: value
+                          })
+                        }
+                      }}
+                      placeholder="Fiyat"
+                    />
+                  </div>
+                </div>
+
+                {editingAdditionalService.pricingType === 'weight' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium">Min Ağırlık (kg)</label>
+                      <Input
+                        type="number"
+                        value={editingAdditionalService.minWeight || 1}
+                        onChange={(e) => setEditingAdditionalService({
+                          ...editingAdditionalService,
+                          minWeight: parseFloat(e.target.value) || 1
+                        })}
+                        placeholder="Min kg"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Max Ağırlık (kg)</label>
+                      <Input
+                        type="number"
+                        value={editingAdditionalService.maxWeight || 50}
+                        onChange={(e) => setEditingAdditionalService({
+                          ...editingAdditionalService,
+                          maxWeight: parseFloat(e.target.value) || 50
+                        })}
+                        placeholder="Max kg"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <label className="text-sm font-medium">Açıklama</label>
+                  <textarea
+                    value={editingAdditionalService.description}
+                    onChange={(e) => setEditingAdditionalService({
+                      ...editingAdditionalService,
+                      description: e.target.value
+                    })}
+                    placeholder="Hizmet açıklaması"
+                    className="w-full px-3 py-2 border border-input rounded-md"
+                    rows={3}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium">Süre</label>
+                    <Input
+                      value={editingAdditionalService.duration}
+                      onChange={(e) => setEditingAdditionalService({
+                        ...editingAdditionalService,
+                        duration: e.target.value
+                      })}
+                      placeholder="Örn: 1-2 saat"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">İkon (Emoji)</label>
+                    <Input
+                      value={editingAdditionalService.icon}
+                      onChange={(e) => setEditingAdditionalService({
+                        ...editingAdditionalService,
+                        icon: e.target.value
+                      })}
+                      placeholder="Örn: ✂️"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button onClick={handleUpdateAdditionalService} className="flex-1">
+                    Güncelle
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setEditingAdditionalService(null)}
+                    className="flex-1"
+                  >
+                    İptal
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* Pet Taksi Tab (Vehicles) */}
         <TabsContent value="vehicles" className="space-y-4">
           {/* Taksi KM Fiyat Ayarları */}
