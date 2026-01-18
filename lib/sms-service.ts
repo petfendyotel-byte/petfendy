@@ -141,125 +141,98 @@ class SMSService {
     }
   }
 
-  // Yeni üyelik bildirimi - Kullanıcıya (Ticari - İYS Kontrollü)
+  // ==============================================
+  // PETFENDY SMS BİLDİRİMLERİ - SADECE 2 DURUM
+  // ==============================================
+
+  // 1. YENİ ÜYELİK BİLDİRİMLERİ
+  // Yeni üye olan kullanıcıya hoş geldin SMS'i (Ticari - İYS Kontrollü)
   async sendWelcomeSMS(phone: string, name: string): Promise<boolean> {
     const message = `Merhaba ${name}! Petfendy'ye hoş geldiniz 🐾 Evcil dostlarınız için en iyi hizmeti sunmak için buradayız. Sorularınız için: 0532 307 32 64`
     return this.sendSMS({ to: phone, message }, true) // Ticari SMS - İYS kontrollü
   }
 
-  // Yeni üyelik bildirimi - İşletme sahibine (Bilgilendirme)
-  async sendNewUserNotificationSMS(
-    ownerPhone: string,
+  // Yeni üye bildirimi - Admin'e (Bilgilendirme)
+  async sendNewUserNotificationToAdmin(
     userName: string,
     userEmail: string,
     userPhone: string
   ): Promise<boolean> {
+    const adminPhone = process.env.ADMIN_PHONE
+    if (!adminPhone) {
+      console.error('[SMS] Admin telefon numarası tanımlı değil (ADMIN_PHONE)')
+      return false
+    }
+
     const message = `🆕 Yeni Üye! Ad: ${userName}, Tel: ${userPhone}, E-posta: ${userEmail} - Petfendy`
-    return this.sendSMS({ to: ownerPhone, message }, false) // İşletme içi bilgilendirme
+    return this.sendSMS({ to: adminPhone, message }, false) // Admin bildirimi
   }
 
-  // Doğrulama kodu SMS (Bilgilendirme - İYS Kontrolsüz)
-  async sendVerificationCodeSMS(phone: string, code: string): Promise<boolean> {
-    const message = `Petfendy doğrulama kodunuz: ${code}. Bu kod 15 dakika geçerlidir.`
-    return this.sendSMS({ to: phone, message }, false) // Güvenlik bildirimi - İYS kontrolsüz
-  }
-
-  // Rezervasyon onay SMS - Kullanıcıya (Ticari - İYS Kontrollü)
+  // 2. REZERVASYON BİLDİRİMLERİ
+  // Rezervasyon onay SMS'i - Kullanıcıya (Ticari - İYS Kontrollü)
   async sendBookingConfirmationSMS(
     phone: string,
-    bookingType: 'hotel' | 'taxi',
+    bookingType: 'hotel' | 'taxi' | 'daycare',
     details: string
   ): Promise<boolean> {
-    const typeText = bookingType === 'hotel' ? 'Pet Otel' : 'Pet Taksi'
+    const typeText = bookingType === 'hotel' ? 'Pet Otel' : 
+                     bookingType === 'taxi' ? 'Pet Taksi' : 'Pet Kreş'
     const message = `✅ ${typeText} rezervasyonunuz onaylandı! ${details} - Petfendy`
     return this.sendSMS({ to: phone, message }, true) // Ticari SMS - İYS kontrollü
   }
 
-  // Rezervasyon bildirimi - İşletme sahibine (Bilgilendirme)
-  async sendNewBookingNotificationSMS(
-    ownerPhone: string,
-    bookingType: 'hotel' | 'taxi',
+  // Yeni rezervasyon bildirimi - Admin'e (Bilgilendirme)
+  async sendNewBookingNotificationToAdmin(
+    bookingType: 'hotel' | 'taxi' | 'daycare',
     customerName: string,
     customerPhone: string,
     details: string
   ): Promise<boolean> {
-    const typeText = bookingType === 'hotel' ? 'Otel' : 'Taksi'
+    const adminPhone = process.env.ADMIN_PHONE
+    if (!adminPhone) {
+      console.error('[SMS] Admin telefon numarası tanımlı değil (ADMIN_PHONE)')
+      return false
+    }
+
+    const typeText = bookingType === 'hotel' ? 'Otel' : 
+                     bookingType === 'taxi' ? 'Taksi' : 'Kreş'
     const message = `🔔 Yeni ${typeText} Rezervasyonu! Müşteri: ${customerName} (${customerPhone}). ${details}`
-    return this.sendSMS({ to: ownerPhone, message }, false) // İşletme içi bilgilendirme
+    return this.sendSMS({ to: adminPhone, message }, false) // Admin bildirimi
   }
 
-  // =============================================
-  // ÖDEME BİLDİRİMLERİ
-  // =============================================
+  // ==============================================
+  // TOPLU BİLDİRİM FONKSİYONLARI
+  // ==============================================
 
-  // Ödeme başarılı - Müşteriye (Ticari - İYS Kontrollü)
-  async sendPaymentSuccessSMS(
-    phone: string,
-    amount: string,
-    bookingType: 'hotel' | 'taxi',
-    bookingRef: string
-  ): Promise<boolean> {
-    const typeText = bookingType === 'hotel' ? 'Pet Otel' : 'Pet Taksi'
-    const message = `✅ Ödemeniz alındı! ${typeText} - ${amount} TL. Ref: ${bookingRef}. Detaylar için: petfendy.com - Petfendy`
-    return this.sendSMS({ to: phone, message }, true) // Ticari SMS - İYS kontrollü
+  // Yeni üyelik - Hem kullanıcıya hem admin'e bildirim gönder
+  async sendNewUserNotifications(
+    userName: string,
+    userEmail: string,
+    userPhone: string
+  ): Promise<{ userSMS: boolean; adminSMS: boolean }> {
+    const userSMS = await this.sendWelcomeSMS(userPhone, userName)
+    const adminSMS = await this.sendNewUserNotificationToAdmin(userName, userEmail, userPhone)
+    
+    console.log(`📱 [SMS] Yeni üye bildirimleri - Kullanıcı: ${userSMS ? '✅' : '❌'}, Admin: ${adminSMS ? '✅' : '❌'}`)
+    
+    return { userSMS, adminSMS }
   }
 
-  // Ödeme başarılı - İşletme sahibine (Bilgilendirme)
-  async sendPaymentReceivedNotificationSMS(
-    ownerPhone: string,
+  // Yeni rezervasyon - Hem kullanıcıya hem admin'e bildirim gönder
+  async sendNewBookingNotifications(
+    bookingType: 'hotel' | 'taxi' | 'daycare',
     customerName: string,
-    amount: string,
-    bookingType: 'hotel' | 'taxi',
-    bookingRef: string
-  ): Promise<boolean> {
-    const typeText = bookingType === 'hotel' ? 'Otel' : 'Taksi'
-    const message = `💰 Ödeme Alındı! ${typeText} - ${amount} TL. Müşteri: ${customerName}. Ref: ${bookingRef}`
-    return this.sendSMS({ to: ownerPhone, message }, false) // İşletme içi bilgilendirme
+    customerPhone: string,
+    details: string
+  ): Promise<{ userSMS: boolean; adminSMS: boolean }> {
+    const userSMS = await this.sendBookingConfirmationSMS(customerPhone, bookingType, details)
+    const adminSMS = await this.sendNewBookingNotificationToAdmin(bookingType, customerName, customerPhone, details)
+    
+    console.log(`📱 [SMS] Rezervasyon bildirimleri - Kullanıcı: ${userSMS ? '✅' : '❌'}, Admin: ${adminSMS ? '✅' : '❌'}`)
+    
+    return { userSMS, adminSMS }
   }
 
-  // Ödeme başarısız - Müşteriye (Ticari - İYS Kontrollü)
-  async sendPaymentFailedSMS(
-    phone: string,
-    bookingType: 'hotel' | 'taxi'
-  ): Promise<boolean> {
-    const typeText = bookingType === 'hotel' ? 'Pet Otel' : 'Pet Taksi'
-    const message = `❌ ${typeText} ödemeniz başarısız oldu. Lütfen tekrar deneyin veya farklı bir kart kullanın. Destek: 0532 307 32 64 - Petfendy`
-    return this.sendSMS({ to: phone, message }, true) // Ticari SMS - İYS kontrollü
-  }
-
-  // Rezervasyon hatırlatma - Müşteriye (Ticari - İYS Kontrollü)
-  async sendBookingReminderSMS(
-    phone: string,
-    bookingType: 'hotel' | 'taxi',
-    date: string,
-    time: string
-  ): Promise<boolean> {
-    const typeText = bookingType === 'hotel' ? 'Pet Otel' : 'Pet Taksi'
-    const message = `⏰ Hatırlatma: ${typeText} rezervasyonunuz yarın ${date} saat ${time}'de. Sorularınız için: 0532 307 32 64 - Petfendy`
-    return this.sendSMS({ to: phone, message }, true) // Ticari SMS - İYS kontrollü
-  }
-
-  // İptal bildirimi - Müşteriye (Ticari - İYS Kontrollü)
-  async sendBookingCancelledSMS(
-    phone: string,
-    bookingType: 'hotel' | 'taxi',
-    refundAmount?: string
-  ): Promise<boolean> {
-    const typeText = bookingType === 'hotel' ? 'Pet Otel' : 'Pet Taksi'
-    const refundText = refundAmount ? ` ${refundAmount} TL iade edilecektir.` : ''
-    const message = `🚫 ${typeText} rezervasyonunuz iptal edildi.${refundText} Sorularınız için: 0532 307 32 64 - Petfendy`
-    return this.sendSMS({ to: phone, message }, true) // Ticari SMS - İYS kontrollü
-  }
-
-  // İade bildirimi - Müşteriye (Ticari - İYS Kontrollü)
-  async sendRefundProcessedSMS(
-    phone: string,
-    amount: string,
-    bookingRef: string
-  ): Promise<boolean> {
-    const message = `💳 İadeniz işleme alındı! ${amount} TL, 7-14 iş günü içinde kartınıza yansıyacaktır. Ref: ${bookingRef} - Petfendy`
-    return this.sendSMS({ to: phone, message }, true) // Ticari SMS - İYS kontrollü
-  }
 }
 
 export const smsService = new SMSService()

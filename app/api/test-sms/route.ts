@@ -25,11 +25,15 @@ export async function POST(request: NextRequest) {
         testData = { name }
         break
       
-      case 'verification':
-        const code = Math.floor(100000 + Math.random() * 900000).toString()
-        result = await smsService.sendVerificationCodeSMS(phone, code)
-        message = `Doğrulama kodu SMS\'i gönderildi`
-        testData = { code }
+      case 'new-user':
+        const testResult = await smsService.sendNewUserNotifications(
+          name,
+          'test@example.com',
+          phone
+        )
+        result = testResult.userSMS && testResult.adminSMS
+        message = `Yeni üye bildirimleri gönderildi - Kullanıcı: ${testResult.userSMS ? '✅' : '❌'}, Admin: ${testResult.adminSMS ? '✅' : '❌'}`
+        testData = { userSMS: testResult.userSMS, adminSMS: testResult.adminSMS }
         break
       
       case 'booking':
@@ -42,31 +46,21 @@ export async function POST(request: NextRequest) {
         testData = { bookingType: 'hotel', details: 'Test Otel Rezervasyonu - 25 Ocak 2026, Saat: 14:00' }
         break
       
-      case 'payment':
-        result = await smsService.sendPaymentSuccessSMS(
-          phone, 
-          '150', 
-          'hotel', 
-          'TEST123456'
-        )
-        message = 'Ödeme başarılı SMS\'i gönderildi'
-        testData = { amount: '150 TL', bookingRef: 'TEST123456' }
-        break
-      
-      case 'reminder':
-        result = await smsService.sendBookingReminderSMS(
-          phone,
+      case 'new-booking':
+        const bookingResult = await smsService.sendNewBookingNotifications(
           'hotel',
-          '26 Ocak 2026',
-          '14:00'
+          name,
+          phone,
+          'Test Otel Rezervasyonu - 25 Ocak 2026, Saat: 14:00'
         )
-        message = 'Rezervasyon hatırlatma SMS\'i gönderildi'
-        testData = { date: '26 Ocak 2026', time: '14:00' }
+        result = bookingResult.userSMS && bookingResult.adminSMS
+        message = `Rezervasyon bildirimleri gönderildi - Kullanıcı: ${bookingResult.userSMS ? '✅' : '❌'}, Admin: ${bookingResult.adminSMS ? '✅' : '❌'}`
+        testData = { userSMS: bookingResult.userSMS, adminSMS: bookingResult.adminSMS }
         break
       
       default:
         return NextResponse.json(
-          { success: false, error: 'Geçersiz SMS türü. Geçerli türler: welcome, verification, booking, payment, reminder' },
+          { success: false, error: 'Geçersiz SMS türü. Geçerli türler: welcome, new-user, booking, new-booking' },
           { status: 400 }
         )
     }
@@ -100,16 +94,22 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   return NextResponse.json({
-    message: 'NetGSM SMS Test API - Petfendy',
+    message: 'Petfendy SMS Test API - Sadeleştirilmiş Versiyon',
     status: 'SMS servisi aktif (NetGSM XML API)',
     usage: {
       method: 'POST',
       endpoint: '/api/test-sms',
       body: {
         phone: '05321234567 (zorunlu)',
-        type: 'welcome | verification | booking | payment | reminder',
-        name: 'Test Kullanıcı (opsiyonel, sadece welcome için)'
+        type: 'welcome | new-user | booking | new-booking',
+        name: 'Test Kullanıcı (opsiyonel)'
       }
+    },
+    smsTypes: {
+      welcome: 'Sadece kullanıcıya hoş geldin SMS\'i',
+      'new-user': 'Hem kullanıcıya hem admin\'e yeni üye bildirimi',
+      booking: 'Sadece kullanıcıya rezervasyon onay SMS\'i',
+      'new-booking': 'Hem kullanıcıya hem admin\'e rezervasyon bildirimi'
     },
     examples: [
       {
@@ -117,32 +117,29 @@ export async function GET() {
         body: { phone: '05321234567', type: 'welcome', name: 'Ahmet Yılmaz' }
       },
       {
-        description: 'Doğrulama kodu SMS\'i test et',
-        body: { phone: '05321234567', type: 'verification' }
+        description: 'Yeni üye bildirimleri test et (kullanıcı + admin)',
+        body: { phone: '05321234567', type: 'new-user', name: 'Ahmet Yılmaz' }
       },
       {
         description: 'Rezervasyon onay SMS\'i test et',
         body: { phone: '05321234567', type: 'booking' }
       },
       {
-        description: 'Ödeme başarılı SMS\'i test et',
-        body: { phone: '05321234567', type: 'payment' }
-      },
-      {
-        description: 'Rezervasyon hatırlatma SMS\'i test et',
-        body: { phone: '05321234567', type: 'reminder' }
+        description: 'Rezervasyon bildirimleri test et (kullanıcı + admin)',
+        body: { phone: '05321234567', type: 'new-booking', name: 'Ahmet Yılmaz' }
       }
     ],
+    adminPhone: process.env.ADMIN_PHONE || 'Tanımlı değil',
     netgsmInfo: {
       altKullanici: 'bilge.corumlu@gmail.com',
       apiYetkilisi: 'BİLGE GÜLER (petfendyotel@gmail.com)',
       gondericiAdi: 'PETFENDY',
       apiEndpoint: 'https://api.netgsm.com.tr/sms/send/xml',
       encoding: 'TR (Türkçe karakter desteği)',
+      kullanim: 'Sadece yeni üyelik ve rezervasyon bildirimleri',
       iysUyumluluk: {
-        ticariSMS: 'iysfilter=11 (İYS kontrollü)',
-        bilgilendirmeSMS: 'iysfilter=0 (İYS kontrolsüz)',
-        uyari: 'Ticari SMS\'ler sadece İYS\'de kayıtlı numaralara gönderilir'
+        ticariSMS: 'Kullanıcılara gönderilen SMS\'ler (İYS kontrollü)',
+        bilgilendirmeSMS: 'Admin\'e gönderilen SMS\'ler (İYS kontrolsüz)'
       }
     }
   })

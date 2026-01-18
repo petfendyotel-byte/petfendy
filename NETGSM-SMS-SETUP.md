@@ -16,6 +16,7 @@ SMS_PROVIDER=netgsm
 NETGSM_USERNAME=bilge.corumlu@gmail.com
 NETGSM_PASSWORD=Netgsm.petfendy52707.
 NETGSM_SENDER=PETFENDY
+ADMIN_PHONE=5053921293
 ```
 
 ### NetGSM Panel Durumu
@@ -32,7 +33,29 @@ NETGSM_SENDER=PETFENDY
 
 ### Test Örnekleri
 
-#### 1. Hoş Geldin SMS'i Test Et
+#### 1. Yeni Üye Bildirimleri Test Et (Kullanıcı + Admin)
+```bash
+curl -X POST http://localhost:3000/api/test-sms \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phone": "05321234567",
+    "type": "new-user",
+    "name": "Ahmet Yılmaz"
+  }'
+```
+
+#### 2. Rezervasyon Bildirimleri Test Et (Kullanıcı + Admin)
+```bash
+curl -X POST http://localhost:3000/api/test-sms \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phone": "05321234567",
+    "type": "new-booking",
+    "name": "Ahmet Yılmaz"
+  }'
+```
+
+#### 3. Sadece Hoş Geldin SMS'i Test Et
 ```bash
 curl -X POST http://localhost:3000/api/test-sms \
   -H "Content-Type: application/json" \
@@ -43,17 +66,7 @@ curl -X POST http://localhost:3000/api/test-sms \
   }'
 ```
 
-#### 2. Doğrulama Kodu SMS'i Test Et
-```bash
-curl -X POST http://localhost:3000/api/test-sms \
-  -H "Content-Type: application/json" \
-  -d '{
-    "phone": "05321234567",
-    "type": "verification"
-  }'
-```
-
-#### 3. Rezervasyon Onay SMS'i Test Et
+#### 4. Sadece Rezervasyon Onay SMS'i Test Et
 ```bash
 curl -X POST http://localhost:3000/api/test-sms \
   -H "Content-Type: application/json" \
@@ -63,37 +76,36 @@ curl -X POST http://localhost:3000/api/test-sms \
   }'
 ```
 
-#### 4. Ödeme Başarılı SMS'i Test Et
-```bash
-curl -X POST http://localhost:3000/api/test-sms \
-  -H "Content-Type: application/json" \
-  -d '{
-    "phone": "05321234567",
-    "type": "payment"
-  }'
+## Petfendy SMS Kullanım Senaryoları
+
+### 📱 Sadece 2 Durum İçin SMS Kullanılacak:
+
+#### 1. 🆕 Yeni Üyelik
+- **Kullanıcıya:** Hoş geldin mesajı (Ticari - İYS kontrollü)
+- **Admin'e:** Yeni üye bildirimi (Bilgilendirme - İYS kontrolsüz)
+
+#### 2. 📅 Rezervasyon Yapıldığında
+- **Kullanıcıya:** Rezervasyon onay mesajı (Ticari - İYS kontrollü)
+- **Admin'e:** Yeni rezervasyon bildirimi (Bilgilendirme - İYS kontrolsüz)
+
+### 🎯 Toplu Bildirim Fonksiyonları
+
+```typescript
+// Yeni üye - Hem kullanıcıya hem admin'e
+await smsService.sendNewUserNotifications(
+  'Ahmet Yılmaz',
+  'ahmet@example.com', 
+  '05321234567'
+)
+
+// Yeni rezervasyon - Hem kullanıcıya hem admin'e
+await smsService.sendNewBookingNotifications(
+  'hotel',
+  'Ahmet Yılmaz',
+  '05321234567',
+  'Pet Otel - 25 Ocak 2026, Saat: 14:00'
+)
 ```
-
-## SMS Türleri ve İYS Uyumluluğu
-
-### 🔴 Ticari SMS'ler (İYS Kontrollü - iysfilter=11)
-Bu SMS'ler müşterilere gönderilir ve İYS'de kayıtlı olmayan numaralara gönderilmez:
-
-1. **Hoş Geldin Mesajı** - Yeni üyelik (Ticari içerik)
-2. **Rezervasyon Onayı** - Pet otel/taksi rezervasyonu (Ticari içerik)
-3. **Ödeme Bildirimleri** - Başarılı/başarısız ödeme (Ticari içerik)
-4. **Hatırlatma** - Rezervasyon hatırlatması (Ticari içerik)
-5. **İptal/İade** - Rezervasyon iptali ve iade bildirimleri (Ticari içerik)
-
-### 🟢 Bilgilendirme SMS'leri (İYS Kontrolsüz - iysfilter=0)
-Bu SMS'ler güvenlik/bilgilendirme amaçlı olup İYS kontrolü yapılmaz:
-
-1. **Doğrulama Kodu** - Telefon doğrulama (Güvenlik)
-2. **İşletme Bildirimleri** - İşletme sahibine gönderilen bildirimler
-
-### ⚠️ İYS Uyarısı
-- Müşterilere gönderilen ticari SMS'ler İYS'de kayıtlı olmayan numaralara GÖNDERİLMEZ
-- Müşterilerinizin İYS'de "Petfendy" markası için izin vermiş olması gerekir
-- İYS kaydı olmayan müşteriler SMS alamayacaktır
 
 ## NetGSM Panel Kontrolleri
 
