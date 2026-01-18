@@ -139,7 +139,7 @@ export function AdminDashboard() {
     pricePerKm: 0,
     capacity: 1,
     description: "",
-    features: "",
+    features: [] as string[],
   })
 
   const [newRoomPricing, setNewRoomPricing] = useState({
@@ -722,13 +722,13 @@ export function AdminDashboard() {
       capacity: newVehicle.capacity,
       isAvailable: true,
       description: sanitizeInput(newVehicle.description),
-      features: newVehicle.features ? newVehicle.features.split(',').map(f => sanitizeInput(f.trim())) : [],
+      features: newVehicle.features.filter(f => f.trim()),
       createdAt: new Date(),
       updatedAt: new Date()
     }
 
     saveTaxiVehicles([...taxiVehicles, vehicle])
-    setNewVehicle({ name: "", type: "vip", pricePerKm: 0, capacity: 1, description: "", features: "" })
+    setNewVehicle({ name: "", type: "vip", pricePerKm: 0, capacity: 1, description: "", features: [] })
     setShowAddVehicle(false)
 
     toast({
@@ -2607,8 +2607,11 @@ export function AdminDashboard() {
                   <label className="text-sm font-medium">Özellikler (virgülle ayırın)</label>
                   <Input
                     placeholder="Örn: Klimalı, Hayvan kafesi, Su kabı"
-                    value={newVehicle.features}
-                    onChange={(e) => setNewVehicle({ ...newVehicle, features: e.target.value })}
+                    value={newVehicle.features.join(", ")}
+                    onChange={(e) => setNewVehicle({ 
+                      ...newVehicle, 
+                      features: e.target.value.split(",").map(f => f.trim()).filter(f => f)
+                    })}
                   />
                 </div>
 
@@ -2620,7 +2623,7 @@ export function AdminDashboard() {
                     variant="outline"
                     onClick={() => {
                       setShowAddVehicle(false)
-                      setNewVehicle({ name: "", type: "vip", pricePerKm: 0, capacity: 1, description: "", features: "" })
+                      setNewVehicle({ name: "", type: "vip", pricePerKm: 0, capacity: 1, description: "", features: [] })
                     }}
                     className="flex-1"
                   >
