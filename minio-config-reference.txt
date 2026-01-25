@@ -1,0 +1,86 @@
+═══════════════════════════════════════════════════════════
+  PETFENDY - MinIO YAPILANDIRMA BİLGİLERİ
+═══════════════════════════════════════════════════════════
+
+📦 MİNIO SERVİS BİLGİLERİ
+─────────────────────────────────────────────────────────
+Service Name:     petfendy-minio
+Root User:        petfendy_admin
+Root Password:    PetF3ndy2024!MinIO#Secure
+Bucket Name:      petfendy
+Region:           us-east-1
+
+🌐 URL'LER
+─────────────────────────────────────────────────────────
+Coolify URL:      http://46.224.248.228:8000
+MinIO Console:    http://46.224.248.228:9001
+                  (veya sslip.io URL'i)
+MinIO API:        http://46.224.248.228:9000
+                  (veya sslip.io URL'i)
+
+🔐 GİRİŞ BİLGİLERİ
+─────────────────────────────────────────────────────────
+Username:         petfendy_admin
+Password:         PetF3ndy2024!MinIO#Secure
+
+📝 ENVIRONMENT VARIABLES (Petfendy Application)
+─────────────────────────────────────────────────────────
+AWS_ACCESS_KEY_ID=petfendy_admin
+AWS_SECRET_ACCESS_KEY=PetF3ndy2024!MinIO#Secure
+AWS_REGION=us-east-1
+S3_BUCKET=petfendy
+S3_ENDPOINT=http://46.224.248.228:9000
+S3_PUBLIC_URL=http://46.224.248.228:9000/petfendy
+
+NOT: S3_ENDPOINT ve S3_PUBLIC_URL değerlerini kendi 
+     MinIO API URL'inle değiştir!
+
+🎯 HIZLI KURULUM ADIMLARI
+─────────────────────────────────────────────────────────
+1. Coolify → Resources → New → Service → MinIO
+2. Service bilgilerini gir ve Deploy
+3. MinIO Console'a giriş yap
+4. Bucket oluştur: "petfendy"
+5. Bucket'ı public yap (Access: readonly)
+6. Environment variables'ı Petfendy'e ekle
+7. Application'ı restart et
+8. Test et!
+
+🧪 TEST ADIMLARI
+─────────────────────────────────────────────────────────
+1. MinIO Console → Buckets → petfendy
+2. Upload ile test resmi yükle
+3. Dosyaya tıkla → Share → URL'i kopyala
+4. Tarayıcıda aç → Resim görünmeli ✓
+
+5. Petfendy → Admin Panel → Oda Ekle
+6. Resim yükle
+7. MinIO Console'da dosyanın geldiğini kontrol et ✓
+
+📚 DÖKÜMANTASYON
+─────────────────────────────────────────────────────────
+Detaylı Kurulum:  COOLIFY-MINIO-SETUP.md
+Hızlı Kurulum:    MINIO-QUICK-SETUP.md
+Kontrol Listesi:  MINIO-CHECKLIST.md
+
+🔧 SORUN GİDERME
+─────────────────────────────────────────────────────────
+"Access Denied"
+→ Bucket policy'yi kontrol et (readonly olmalı)
+
+"Connection Refused"
+→ MinIO service çalışıyor mu kontrol et
+
+"Upload çalışmıyor"
+→ Environment variables ve S3_ENDPOINT kontrol et
+
+"Dosyalar görünmüyor"
+→ S3_PUBLIC_URL ve bucket policy kontrol et
+
+📞 YARDIM
+─────────────────────────────────────────────────────────
+Sorun mu yaşıyorsun? Bana söyle, yardımcı olayım! 🚀
+
+═══════════════════════════════════════════════════════════
+  Son Güncelleme: 2026-01-17
+═══════════════════════════════════════════════════════════

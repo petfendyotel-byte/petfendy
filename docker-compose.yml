@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: petfendy-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: petfendy
+      POSTGRES_USER: petfendy_user
+      POSTGRES_PASSWORD: PetF3ndy2024!Secure#DB
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U petfendy_user -d petfendy"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Next.js Application
+  app:
+    build:
+      context: ./petfendy
+      dockerfile: Dockerfile
+    container_name: petfendy-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Database
+      DATABASE_URL: postgresql://petfendy_user:PetF3ndy2024!Secure#DB@postgres:5432/petfendy
+      
+      # Node
+      NODE_ENV: production
+      
+      # Security
+      JWT_SECRET: E8olK0XnK5F+vhQDGHBPm2LKLf3hR2PfORHVbUDNepL+HNZJT4FShJu94aam5YwXoQoVwfykla6T7TU3q7aiWA==
+      JWT_REFRESH_SECRET: 1+jhAqkT51p2wrpSScc5L9uog7QmvHwiil3UaxA2nYY7s/C7EAZW+cQbbV6tlCFp+16oyBDzd7tYvw+jSNc2NA==
+      ENCRYPTION_KEY: 4GpznE9D7jyNGZD+W+Z2CfP0jzC3eZe5JNR5Lt8o7vc=
+      
+      # Admin
+      NEXT_PUBLIC_TEST_ADMIN_EMAIL: petfendyotel@gmail.com
+      NEXT_PUBLIC_TEST_ADMIN_PASSWORD_HASH: $$2b$$12$$C8.izTK3qs/MOrucqQzw5.potXQo7b21fHT/Z4EnM6jEmZNZ7EGN2
+      
+      # SMS
+      SMS_PROVIDER: mock
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./petfendy/public/uploads:/app/public/uploads
+    command: sh -c "npx prisma db push && npm start"
+
+volumes:
+  postgres_data:
+    driver: local

@@ -1,0 +1,6 @@
+﻿AWS_ACCESS_KEY_ID=petfendy_admin
+AWS_SECRET_ACCESS_KEY=PetF3ndy2024!MinIO#Secure
+AWS_REGION=us-east-1
+S3_BUCKET=petfendy
+S3_ENDPOINT=https://console-c44o8cow04s804ss48soc4w4.46.224.248.228.sslip.io/
+S3_PUBLIC_URL=https://console-c44o8cow04s804ss48soc4w4.46.224.248.228.sslip.io//petfendy

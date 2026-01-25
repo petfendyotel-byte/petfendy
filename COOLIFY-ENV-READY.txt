@@ -1,0 +1,44 @@
+# Petfendy - Coolify Environment Variables
+# Kopyala-yapıştır için hazır!
+
+# ============================================
+# DATABASE (PostgreSQL'den aldığın)
+# ============================================
+DATABASE_URL=postgres://postgres:QTLv9rzUDyYQ5GFQIsUGc7rA2fm843iL91bvALTdI2qUUjmDDeFgPUvVm9xNoBnI@pw0cos400cwk84o4kwc0k0gc:5432/postgres
+
+# ============================================
+# NODE ENVIRONMENT
+# ============================================
+NODE_ENV=production
+
+# ============================================
+# SECURITY - JWT & ENCRYPTION
+# ============================================
+JWT_SECRET=E8olK0XnK5F+vhQDGHBPm2LKLf3hR2PfORHVbUDNepL+HNZJT4FShJu94aam5YwXoQoVwfykla6T7TU3q7aiWA==
+
+JWT_REFRESH_SECRET=1+jhAqkT51p2wrpSScc5L9uog7QmvHwiil3UaxA2nYY7s/C7EAZW+cQbbV6tlCFp+16oyBDzd7tYvw+jSNc2NA==
+
+ENCRYPTION_KEY=4GpznE9D7jyNGZD+W+Z2CfP0jzC3eZe5JNR5Lt8o7vc=
+
+# ============================================
+# ADMIN CREDENTIALS (Test)
+# ============================================
+NEXT_PUBLIC_TEST_ADMIN_EMAIL=petfendyotel@gmail.com
+
+NEXT_PUBLIC_TEST_ADMIN_PASSWORD_HASH=$2b$12$C8.izTK3qs/MOrucqQzw5.potXQo7b21fHT/Z4EnM6jEmZNZ7EGN2
+
+# ============================================
+# SMS SERVICE (Mock mode - gerçek SMS göndermez)
+# ============================================
+SMS_PROVIDER=mock
+
+# ============================================
+# OPSIYONEL (Şimdilik boş bırakabilirsin)
+# ============================================
+# SENDGRID_API_KEY=
+# SENDGRID_FROM_EMAIL=noreply@petfendy.com
+# NETGSM_USERNAME=
+# NETGSM_PASSWORD=
+# NETGSM_SENDER=PETFENDY
+# GOOGLE_MAPS_API_KEY=
+# INSTAGRAM_ACCESS_TOKEN=

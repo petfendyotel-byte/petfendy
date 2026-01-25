@@ -1,0 +1,44 @@
+═══════════════════════════════════════════════════════════
+  PETFENDY - MinIO Environment Variables
+  COOLIFY'A EKLENECEK DEĞERLER
+═══════════════════════════════════════════════════════════
+
+📋 KOPYALA-YAPIŞTIR İÇİN HAZIR:
+
+AWS_ACCESS_KEY_ID=JTIufur386jHCyMy
+AWS_SECRET_ACCESS_KEY=ul8wzUgISnqFbrf1oN92q1cAtP8zioAS
+AWS_REGION=us-east-1
+S3_BUCKET=petfendy
+S3_ENDPOINT=https://minio-c44o8cow04s804ss48soc4w4.46.224.248.228.sslip.io
+S3_PUBLIC_URL=https://minio-c44o8cow04s804ss48soc4w4.46.224.248.228.sslip.io/petfendy
+
+═══════════════════════════════════════════════════════════
+
+📝 NASIL EKLENİR:
+
+1. Coolify'a git: http://46.224.248.228:8000
+2. Petfendy application'ına tıkla
+3. "Environment Variables" bölümünü bul
+4. Yukarıdaki 6 değişkeni tek tek ekle
+5. "Save" tıkla
+
+═══════════════════════════════════════════════════════════
+
+🔐 MinIO GİRİŞ BİLGİLERİ:
+
+Console URL: https://console-c44o8cow04s804ss48soc4w4.46.224.248.228.sslip.io
+Username: JTIufur386jHCyMy
+Password: ul8wzUgISnqFbrf1oN92q1cAtP8zioAS
+
+═══════════════════════════════════════════════════════════
+
+✅ SONRAKİ ADIMLAR:
+
+1. MinIO Console'a giriş yap
+2. "petfendy" bucket'ı oluştur
+3. Bucket'ı public yap (Access: readonly)
+4. Environment variables'ı Coolify'a ekle
+5. Application'ı restart et
+6. Test et!
+
+═══════════════════════════════════════════════════════════
