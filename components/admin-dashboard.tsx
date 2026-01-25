@@ -87,6 +87,7 @@ export function AdminDashboard() {
   const [additionalServices, setAdditionalServices] = useState<any[]>([])
   const [aboutPage, setAboutPage] = useState<AboutPage | null>(null)
   const [paymentGateways, setPaymentGateways] = useState<PaymentGateway[]>([])
+  const [pages, setPages] = useState<any[]>([])
   const [showAddGateway, setShowAddGateway] = useState(false)
   const [editingGateway, setEditingGateway] = useState<PaymentGateway | null>(null)
   const [showCredentials, setShowCredentials] = useState<Record<string, boolean>>({})
@@ -103,6 +104,8 @@ export function AdminDashboard() {
   const [showAddRoomPricing, setShowAddRoomPricing] = useState(false)
   const [showAddAdditionalService, setShowAddAdditionalService] = useState(false)
   const [editingAdditionalService, setEditingAdditionalService] = useState<any>(null)
+  const [showAddPage, setShowAddPage] = useState(false)
+  const [editingPage, setEditingPage] = useState<any>(null)
   
   // Filter states
   const [orderFilter, setOrderFilter] = useState<string>("all")
@@ -166,6 +169,22 @@ export function AdminDashboard() {
     icon: "✂️",
   })
 
+  const [newPage, setNewPage] = useState({
+    title: "",
+    slug: "",
+    content: "",
+    excerpt: "",
+    metaTitle: "",
+    metaDescription: "",
+    heroImage: "",
+    published: false,
+    showInMenu: false,
+    menuOrder: 0,
+    parentSlug: "",
+    pageType: "page",
+    customFields: {}
+  })
+
   // Taksi km fiyat ayarları
   const [taxiPrices, setTaxiPrices] = useState({
     vipPricePerKm: 0,
@@ -208,6 +227,73 @@ export function AdminDashboard() {
     maxInstallment: 12,
     currency: "TL"
   })
+
+  // API Functions for Pages
+  const fetchPages = async () => {
+    try {
+      const response = await fetch('/api/pages?includeUnpublished=true')
+      if (response.ok) {
+        const data = await response.json()
+        setPages(data.pages || [])
+      } else {
+        console.error('Failed to fetch pages:', response.statusText)
+        setPages([])
+      }
+    } catch (error) {
+      console.error('Failed to fetch pages:', error)
+      setPages([])
+    }
+  }
+
+  const createPageAPI = async (pageData: any): Promise<any | null> => {
+    try {
+      const response = await fetch('/api/pages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pageData)
+      })
+      if (response.ok) {
+        return await response.json()
+      }
+      const errorData = await response.json()
+      throw new Error(errorData.error || 'Failed to create page')
+    } catch (error) {
+      console.error('Failed to create page:', error)
+      throw error
+    }
+  }
+
+  const updatePageAPI = async (slug: string, pageData: any): Promise<any | null> => {
+    try {
+      const response = await fetch(`/api/pages/${slug}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pageData)
+      })
+      if (response.ok) {
+        return await response.json()
+      }
+      const errorData = await response.json()
+      throw new Error(errorData.error || 'Failed to update page')
+    } catch (error) {
+      console.error('Failed to update page:', error)
+      throw error
+    }
+  }
+
+  const deletePageAPI = async (slug: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`/api/pages/${slug}`, { method: 'DELETE' })
+      if (response.ok) {
+        return true
+      }
+      const errorData = await response.json()
+      throw new Error(errorData.error || 'Failed to delete page')
+    } catch (error) {
+      console.error('Failed to delete page:', error)
+      throw error
+    }
+  }
 
   // API Functions for Rooms
   const fetchRooms = async () => {
@@ -310,6 +396,9 @@ export function AdminDashboard() {
   useEffect(() => {
     // Fetch rooms from API
     fetchRooms()
+    
+    // Fetch pages from API
+    fetchPages()
 
     // Load other data from localStorage (will be migrated later)
     const storedOrders = JSON.parse(localStorage.getItem("petfendy_orders") || "[]")
@@ -498,6 +587,125 @@ export function AdminDashboard() {
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new Event('additionalServicesUpdated'))
     }
+  }
+
+  // Page management
+  const handleAddPage = async () => {
+    if (!newPage.title || !newPage.content) {
+      toast({
+        title: "Hata",
+        description: "Başlık ve içerik zorunludur",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      // Generate slug if not provided
+      const slug = newPage.slug || generateSlugFromTitle(newPage.title)
+      
+      const pageData = {
+        ...newPage,
+        slug,
+        menuOrder: parseInt(newPage.menuOrder.toString()) || 0
+      }
+
+      await createPageAPI(pageData)
+      await fetchPages() // Refresh pages list
+
+      setNewPage({
+        title: "",
+        slug: "",
+        content: "",
+        excerpt: "",
+        metaTitle: "",
+        metaDescription: "",
+        heroImage: "",
+        published: false,
+        showInMenu: false,
+        menuOrder: 0,
+        parentSlug: "",
+        pageType: "page",
+        customFields: {}
+      })
+      setShowAddPage(false)
+
+      toast({
+        title: "✅ Başarılı",
+        description: `${pageData.title} sayfası eklendi`,
+      })
+    } catch (error: any) {
+      toast({
+        title: "Hata",
+        description: error.message || "Sayfa eklenirken hata oluştu",
+        variant: "destructive"
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleUpdatePage = async (updatedPage: any) => {
+    setIsLoading(true)
+
+    try {
+      await updatePageAPI(editingPage.slug, updatedPage)
+      await fetchPages() // Refresh pages list
+      setEditingPage(null)
+
+      toast({
+        title: "✅ Güncellendi",
+        description: `${updatedPage.title} sayfası güncellendi`,
+      })
+    } catch (error: any) {
+      toast({
+        title: "Hata",
+        description: error.message || "Sayfa güncellenirken hata oluştu",
+        variant: "destructive"
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleDeletePage = async (slug: string) => {
+    const page = pages.find(p => p.slug === slug)
+    
+    if (!confirm(`"${page?.title}" sayfasını silmek istediğinizden emin misiniz?`)) {
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      await deletePageAPI(slug)
+      await fetchPages() // Refresh pages list
+
+      toast({
+        title: "🗑️ Silindi",
+        description: `${page?.title} sayfası silindi`,
+      })
+    } catch (error: any) {
+      toast({
+        title: "Hata",
+        description: error.message || "Sayfa silinirken hata oluştu",
+        variant: "destructive"
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const generateSlugFromTitle = (title: string): string => {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single
+      .trim()
+      .substring(0, 100) // Limit length
   }
 
   // Room management
@@ -1394,7 +1602,11 @@ export function AdminDashboard() {
             </TabsTrigger>
             <TabsTrigger value="pages" className="flex-shrink-0 gap-1.5 px-3 py-2.5 text-xs font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <FileText className="w-4 h-4" />
-              <span>Sayfalar</span>
+              <span>Sayfa Yönetimi</span>
+            </TabsTrigger>
+            <TabsTrigger value="about" className="flex-shrink-0 gap-1.5 px-3 py-2.5 text-xs font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <FileText className="w-4 h-4" />
+              <span>Hakkımızda</span>
             </TabsTrigger>
             <TabsTrigger value="reports" className="flex-shrink-0 gap-1.5 px-3 py-2.5 text-xs font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <TrendingUp className="w-4 h-4" />
@@ -3328,6 +3540,269 @@ export function AdminDashboard() {
 
         {/* Pages Tab */}
         <TabsContent value="pages" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>Sayfa Yönetimi</CardTitle>
+                  <CardDescription>
+                    Sitenizin tüm sayfalarını buradan yönetebilirsiniz. Yeni sayfa ekleyebilir, mevcut sayfaları düzenleyebilir veya silebilirsiniz.
+                  </CardDescription>
+                </div>
+                <Button onClick={() => setShowAddPage(!showAddPage)} className="gap-2">
+                  <Plus className="w-4 h-4" />
+                  Yeni Sayfa Ekle
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {showAddPage && (
+                <Card className="bg-accent/50">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Yeni Sayfa Ekle</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Sayfa Başlığı *</label>
+                        <Input
+                          value={newPage.title}
+                          onChange={(e) => setNewPage({ ...newPage, title: e.target.value })}
+                          placeholder="Örn: Hizmetlerimiz"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">URL Slug</label>
+                        <Input
+                          value={newPage.slug}
+                          onChange={(e) => setNewPage({ ...newPage, slug: e.target.value })}
+                          placeholder="Otomatik oluşturulur"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Boş bırakılırsa başlıktan otomatik oluşturulur
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Sayfa İçeriği *</label>
+                      <Textarea
+                        value={newPage.content}
+                        onChange={(e) => setNewPage({ ...newPage, content: e.target.value })}
+                        placeholder="Sayfa içeriğini buraya yazın..."
+                        rows={8}
+                        className="min-h-[200px]"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Kısa Açıklama</label>
+                      <Textarea
+                        value={newPage.excerpt}
+                        onChange={(e) => setNewPage({ ...newPage, excerpt: e.target.value })}
+                        placeholder="Sayfa hakkında kısa açıklama (SEO için önemli)"
+                        rows={2}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">SEO Başlığı</label>
+                        <Input
+                          value={newPage.metaTitle}
+                          onChange={(e) => setNewPage({ ...newPage, metaTitle: e.target.value })}
+                          placeholder="Google'da görünecek başlık"
+                          maxLength={60}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">SEO Açıklaması</label>
+                        <Input
+                          value={newPage.metaDescription}
+                          onChange={(e) => setNewPage({ ...newPage, metaDescription: e.target.value })}
+                          placeholder="Google'da görünecek açıklama"
+                          maxLength={160}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Ana Görsel URL</label>
+                      <Input
+                        value={newPage.heroImage}
+                        onChange={(e) => setNewPage({ ...newPage, heroImage: e.target.value })}
+                        placeholder="https://example.com/image.jpg"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Sayfa Tipi</label>
+                        <Select
+                          value={newPage.pageType}
+                          onValueChange={(v) => setNewPage({ ...newPage, pageType: v })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="page">Sayfa</SelectItem>
+                            <SelectItem value="service">Hizmet</SelectItem>
+                            <SelectItem value="blog">Blog</SelectItem>
+                            <SelectItem value="legal">Yasal</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Menü Sırası</label>
+                        <Input
+                          type="number"
+                          value={newPage.menuOrder}
+                          onChange={(e) => setNewPage({ ...newPage, menuOrder: parseInt(e.target.value) || 0 })}
+                          min="0"
+                          max="100"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Üst Sayfa</label>
+                        <Select
+                          value={newPage.parentSlug}
+                          onValueChange={(v) => setNewPage({ ...newPage, parentSlug: v })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Üst sayfa seçin" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Ana Sayfa</SelectItem>
+                            {pages.filter(p => !p.parentSlug).map(page => (
+                              <SelectItem key={page.slug} value={page.slug}>
+                                {page.title}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="published"
+                          checked={newPage.published}
+                          onChange={(e) => setNewPage({ ...newPage, published: e.target.checked })}
+                          className="w-4 h-4"
+                        />
+                        <label htmlFor="published" className="text-sm font-medium cursor-pointer">
+                          Yayınla
+                        </label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="showInMenu"
+                          checked={newPage.showInMenu}
+                          onChange={(e) => setNewPage({ ...newPage, showInMenu: e.target.checked })}
+                          className="w-4 h-4"
+                        />
+                        <label htmlFor="showInMenu" className="text-sm font-medium cursor-pointer">
+                          Menüde Göster
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 pt-4">
+                      <Button onClick={handleAddPage} className="flex-1" disabled={isLoading}>
+                        {isLoading ? "Ekleniyor..." : "Sayfa Ekle"}
+                      </Button>
+                      <Button variant="outline" onClick={() => setShowAddPage(false)} className="flex-1">
+                        İptal
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Pages List */}
+              <div className="space-y-3">
+                {pages.length === 0 ? (
+                  <div className="text-center py-12 bg-muted/30 rounded-lg">
+                    <FileText className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground mb-4">Henüz sayfa eklenmemiş</p>
+                    <Button onClick={() => setShowAddPage(true)}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      İlk Sayfayı Ekle
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-4">
+                    {pages.map((page) => (
+                      <Card key={page.id} className={page.published ? "" : "border-dashed border-2"}>
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h3 className="font-semibold text-lg">{page.title}</h3>
+                                <Badge variant={page.published ? "default" : "secondary"}>
+                                  {page.published ? "Yayında" : "Taslak"}
+                                </Badge>
+                                {page.showInMenu && (
+                                  <Badge variant="outline">Menüde</Badge>
+                                )}
+                                <Badge variant="outline" className="text-xs">
+                                  {page.pageType}
+                                </Badge>
+                              </div>
+                              
+                              <p className="text-sm text-muted-foreground mb-2">
+                                /{page.slug}
+                              </p>
+                              
+                              {page.excerpt && (
+                                <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                                  {page.excerpt}
+                                </p>
+                              )}
+                              
+                              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                <span>Oluşturulma: {new Date(page.createdAt).toLocaleDateString('tr-TR')}</span>
+                                <span>Güncelleme: {new Date(page.updatedAt).toLocaleDateString('tr-TR')}</span>
+                                {page.menuOrder > 0 && (
+                                  <span>Sıra: {page.menuOrder}</span>
+                                )}
+                              </div>
+                            </div>
+                            
+                            <div className="flex gap-2 ml-4">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setEditingPage(page)}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => handleDeletePage(page.slug)}
+                                disabled={['home', 'hakkimda', 'iletisim', 'hizmetler'].includes(page.slug)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* About Page Tab */}
+        <TabsContent value="about" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Hakkımızda Sayfası Yönetimi</CardTitle>

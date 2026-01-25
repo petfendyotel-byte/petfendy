@@ -63,12 +63,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     setIsLoading(true)
     try {
+      // Input validation
+      if (!email || !password) {
+        throw new Error('Email ve şifre gereklidir')
+      }
+
+      // Email format validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(email)) {
+        throw new Error('Geçerli bir email adresi giriniz')
+      }
+
+      // Rate limiting check (simple client-side implementation)
+      const loginAttempts = localStorage.getItem(`login_attempts_${email}`)
+      const attempts = loginAttempts ? JSON.parse(loginAttempts) : { count: 0, lastAttempt: 0 }
+      const now = Date.now()
+      const fiveMinutes = 5 * 60 * 1000
+
+      // Reset attempts if more than 5 minutes have passed
+      if (now - attempts.lastAttempt > fiveMinutes) {
+        attempts.count = 0
+      }
+
+      // Block if too many attempts
+      if (attempts.count >= 5) {
+        const timeLeft = Math.ceil((fiveMinutes - (now - attempts.lastAttempt)) / 1000 / 60)
+        throw new Error(`Çok fazla başarısız deneme. ${timeLeft} dakika sonra tekrar deneyin.`)
+      }
+
       // Look up user in test database
       const userRecord = TEST_USERS_DB.get(email)
 
       if (!userRecord) {
         // Simulate timing to prevent user enumeration
         await new Promise(resolve => setTimeout(resolve, 500))
+        
+        // Increment failed attempts
+        attempts.count++
+        attempts.lastAttempt = now
+        localStorage.setItem(`login_attempts_${email}`, JSON.stringify(attempts))
+        
         throw new Error('Geçersiz email veya şifre')
       }
 
@@ -86,8 +120,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (!isValidPassword) {
+        // Increment failed attempts
+        attempts.count++
+        attempts.lastAttempt = now
+        localStorage.setItem(`login_attempts_${email}`, JSON.stringify(attempts))
+        
         throw new Error('Geçersiz email veya şifre')
       }
+
+      // Clear failed attempts on successful login
+      localStorage.removeItem(`login_attempts_${email}`)
 
       // Generate secure JWT token
       const token = generateToken(
@@ -99,6 +141,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAuthToken(token)
       setCurrentUser(userRecord.user)
       setUser(userRecord.user)
+
+      // Log successful login (for security monitoring)
+      console.log(`✅ User logged in: ${email} (${userRecord.user.role})`)
+      
     } catch (error) {
       console.error("Login error:", error)
       throw error
@@ -110,10 +156,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (email: string, password: string, name: string, phone: string) => {
     setIsLoading(true)
     try {
+      // Input validation
+      if (!email || !password || !name) {
+        throw new Error('Email, şifre ve isim gereklidir')
+      }
+
+      // Email format validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(email)) {
+        throw new Error('Geçerli bir email adresi giriniz')
+      }
+
+      // Name validation
+      if (name.length < 2 || name.length > 50) {
+        throw new Error('İsim 2-50 karakter arasında olmalıdır')
+      }
+
+      // Phone validation (if provided)
+      if (phone && !/^(\+90|0)?[1-9]\d{9}$/.test(phone.replace(/\s/g, ""))) {
+        throw new Error('Geçerli bir telefon numarası giriniz')
+      }
+
+      // Password strength validation
+      if (password.length < 8) {
+        throw new Error('Şifre en az 8 karakter olmalıdır')
+      }
+
+      if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+        throw new Error('Şifre en az bir büyük harf, bir küçük harf ve bir rakam içermelidir')
+      }
+
       // Check if user already exists
       if (TEST_USERS_DB.has(email)) {
         throw new Error('Bu email adresi zaten kayıtlı')
       }
+
+      // Sanitize inputs
+      const sanitizedName = name.trim().replace(/[<>]/g, '')
+      const sanitizedPhone = phone ? phone.trim().replace(/[<>]/g, '') : ''
 
       // Hash password securely
       const passwordHash = await hashPassword(password)
@@ -121,10 +201,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Create new user
       const newUser: Partial<User> = {
         id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        email,
-        name,
-        phone,
+        email: email.toLowerCase().trim(),
+        name: sanitizedName,
+        phone: sanitizedPhone,
         role: "user",
+        emailVerified: false, // In production, send verification email
+        createdAt: new Date(),
+        updatedAt: new Date()
       }
 
       // Store in test database
@@ -139,6 +222,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAuthToken(token)
       setCurrentUser(newUser)
       setUser(newUser)
+
+      // Log successful registration (for security monitoring)
+      console.log(`✅ New user registered: ${email}`)
+      
     } catch (error) {
       console.error("Registration error:", error)
       throw error
@@ -148,8 +235,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const logout = () => {
+    // Clear all authentication data
     clearAllData()
     setUser(null)
+    
+    // Clear any cached login attempts
+    const keys = Object.keys(localStorage)
+    keys.forEach(key => {
+      if (key.startsWith('login_attempts_')) {
+        localStorage.removeItem(key)
+      }
+    })
+    
+    // Log logout (for security monitoring)
+    console.log('✅ User logged out')
   }
 
   return (

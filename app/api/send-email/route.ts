@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
       try {
         const nodemailer = await import('nodemailer')
         
-        const transporter = nodemailer.default.createTransporter({
+        const transporter = nodemailer.default.createTransport({
           host: smtpHost,
           port: parseInt(process.env.SMTP_PORT || '587'),
           secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports

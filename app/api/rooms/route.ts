@@ -1,9 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { requireAdmin, validateInput, sanitizeInputData, logSecurityEvent, optionalAuth } from '@/lib/auth-middleware'
+import { sanitizeInput } from '@/lib/security'
 
 // Room type mapping
 const ROOM_TYPES = ['STANDARD', 'DELUXE', 'SUITE'] as const
 
-// GET - Tüm odaları getir
+// Room validation schema
+const roomSchema = {
+  name: { required: true, type: 'string', minLength: 2, maxLength: 100 },
+  type: { required: true, type: 'string' },
+  capacity: { required: true, type: 'number', min: 1, max: 10 },
+  pricePerNight: { required: true, type: 'number', min: 0, max: 10000 },
+  description: { type: 'string', maxLength: 1000 },
+  amenities: { type: 'array' },
+  features: { type: 'array' },
+  images: { type: 'array' },
+  videos: { type: 'array' }
+}
+
+// GET - Tüm odaları getir (public endpoint with optional auth)
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -54,50 +69,82 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - Yeni oda ekle
-export async function POST(request: NextRequest) {
+// POST - Yeni oda ekle (Admin only)
+export const POST = requireAdmin(async (request: NextRequest, user) => {
   try {
     const body = await request.json()
-    const { name, type, capacity, pricePerNight, description, amenities, features, images, videos } = body
-
-    // Validation
-    if (!name || !type || !capacity || !pricePerNight) {
-      return NextResponse.json({ error: 'Zorunlu alanlar eksik' }, { status: 400 })
+    
+    // Sanitize input data
+    const sanitizedData = sanitizeInputData(body)
+    
+    // Validate input
+    const validation = validateInput(sanitizedData, roomSchema)
+    if (!validation.valid) {
+      logSecurityEvent({
+        type: 'INVALID_ROOM_DATA',
+        userId: user.userId,
+        details: { errors: validation.errors }
+      })
+      return NextResponse.json({ 
+        error: 'Geçersiz veri', 
+        details: validation.errors 
+      }, { status: 400 })
     }
 
-    // Map type to enum
+    const { name, type, capacity, pricePerNight, description, amenities, features, images, videos } = validation.data!
+
+    // Additional validation
     const roomType = type.toUpperCase()
     if (!ROOM_TYPES.includes(roomType as any)) {
       return NextResponse.json({ error: 'Geçersiz oda tipi' }, { status: 400 })
     }
 
+    // Sanitize string fields
+    const sanitizedName = sanitizeInput(name)
+    const sanitizedDescription = description ? sanitizeInput(description) : null
+
+    // Validate arrays
+    const validAmenities = Array.isArray(amenities) ? amenities.filter(a => typeof a === 'string' && a.trim()).map(a => sanitizeInput(a)) : []
+    const validFeatures = Array.isArray(features) ? features.filter(f => typeof f === 'string' && f.trim()).map(f => sanitizeInput(f)) : []
+    const validImages = Array.isArray(images) ? images.filter(img => typeof img === 'string' && img.trim()) : []
+    const validVideos = Array.isArray(videos) ? videos.filter(v => v && typeof v.url === 'string' && v.url.trim()) : []
+
     // Try database
     try {
       const prisma = (await import('@/lib/prisma')).default
       
+      // Check for duplicate room names
+      const existingRoom = await prisma.hotelRoom.findFirst({
+        where: { name: sanitizedName }
+      })
+      
+      if (existingRoom) {
+        return NextResponse.json({ error: 'Bu isimde bir oda zaten mevcut' }, { status: 409 })
+      }
+      
       // Create room with relations
       const room = await prisma.hotelRoom.create({
         data: {
-          name,
+          name: sanitizedName,
           type: roomType as any,
-          capacity: parseInt(capacity),
-          pricePerNight: parseFloat(pricePerNight),
-          description: description || null,
+          capacity: Math.floor(capacity),
+          pricePerNight: Math.round(pricePerNight * 100) / 100, // Round to 2 decimal places
+          description: sanitizedDescription,
           available: true,
           amenities: {
-            create: (amenities || []).map((name: string) => ({ name }))
+            create: validAmenities.map((name: string) => ({ name }))
           },
           features: {
-            create: (features || []).map((name: string) => ({ name }))
+            create: validFeatures.map((name: string) => ({ name }))
           },
           images: {
-            create: (images || []).map((url: string, index: number) => ({ 
+            create: validImages.map((url: string, index: number) => ({ 
               url, 
               order: index 
             }))
           },
           videos: {
-            create: (videos || []).map((v: { type: string, url: string }, index: number) => ({
+            create: validVideos.map((v: { type: string, url: string }, index: number) => ({
               type: v.type.toUpperCase() as any,
               url: v.url,
               order: index
@@ -110,6 +157,13 @@ export async function POST(request: NextRequest) {
           images: { orderBy: { order: 'asc' } },
           videos: { orderBy: { order: 'asc' } },
         }
+      })
+
+      // Log successful creation
+      logSecurityEvent({
+        type: 'ROOM_CREATED',
+        userId: user.userId,
+        details: { roomId: room.id, roomName: room.name }
       })
 
       // Transform response
@@ -131,13 +185,27 @@ export async function POST(request: NextRequest) {
       }
 
       return NextResponse.json(transformedRoom, { status: 201 })
-    } catch (dbError) {
+    } catch (dbError: any) {
       console.error('Database error:', dbError)
-      return NextResponse.json({ error: 'Veritabanı bağlantısı kurulamadı' }, { status: 500 })
+      
+      logSecurityEvent({
+        type: 'DATABASE_ERROR',
+        userId: user.userId,
+        details: { error: dbError.message, operation: 'CREATE_ROOM' }
+      })
+      
+      return NextResponse.json({ error: 'Veritabanı hatası' }, { status: 500 })
     }
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Create room error:', error)
+    
+    logSecurityEvent({
+      type: 'API_ERROR',
+      userId: user.userId,
+      details: { error: error.message, endpoint: 'POST /api/rooms' }
+    })
+    
     return NextResponse.json({ error: 'Oda eklenirken hata oluştu' }, { status: 500 })
   }
-}
+})

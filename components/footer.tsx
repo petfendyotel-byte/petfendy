@@ -130,9 +130,27 @@ export function Footer({ locale }: FooterProps) {
                 </a>
               </li>
               <li>
-                <a href={`/${locale}/cerez`} className="text-gray-300 hover:text-pink-400 transition-colors flex items-center gap-2 group">
+                <a href={`/${locale}/cerez-politikasi`} className="text-gray-300 hover:text-pink-400 transition-colors flex items-center gap-2 group">
                   <PawPrint className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                   <span>{t('cookies')}</span>
+                </a>
+              </li>
+              <li>
+                <a href={`/${locale}/sartlar-kosullar`} className="text-gray-300 hover:text-pink-400 transition-colors flex items-center gap-2 group">
+                  <PawPrint className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span>{t('terms')}</span>
+                </a>
+              </li>
+              <li>
+                <a href={`/${locale}/odeme-guvenligi`} className="text-gray-300 hover:text-pink-400 transition-colors flex items-center gap-2 group">
+                  <PawPrint className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span>{t('paymentSecurity')}</span>
+                </a>
+              </li>
+              <li>
+                <a href={`/${locale}/veri-guvenligi`} className="text-gray-300 hover:text-pink-400 transition-colors flex items-center gap-2 group">
+                  <PawPrint className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span>{t('dataSecurity')}</span>
                 </a>
               </li>
             </ul>

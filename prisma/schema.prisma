@@ -483,6 +483,28 @@ model UploadedFile {
   @@map("uploaded_files")
 }
 
+// ==================== SAYFA YÖNETİMİ ====================
+model Page {
+  id              String   @id @default(cuid())
+  title           String
+  slug            String   @unique
+  content         String   @db.Text
+  excerpt         String?
+  metaTitle       String?
+  metaDescription String?
+  heroImage       String?
+  published       Boolean  @default(false)
+  showInMenu      Boolean  @default(false)
+  menuOrder       Int      @default(0)
+  parentSlug      String?
+  pageType        String   @default("page") // page, blog, service, etc.
+  customFields    Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("pages")
+}
+
 // ==================== AUDIT LOG ====================
 model AuditLog {
   id         String   @id @default(cuid())
