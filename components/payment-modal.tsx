@@ -1,4 +1,6 @@
-import { useState, useEffect, useRef } from "react"
+"use client"
+
+import { useState, useRef } from "react"
 import { useTranslations } from 'next-intl';
 import { sanitizeString, sanitizeNumber, createSubmissionGuard } from "@/lib/input-sanitizer"
 import { Button } from "@/components/ui/button"
@@ -19,8 +21,6 @@ interface PaymentModalProps {
   totalAmount: number
   userEmail: string
 }
-
-"use client"
 
 export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmount, userEmail }: PaymentModalProps) {
   const t = useTranslations('payment');
