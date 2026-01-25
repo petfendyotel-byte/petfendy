@@ -30,6 +30,8 @@ import {
   DollarSign,
   ShoppingBag,
   Calendar,
+  Clock,
+  Users,
   Filter,
   Download,
   ChevronLeft,
@@ -197,7 +199,9 @@ export function AdminDashboard() {
     route: '',
     date: '',
     time: '',
-    capacity: 4
+    customTime: '',
+    capacity: 4,
+    price: 0
   })
 
   const [newGateway, setNewGateway] = useState<{
@@ -496,10 +500,21 @@ export function AdminDashboard() {
   }
 
   const handleAddSharedTaxiSchedule = () => {
-    if (!newSharedTaxiSchedule.route || !newSharedTaxiSchedule.date || !newSharedTaxiSchedule.time) {
+    const finalTime = newSharedTaxiSchedule.time === 'custom' ? newSharedTaxiSchedule.customTime : newSharedTaxiSchedule.time
+    
+    if (!newSharedTaxiSchedule.route || !newSharedTaxiSchedule.date || !finalTime) {
       toast({
         title: "Hata",
         description: "Lütfen tüm alanları doldurun",
+        variant: "destructive"
+      })
+      return
+    }
+
+    if (!newSharedTaxiSchedule.price || newSharedTaxiSchedule.price <= 0) {
+      toast({
+        title: "Hata", 
+        description: "Lütfen geçerli bir fiyat girin",
         variant: "destructive"
       })
       return
@@ -509,7 +524,7 @@ export function AdminDashboard() {
     const existingSchedule = sharedTaxiSchedules.find(s => 
       s.route === newSharedTaxiSchedule.route && 
       s.date === newSharedTaxiSchedule.date && 
-      s.time === newSharedTaxiSchedule.time
+      s.time === finalTime
     )
 
     if (existingSchedule) {
@@ -524,20 +539,22 @@ export function AdminDashboard() {
     const schedule = {
       id: `schedule-${Date.now()}`,
       route: newSharedTaxiSchedule.route,
+      routeDisplay: newSharedTaxiSchedule.route.replace('-', ' → ').toUpperCase(),
       date: newSharedTaxiSchedule.date,
-      time: newSharedTaxiSchedule.time,
+      time: finalTime,
       capacity: newSharedTaxiSchedule.capacity,
+      price: newSharedTaxiSchedule.price,
       bookedSeats: 0,
       isActive: true,
       createdAt: new Date().toISOString()
     }
 
     saveSharedTaxiSchedules([...sharedTaxiSchedules, schedule])
-    setNewSharedTaxiSchedule({route: '', date: '', time: '', capacity: 4})
+    setNewSharedTaxiSchedule({route: '', date: '', time: '', customTime: '', capacity: 4, price: 0})
 
     toast({
       title: "✅ Sefer Eklendi",
-      description: `${schedule.route} - ${schedule.date} ${schedule.time}`,
+      description: `${schedule.routeDisplay} - ${new Date(schedule.date).toLocaleDateString('tr-TR')} ${schedule.time} (₺${schedule.price})`,
     })
   }
 
@@ -2746,11 +2763,11 @@ export function AdminDashboard() {
             <CardContent>
               <div className="space-y-4">
                 {/* Sefer Ekleme Formu */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-white rounded-lg border">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Güzergah</label>
+                    <label className="text-sm font-medium text-blue-800">Güzergah</label>
                     <Select value={newSharedTaxiSchedule.route} onValueChange={(value) => setNewSharedTaxiSchedule({...newSharedTaxiSchedule, route: value})}>
-                      <SelectTrigger>
+                      <SelectTrigger className="border-blue-300 focus:border-blue-500">
                         <SelectValue placeholder="Güzergah seçin" />
                       </SelectTrigger>
                       <SelectContent>
@@ -2759,36 +2776,81 @@ export function AdminDashboard() {
                         <SelectItem value="ankara-antalya">Ankara → Antalya</SelectItem>
                         <SelectItem value="ankara-bursa">Ankara → Bursa</SelectItem>
                         <SelectItem value="ankara-konya">Ankara → Konya</SelectItem>
+                        <SelectItem value="ankara-samsun">Ankara → Samsun</SelectItem>
+                        <SelectItem value="ankara-trabzon">Ankara → Trabzon</SelectItem>
+                        <SelectItem value="ankara-adana">Ankara → Adana</SelectItem>
+                        <SelectItem value="ankara-gaziantep">Ankara → Gaziantep</SelectItem>
+                        <SelectItem value="istanbul-izmir">İstanbul → İzmir</SelectItem>
+                        <SelectItem value="istanbul-antalya">İstanbul → Antalya</SelectItem>
+                        <SelectItem value="izmir-antalya">İzmir → Antalya</SelectItem>
                         <SelectItem value="custom">Özel Güzergah</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Tarih</label>
+                    <label className="text-sm font-medium text-blue-800">Tarih</label>
                     <Input 
                       type="date" 
                       value={newSharedTaxiSchedule.date}
                       onChange={(e) => setNewSharedTaxiSchedule({...newSharedTaxiSchedule, date: e.target.value})}
                       min={new Date().toISOString().split('T')[0]}
+                      className="border-blue-300 focus:border-blue-500"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Saat</label>
-                    <Input 
-                      type="time" 
-                      value={newSharedTaxiSchedule.time}
-                      onChange={(e) => setNewSharedTaxiSchedule({...newSharedTaxiSchedule, time: e.target.value})}
-                    />
+                    <label className="text-sm font-medium text-blue-800">Saat</label>
+                    <Select value={newSharedTaxiSchedule.time} onValueChange={(value) => setNewSharedTaxiSchedule({...newSharedTaxiSchedule, time: value})}>
+                      <SelectTrigger className="border-blue-300 focus:border-blue-500">
+                        <SelectValue placeholder="Saat seçin" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="06:00">06:00</SelectItem>
+                        <SelectItem value="08:00">08:00</SelectItem>
+                        <SelectItem value="10:00">10:00</SelectItem>
+                        <SelectItem value="12:00">12:00</SelectItem>
+                        <SelectItem value="14:00">14:00</SelectItem>
+                        <SelectItem value="16:00">16:00</SelectItem>
+                        <SelectItem value="18:00">18:00</SelectItem>
+                        <SelectItem value="20:00">20:00</SelectItem>
+                        <SelectItem value="custom">Özel Saat</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {newSharedTaxiSchedule.time === 'custom' && (
+                      <Input 
+                        type="time" 
+                        value={newSharedTaxiSchedule.customTime || ''}
+                        onChange={(e) => setNewSharedTaxiSchedule({...newSharedTaxiSchedule, customTime: e.target.value})}
+                        className="border-blue-300 focus:border-blue-500 mt-2"
+                        placeholder="Özel saat girin"
+                      />
+                    )}
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Kapasite</label>
+                    <label className="text-sm font-medium text-blue-800">Kapasite</label>
+                    <Select value={newSharedTaxiSchedule.capacity.toString()} onValueChange={(value) => setNewSharedTaxiSchedule({...newSharedTaxiSchedule, capacity: parseInt(value)})}>
+                      <SelectTrigger className="border-blue-300 focus:border-blue-500">
+                        <SelectValue placeholder="Kapasite" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="2">2 Hayvan</SelectItem>
+                        <SelectItem value="3">3 Hayvan</SelectItem>
+                        <SelectItem value="4">4 Hayvan</SelectItem>
+                        <SelectItem value="5">5 Hayvan</SelectItem>
+                        <SelectItem value="6">6 Hayvan</SelectItem>
+                        <SelectItem value="8">8 Hayvan</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-blue-800">Fiyat (₺)</label>
                     <Input 
                       type="number" 
-                      value={newSharedTaxiSchedule.capacity}
-                      onChange={(e) => setNewSharedTaxiSchedule({...newSharedTaxiSchedule, capacity: parseInt(e.target.value) || 4})}
-                      placeholder="4"
-                      min="1"
-                      max="8"
+                      value={newSharedTaxiSchedule.price || ''}
+                      onChange={(e) => setNewSharedTaxiSchedule({...newSharedTaxiSchedule, price: parseFloat(e.target.value) || 0})}
+                      placeholder="Kişi başı fiyat"
+                      min="0"
+                      step="10"
+                      className="border-blue-300 focus:border-blue-500"
                     />
                   </div>
                 </div>
@@ -2798,7 +2860,7 @@ export function AdminDashboard() {
                     <Plus className="w-4 h-4 mr-2" />
                     Sefer Ekle
                   </Button>
-                  <Button variant="outline" onClick={() => setNewSharedTaxiSchedule({route: '', date: '', time: '', capacity: 4})}>
+                  <Button variant="outline" onClick={() => setNewSharedTaxiSchedule({route: '', date: '', time: '', customTime: '', capacity: 4, price: 0})}>
                     Temizle
                   </Button>
                 </div>
@@ -2813,22 +2875,46 @@ export function AdminDashboard() {
                       {sharedTaxiSchedules
                         .sort((a, b) => new Date(a.date + 'T' + a.time).getTime() - new Date(b.date + 'T' + b.time).getTime())
                         .map((schedule) => (
-                        <div key={schedule.id} className="flex items-center justify-between p-3 bg-white rounded border">
+                        <div key={schedule.id} className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-colors">
                           <div className="flex-1">
-                            <div className="font-medium">{schedule.route}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {new Date(schedule.date).toLocaleDateString('tr-TR')} - {schedule.time}
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className="font-semibold text-lg text-blue-800">
+                                {schedule.routeDisplay || schedule.route.replace('-', ' → ').toUpperCase()}
+                              </div>
+                              <Badge variant={schedule.isActive ? "default" : "secondary"} className="text-xs">
+                                {schedule.isActive ? 'Aktif' : 'Pasif'}
+                              </Badge>
                             </div>
-                            <div className="text-xs text-muted-foreground">
-                              Kapasite: {schedule.bookedSeats}/{schedule.capacity} | 
-                              Durum: {schedule.isActive ? 'Aktif' : 'Pasif'}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm text-gray-600">
+                              <div className="flex items-center gap-1">
+                                <Calendar className="w-4 h-4" />
+                                {new Date(schedule.date).toLocaleDateString('tr-TR')}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Clock className="w-4 h-4" />
+                                {schedule.time}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Users className="w-4 h-4" />
+                                {schedule.bookedSeats}/{schedule.capacity} Kişi
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <DollarSign className="w-4 h-4" />
+                                ₺{schedule.price || 0} / Kişi
+                              </div>
                             </div>
+                            {schedule.bookedSeats > 0 && (
+                              <div className="mt-2 p-2 bg-green-50 rounded text-xs text-green-700">
+                                {schedule.bookedSeats} rezervasyon var
+                              </div>
+                            )}
                           </div>
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 ml-4">
                             <Button
                               size="sm"
                               variant={schedule.isActive ? "destructive" : "default"}
                               onClick={() => handleToggleScheduleStatus(schedule.id)}
+                              className="text-xs"
                             >
                               {schedule.isActive ? 'Pasif Yap' : 'Aktif Yap'}
                             </Button>
@@ -2836,6 +2922,7 @@ export function AdminDashboard() {
                               size="sm"
                               variant="outline"
                               onClick={() => handleDeleteSchedule(schedule.id)}
+                              className="text-xs"
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
