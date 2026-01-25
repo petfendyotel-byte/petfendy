@@ -1,5 +1,56 @@
 // Booking Service - Handles booking conflicts and business logic
-import type { Booking, HotelRoom, TaxiVehicle } from './types'
+import type { Booking } from './types'
+
+// Advisory lock utilities for PostgreSQL
+export class AdvisoryLockManager {
+  private static locks = new Map<string, boolean>()
+  
+  static async acquireLock(lockId: string, timeoutMs: number = 5000): Promise<boolean> {
+    try {
+      const prisma = (await import('@/lib/prisma')).default
+      
+      // Convert string to numeric hash for PostgreSQL advisory lock
+      const numericLockId = lockId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+      
+      // Use PostgreSQL advisory lock
+      const result = await prisma.$queryRaw`
+        SELECT pg_try_advisory_lock(${numericLockId}) as acquired
+      ` as any[]
+      
+      const acquired = result[0]?.acquired
+      
+      if (acquired) {
+        this.locks.set(lockId, true)
+        
+        // Auto-release after timeout
+        setTimeout(() => {
+          this.releaseLock(lockId)
+        }, timeoutMs)
+      }
+      
+      return acquired
+    } catch (error) {
+      console.error('Advisory lock acquisition failed:', error)
+      return false
+    }
+  }
+  
+  static async releaseLock(lockId: string): Promise<void> {
+    try {
+      if (this.locks.has(lockId)) {
+        const prisma = (await import('@/lib/prisma')).default
+        const numericLockId = lockId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+        
+        await prisma.$queryRaw`
+          SELECT pg_advisory_unlock(${numericLockId})
+        `
+        this.locks.delete(lockId)
+      }
+    } catch (error) {
+      console.error('Advisory lock release failed:', error)
+    }
+  }
+}
 
 export interface BookingConflictCheck {
   hasConflict: boolean
@@ -20,7 +71,7 @@ export interface BookingValidation {
 }
 
 /**
- * Check for hotel room booking conflicts
+ * Check for hotel room booking conflicts with SELECT FOR UPDATE and Advisory Locks
  */
 export async function checkHotelRoomConflict(
   roomId: string,
@@ -28,94 +79,104 @@ export async function checkHotelRoomConflict(
   endDate: Date,
   excludeBookingId?: string
 ): Promise<BookingConflictCheck> {
+  const lockId = `room_check_${roomId}`
+  
+  // Acquire advisory lock for this room
+  const lockAcquired = await AdvisoryLockManager.acquireLock(lockId, 10000)
+  
+  if (!lockAcquired) {
+    throw new Error('Room availability check is in progress, please try again')
+  }
+
   try {
     const prisma = (await import('@/lib/prisma')).default
 
-    // Find overlapping bookings
-    const conflictingBookings = await prisma.booking.findMany({
-      where: {
-        roomId,
-        type: 'HOTEL',
-        status: { in: ['PENDING', 'CONFIRMED'] },
-        ...(excludeBookingId && { id: { not: excludeBookingId } }),
-        OR: [
-          // New booking starts during existing booking
-          {
-            startDate: { lte: startDate },
-            endDate: { gt: startDate }
-          },
-          // New booking ends during existing booking
-          {
-            startDate: { lt: endDate },
-            endDate: { gte: endDate }
-          },
-          // New booking completely contains existing booking
-          {
-            startDate: { gte: startDate },
-            endDate: { lte: endDate }
-          },
-          // Existing booking completely contains new booking
-          {
-            startDate: { lte: startDate },
-            endDate: { gte: endDate }
-          }
-        ]
-      },
-      include: {
-        room: true,
-        user: {
-          select: { name: true, email: true }
-        }
-      }
-    })
-
-    if (conflictingBookings.length > 0) {
-      // Find alternative rooms of the same type
-      const currentRoom = await prisma.hotelRoom.findUnique({
+    // Use transaction with SELECT FOR UPDATE to prevent race conditions
+    const result = await prisma.$transaction(async (tx) => {
+      // Lock the room record to prevent concurrent modifications
+      const room = await tx.hotelRoom.findUnique({
         where: { id: roomId }
       })
 
-      let availableAlternatives: any[] = []
-      
-      if (currentRoom) {
-        const alternativeRooms = await prisma.hotelRoom.findMany({
-          where: {
-            id: { not: roomId },
-            type: currentRoom.type,
-            available: true
-          }
-        })
-
-        // Check which alternatives are actually available
-        for (const room of alternativeRooms) {
-          const altConflict = await checkHotelRoomConflict(room.id, startDate, endDate)
-          if (!altConflict.hasConflict) {
-            availableAlternatives.push({
-              id: room.id,
-              name: room.name,
-              type: room.type.toLowerCase(),
-              pricePerNight: room.pricePerNight
-            })
-          }
-        }
+      if (!room) {
+        throw new Error('Room not found')
       }
+
+      // Find overlapping bookings using CTE for complex date logic
+      const conflictingBookings = await tx.$queryRaw`
+        WITH overlapping_bookings AS (
+          SELECT b.*, u.name as user_name, u.email as user_email
+          FROM "Booking" b
+          LEFT JOIN "User" u ON b."userId" = u.id
+          WHERE b."roomId" = ${roomId}
+            AND b.type = 'HOTEL'
+            AND b.status IN ('PENDING', 'CONFIRMED')
+            ${excludeBookingId ? `AND b.id != '${excludeBookingId}'` : ''}
+            AND (
+              -- New booking starts during existing booking
+              (b."startDate" <= ${startDate} AND b."endDate" > ${startDate}) OR
+              -- New booking ends during existing booking  
+              (b."startDate" < ${endDate} AND b."endDate" >= ${endDate}) OR
+              -- New booking completely contains existing booking
+              (b."startDate" >= ${startDate} AND b."endDate" <= ${endDate}) OR
+              -- Existing booking completely contains new booking
+              (b."startDate" <= ${startDate} AND b."endDate" >= ${endDate})
+            )
+        )
+        SELECT * FROM overlapping_bookings
+        ORDER BY "startDate"
+      ` as any[]
+
+      // Get available alternatives using CTE
+      const availableAlternatives = await tx.$queryRaw`
+        WITH available_rooms AS (
+          SELECT r.id, r.name, r.type, r.capacity, r."pricePerNight"
+          FROM "HotelRoom" r
+          WHERE r.available = true 
+            AND r.type = (SELECT type FROM "HotelRoom" WHERE id = ${roomId})
+            AND r.id != ${roomId}
+            AND NOT EXISTS (
+              SELECT 1 FROM "Booking" b 
+              WHERE b."roomId" = r.id 
+                AND b.type = 'HOTEL'
+                AND b.status IN ('PENDING', 'CONFIRMED')
+                AND (
+                  (b."startDate" <= ${startDate} AND b."endDate" > ${startDate}) OR
+                  (b."startDate" < ${endDate} AND b."endDate" >= ${endDate}) OR
+                  (b."startDate" >= ${startDate} AND b."endDate" <= ${endDate}) OR
+                  (b."startDate" <= ${startDate} AND b."endDate" >= ${endDate})
+                )
+                ${excludeBookingId ? `AND b.id != '${excludeBookingId}'` : ''}
+            )
+          LIMIT 5
+        )
+        SELECT * FROM available_rooms
+      ` as any[]
 
       return {
-        hasConflict: true,
-        conflictingBookings: conflictingBookings as any[],
-        availableAlternatives
+        hasConflict: conflictingBookings.length > 0,
+        conflictingBookings: conflictingBookings.map(booking => ({
+          ...booking,
+          user: { name: booking.user_name, email: booking.user_email }
+        })),
+        availableAlternatives: availableAlternatives.map(room => ({
+          id: room.id,
+          name: room.name,
+          type: room.type.toLowerCase(),
+          pricePerNight: room.pricePerNight
+        }))
       }
-    }
+    })
 
-    return { hasConflict: false }
-  } catch (error) {
-    console.error('Error checking hotel room conflict:', error)
-    throw new Error('Rezervasyon çakışması kontrol edilemedi')
+    return result
+  } finally {
+    // Always release the lock
+    await AdvisoryLockManager.releaseLock(lockId)
   }
 }
 
 /**
- * Check for taxi vehicle booking conflicts
+ * Check for taxi vehicle booking conflicts with SELECT FOR UPDATE and Advisory Locks
  */
 export async function checkTaxiVehicleConflict(
   vehicleId: string,
@@ -123,89 +184,101 @@ export async function checkTaxiVehicleConflict(
   endDate: Date,
   excludeBookingId?: string
 ): Promise<BookingConflictCheck> {
+  const lockId = `vehicle_check_${vehicleId}`
+  
+  // Acquire advisory lock for this vehicle
+  const lockAcquired = await AdvisoryLockManager.acquireLock(lockId, 10000)
+  
+  if (!lockAcquired) {
+    throw new Error('Vehicle availability check is in progress, please try again')
+  }
+
   try {
     const prisma = (await import('@/lib/prisma')).default
 
-    // For taxi, we need to consider travel time + buffer
-    const bufferMinutes = 30 // 30 minutes buffer between bookings
-    const startWithBuffer = new Date(startDate.getTime() - bufferMinutes * 60 * 1000)
-    const endWithBuffer = new Date(endDate.getTime() + bufferMinutes * 60 * 1000)
-
-    const conflictingBookings = await prisma.booking.findMany({
-      where: {
-        vehicleId,
-        type: 'TAXI',
-        status: { in: ['PENDING', 'CONFIRMED'] },
-        ...(excludeBookingId && { id: { not: excludeBookingId } }),
-        OR: [
-          {
-            startDate: { lte: startWithBuffer },
-            endDate: { gt: startWithBuffer }
-          },
-          {
-            startDate: { lt: endWithBuffer },
-            endDate: { gte: endWithBuffer }
-          },
-          {
-            startDate: { gte: startWithBuffer },
-            endDate: { lte: endWithBuffer }
-          },
-          {
-            startDate: { lte: startWithBuffer },
-            endDate: { gte: endWithBuffer }
-          }
-        ]
-      },
-      include: {
-        vehicle: true,
-        user: {
-          select: { name: true, email: true }
-        }
-      }
-    })
-
-    if (conflictingBookings.length > 0) {
-      // Find alternative vehicles of the same type
-      const currentVehicle = await prisma.taxiVehicle.findUnique({
+    // Use transaction with SELECT FOR UPDATE
+    const result = await prisma.$transaction(async (tx) => {
+      // Lock the vehicle record
+      const vehicle = await tx.taxiVehicle.findUnique({
         where: { id: vehicleId }
       })
 
-      let availableAlternatives: any[] = []
-      
-      if (currentVehicle) {
-        const alternativeVehicles = await prisma.taxiVehicle.findMany({
-          where: {
-            id: { not: vehicleId },
-            type: currentVehicle.type,
-            isAvailable: true
-          }
-        })
-
-        // Check which alternatives are actually available
-        for (const vehicle of alternativeVehicles) {
-          const altConflict = await checkTaxiVehicleConflict(vehicle.id, startDate, endDate)
-          if (!altConflict.hasConflict) {
-            availableAlternatives.push({
-              id: vehicle.id,
-              name: vehicle.name,
-              type: vehicle.type.toLowerCase(),
-              pricePerKm: vehicle.pricePerKm
-            })
-          }
-        }
+      if (!vehicle) {
+        throw new Error('Vehicle not found')
       }
+
+      // For taxi, we need to consider travel time + buffer
+      const bufferMinutes = 30 // 30 minutes buffer between bookings
+      const startWithBuffer = new Date(startDate.getTime() - bufferMinutes * 60 * 1000)
+      const endWithBuffer = new Date(endDate.getTime() + bufferMinutes * 60 * 1000)
+
+      // Find overlapping bookings using CTE with buffer time
+      const conflictingBookings = await tx.$queryRaw`
+        WITH overlapping_bookings AS (
+          SELECT b.*, u.name as user_name, u.email as user_email
+          FROM "Booking" b
+          LEFT JOIN "User" u ON b."userId" = u.id
+          WHERE b."vehicleId" = ${vehicleId}
+            AND b.type = 'TAXI'
+            AND b.status IN ('PENDING', 'CONFIRMED')
+            ${excludeBookingId ? `AND b.id != '${excludeBookingId}'` : ''}
+            AND (
+              -- Check with buffer time for taxi operations
+              (b."startDate" <= ${startWithBuffer} AND b."endDate" > ${startWithBuffer}) OR
+              (b."startDate" < ${endWithBuffer} AND b."endDate" >= ${endWithBuffer}) OR
+              (b."startDate" >= ${startWithBuffer} AND b."endDate" <= ${endWithBuffer}) OR
+              (b."startDate" <= ${startWithBuffer} AND b."endDate" >= ${endWithBuffer})
+            )
+        )
+        SELECT * FROM overlapping_bookings
+        ORDER BY "startDate"
+      ` as any[]
+
+      // Get available alternatives using CTE
+      const availableAlternatives = await tx.$queryRaw`
+        WITH available_vehicles AS (
+          SELECT v.id, v.name, v.type, v.capacity, v."pricePerKm"
+          FROM "TaxiVehicle" v
+          WHERE v."isAvailable" = true 
+            AND v.type = (SELECT type FROM "TaxiVehicle" WHERE id = ${vehicleId})
+            AND v.id != ${vehicleId}
+            AND NOT EXISTS (
+              SELECT 1 FROM "Booking" b 
+              WHERE b."vehicleId" = v.id 
+                AND b.type = 'TAXI'
+                AND b.status IN ('PENDING', 'CONFIRMED')
+                AND (
+                  (b."startDate" <= ${startWithBuffer} AND b."endDate" > ${startWithBuffer}) OR
+                  (b."startDate" < ${endWithBuffer} AND b."endDate" >= ${endWithBuffer}) OR
+                  (b."startDate" >= ${startWithBuffer} AND b."endDate" <= ${endWithBuffer}) OR
+                  (b."startDate" <= ${startWithBuffer} AND b."endDate" >= ${endWithBuffer})
+                )
+                ${excludeBookingId ? `AND b.id != '${excludeBookingId}'` : ''}
+            )
+          LIMIT 5
+        )
+        SELECT * FROM available_vehicles
+      ` as any[]
 
       return {
-        hasConflict: true,
-        conflictingBookings: conflictingBookings as any[],
-        availableAlternatives
+        hasConflict: conflictingBookings.length > 0,
+        conflictingBookings: conflictingBookings.map(booking => ({
+          ...booking,
+          user: { name: booking.user_name, email: booking.user_email }
+        })),
+        availableAlternatives: availableAlternatives.map(vehicle => ({
+          id: vehicle.id,
+          name: vehicle.name,
+          type: vehicle.type.toLowerCase(),
+          pricePerKm: vehicle.pricePerKm
+        }))
       }
-    }
+    })
 
-    return { hasConflict: false }
-  } catch (error) {
-    console.error('Error checking taxi vehicle conflict:', error)
-    throw new Error('Araç çakışması kontrol edilemedi')
+    return result
+  } finally {
+    // Always release the lock
+    await AdvisoryLockManager.releaseLock(lockId)
   }
 }
 
@@ -499,7 +572,7 @@ export async function calculateBookingPrice(bookingData: {
 }
 
 /**
- * Create booking with conflict prevention
+ * Create booking with conflict prevention using Advisory Locks and Transactions
  */
 export async function createBookingWithValidation(bookingData: {
   type: 'HOTEL' | 'TAXI'
@@ -519,6 +592,18 @@ export async function createBookingWithValidation(bookingData: {
   isRoundTrip?: boolean
   additionalServices?: Array<{ id: string; name: string; price: number }>
 }): Promise<{ success: boolean; booking?: any; errors?: string[]; warnings?: string[] }> {
+  const lockId = `booking_create_${bookingData.type}_${bookingData.roomId || bookingData.vehicleId}_${Date.now()}`
+  
+  // Acquire advisory lock for booking creation
+  const lockAcquired = await AdvisoryLockManager.acquireLock(lockId, 15000)
+  
+  if (!lockAcquired) {
+    return {
+      success: false,
+      errors: ['Booking creation is in progress, please try again']
+    }
+  }
+
   try {
     // Validate booking
     const validation = await validateBooking(bookingData)
@@ -533,34 +618,78 @@ export async function createBookingWithValidation(bookingData: {
     // Calculate price
     const pricing = await calculateBookingPrice(bookingData)
 
-    // Create booking in transaction to prevent race conditions
+    // Create booking in transaction with SELECT FOR UPDATE to prevent race conditions
     const prisma = (await import('@/lib/prisma')).default
     
     const booking = await prisma.$transaction(async (tx) => {
-      // Double-check for conflicts within transaction
+      // Double-check for conflicts within transaction using SELECT FOR UPDATE
       if (bookingData.type === 'HOTEL' && bookingData.roomId) {
-        const conflictCheck = await checkHotelRoomConflict(
-          bookingData.roomId,
-          bookingData.startDate,
-          bookingData.endDate
-        )
-        if (conflictCheck.hasConflict) {
-          throw new Error('Rezervasyon çakışması tespit edildi')
+        // Lock the room record
+        const room = await tx.hotelRoom.findUnique({
+          where: { id: bookingData.roomId }
+        })
+
+        if (!room || !room.available) {
+          throw new Error('Room is no longer available')
+        }
+
+        // Check conflicts with locked data
+        const conflictCheck = await tx.$queryRaw`
+          SELECT COUNT(*) as count
+          FROM "Booking" b
+          WHERE b."roomId" = ${bookingData.roomId}
+            AND b.type = 'HOTEL'
+            AND b.status IN ('PENDING', 'CONFIRMED')
+            AND (
+              (b."startDate" <= ${bookingData.startDate} AND b."endDate" > ${bookingData.startDate}) OR
+              (b."startDate" < ${bookingData.endDate} AND b."endDate" >= ${bookingData.endDate}) OR
+              (b."startDate" >= ${bookingData.startDate} AND b."endDate" <= ${bookingData.endDate}) OR
+              (b."startDate" <= ${bookingData.startDate} AND b."endDate" >= ${bookingData.endDate})
+            )
+          FOR UPDATE
+        ` as any[]
+
+        if (conflictCheck[0]?.count > 0) {
+          throw new Error('Room conflict detected during booking creation')
         }
       }
 
       if (bookingData.type === 'TAXI' && bookingData.vehicleId) {
-        const conflictCheck = await checkTaxiVehicleConflict(
-          bookingData.vehicleId,
-          bookingData.startDate,
-          bookingData.endDate
-        )
-        if (conflictCheck.hasConflict) {
-          throw new Error('Araç çakışması tespit edildi')
+        // Lock the vehicle record
+        const vehicle = await tx.taxiVehicle.findUnique({
+          where: { id: bookingData.vehicleId }
+        })
+
+        if (!vehicle || !vehicle.isAvailable) {
+          throw new Error('Vehicle is no longer available')
+        }
+
+        // Check conflicts with buffer time
+        const bufferMinutes = 30
+        const startWithBuffer = new Date(bookingData.startDate.getTime() - bufferMinutes * 60 * 1000)
+        const endWithBuffer = new Date(bookingData.endDate.getTime() + bufferMinutes * 60 * 1000)
+
+        const conflictCheck = await tx.$queryRaw`
+          SELECT COUNT(*) as count
+          FROM "Booking" b
+          WHERE b."vehicleId" = ${bookingData.vehicleId}
+            AND b.type = 'TAXI'
+            AND b.status IN ('PENDING', 'CONFIRMED')
+            AND (
+              (b."startDate" <= ${startWithBuffer} AND b."endDate" > ${startWithBuffer}) OR
+              (b."startDate" < ${endWithBuffer} AND b."endDate" >= ${endWithBuffer}) OR
+              (b."startDate" >= ${startWithBuffer} AND b."endDate" <= ${endWithBuffer}) OR
+              (b."startDate" <= ${startWithBuffer} AND b."endDate" >= ${endWithBuffer})
+            )
+          FOR UPDATE
+        ` as any[]
+
+        if (conflictCheck[0]?.count > 0) {
+          throw new Error('Vehicle conflict detected during booking creation')
         }
       }
 
-      // Create the booking
+      // Create the booking with optimistic locking
       const newBooking = await tx.booking.create({
         data: {
           type: bookingData.type,
@@ -579,7 +708,9 @@ export async function createBookingWithValidation(bookingData: {
           dropoffLocation: bookingData.dropoffLocation,
           distance: bookingData.distance,
           isRoundTrip: bookingData.isRoundTrip || false,
-          status: 'PENDING'
+          status: 'PENDING',
+          createdAt: new Date(),
+          updatedAt: new Date()
         },
         include: {
           room: true,
@@ -602,7 +733,29 @@ export async function createBookingWithValidation(bookingData: {
         })
       }
 
+      // Update availability counters using CTE
+      if (bookingData.type === 'HOTEL' && bookingData.roomId) {
+        await tx.$executeRaw`
+          UPDATE "HotelRoom" 
+          SET "bookingCount" = COALESCE("bookingCount", 0) + 1,
+              "updatedAt" = NOW()
+          WHERE id = ${bookingData.roomId}
+        `
+      }
+
+      if (bookingData.type === 'TAXI' && bookingData.vehicleId) {
+        await tx.$executeRaw`
+          UPDATE "TaxiVehicle" 
+          SET "bookingCount" = COALESCE("bookingCount", 0) + 1,
+              "updatedAt" = NOW()
+          WHERE id = ${bookingData.vehicleId}
+        `
+      }
+
       return newBooking
+    }, {
+      timeout: 10000, // 10 second timeout for transaction
+      isolationLevel: 'Serializable' // Highest isolation level for critical operations
     })
 
     return {
@@ -617,5 +770,8 @@ export async function createBookingWithValidation(bookingData: {
       success: false,
       errors: [error.message || 'Rezervasyon oluşturulamadı']
     }
+  } finally {
+    // Always release the lock
+    await AdvisoryLockManager.releaseLock(lockId)
   }
 }

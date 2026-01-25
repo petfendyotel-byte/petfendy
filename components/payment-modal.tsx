@@ -1,7 +1,6 @@
-"use client"
-
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useTranslations } from 'next-intl';
+import { sanitizeString, sanitizeNumber, createSubmissionGuard } from "@/lib/input-sanitizer"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -21,8 +20,14 @@ interface PaymentModalProps {
   userEmail: string
 }
 
+"use client"
+
 export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmount, userEmail }: PaymentModalProps) {
   const t = useTranslations('payment');
+  
+  // Security guards
+  const submissionGuard = useRef(createSubmissionGuard())
+  
   const [formData, setFormData] = useState({
     cardNumber: "",
     cardHolder: "",
@@ -42,14 +47,17 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
   const [isProcessing, setIsProcessing] = useState(false)
   const [success, setSuccess] = useState(false)
 
+  // Enhanced input formatters with sanitization
   const formatCardNumber = (value: string) => {
-    const cleaned = value.replace(/\D/g, '')
+    const sanitized = sanitizeString(value)
+    const cleaned = sanitized.replace(/\D/g, '')
     const formatted = cleaned.match(/.{1,4}/g)?.join(' ') || cleaned
     return formatted.substring(0, 19) // 16 digits + 3 spaces
   }
 
   const formatExpiryDate = (value: string) => {
-    const cleaned = value.replace(/\D/g, '')
+    const sanitized = sanitizeString(value)
+    const cleaned = sanitized.replace(/\D/g, '')
     if (cleaned.length >= 2) {
       return `${cleaned.substring(0, 2)}/${cleaned.substring(2, 4)}`
     }
@@ -66,25 +74,45 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
     setFormData({ ...formData, expiryDate: formatted })
   }
 
+  const handleCardHolderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const sanitized = sanitizeString(e.target.value).toUpperCase()
+    // Only allow letters, spaces, and Turkish characters
+    const filtered = sanitized.replace(/[^A-ZÇĞİÖŞÜ\s]/g, '')
+    setFormData({ ...formData, cardHolder: filtered })
+  }
+
+  const handleCVVChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const sanitized = sanitizeString(e.target.value)
+    const cleaned = sanitized.replace(/\D/g, '').substring(0, 4)
+    setFormData({ ...formData, cvv: cleaned })
+  }
+
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {}
 
+    // Sanitize all inputs before validation
+    const sanitizedCardNumber = sanitizeString(formData.cardNumber)
+    const sanitizedCardHolder = sanitizeString(formData.cardHolder)
+    const sanitizedExpiryDate = sanitizeString(formData.expiryDate)
+    const sanitizedCVV = sanitizeString(formData.cvv)
+
     // Validate card number using Luhn algorithm (industry standard)
-    const cardDigits = formData.cardNumber.replace(/\s/g, '')
+    const cardDigits = sanitizedCardNumber.replace(/\s/g, '')
     if (!validateCardNumber(cardDigits)) {
       newErrors.cardNumber = "Geçersiz kart numarası"
     }
 
-    // Validate card holder (prevent special characters)
-    const cardHolderRegex = /^[a-zA-ZçÇğĞıİöÖşŞüÜ\s]+$/
-    if (formData.cardHolder.trim().length < 3) {
+    // Enhanced card holder validation
+    if (sanitizedCardHolder.trim().length < 3) {
       newErrors.cardHolder = "Kart sahibi adı en az 3 karakter olmalıdır"
-    } else if (!cardHolderRegex.test(formData.cardHolder)) {
+    } else if (sanitizedCardHolder.trim().length > 50) {
+      newErrors.cardHolder = "Kart sahibi adı en fazla 50 karakter olabilir"
+    } else if (!/^[a-zA-ZçÇğĞıİöÖşŞüÜ\s]+$/.test(sanitizedCardHolder)) {
       newErrors.cardHolder = "Kart sahibi adı sadece harf içermelidir"
     }
 
-    // Validate expiry date (MM/YY)
-    const expiryParts = formData.expiryDate.split('/')
+    // Enhanced expiry date validation
+    const expiryParts = sanitizedExpiryDate.split('/')
     if (expiryParts.length !== 2 || expiryParts[0].length !== 2 || expiryParts[1].length !== 2) {
       newErrors.expiryDate = "Son kullanma tarihi geçersiz (AA/YY)"
     } else {
@@ -92,7 +120,11 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
       const year = parseInt(expiryParts[1])
       
       if (month < 1 || month > 12) {
-        newErrors.expiryDate = "Geçersiz ay"
+        newErrors.expiryDate = "Geçersiz ay (01-12)"
+      }
+      
+      if (year < 0 || year > 99) {
+        newErrors.expiryDate = "Geçersiz yıl"
       }
       
       // Check if card is expired
@@ -102,38 +134,70 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
       if (year < currentYear || (year === currentYear && month < currentMonth)) {
         newErrors.expiryDate = "Kartın süresi dolmuş"
       }
+      
+      // Check if expiry is too far in future (more than 10 years)
+      const fullYear = year < 50 ? 2000 + year : 1900 + year
+      const maxYear = new Date().getFullYear() + 10
+      if (fullYear > maxYear) {
+        newErrors.expiryDate = "Son kullanma tarihi çok uzak gelecekte"
+      }
     }
 
-    // Validate CVV using secure validation
-    if (!validateCVV(formData.cvv)) {
+    // Enhanced CVV validation
+    if (!validateCVV(sanitizedCVV)) {
       newErrors.cvv = "CVV geçersiz (3-4 hane)"
     }
 
-    // Validate invoice information based on type
+    // Enhanced invoice information validation
     if (invoiceType === "individual") {
-      if (!invoiceInfo.individualName.trim()) {
-        newErrors.individualName = "Ad alanı zorunludur"
+      const sanitizedName = sanitizeString(invoiceInfo.individualName)
+      const sanitizedSurname = sanitizeString(invoiceInfo.individualSurname)
+      const sanitizedTcNo = sanitizeString(invoiceInfo.individualTcNo)
+
+      if (!sanitizedName.trim() || sanitizedName.length < 2) {
+        newErrors.individualName = "Ad en az 2 karakter olmalıdır"
       }
-      if (!invoiceInfo.individualSurname.trim()) {
-        newErrors.individualSurname = "Soyad alanı zorunludur"
+      if (!sanitizedSurname.trim() || sanitizedSurname.length < 2) {
+        newErrors.individualSurname = "Soyad en az 2 karakter olmalıdır"
       }
-      if (!invoiceInfo.individualTcNo.trim()) {
+      if (!sanitizedTcNo.trim()) {
         newErrors.individualTcNo = "TC Kimlik No zorunludur"
-      } else if (!/^\d{11}$/.test(invoiceInfo.individualTcNo)) {
+      } else if (!/^\d{11}$/.test(sanitizedTcNo)) {
         newErrors.individualTcNo = "TC Kimlik No 11 haneli olmalıdır"
+      } else {
+        // Basic TC Kimlik No validation algorithm
+        const digits = sanitizedTcNo.split('').map(Number)
+        const sum1 = digits[0] + digits[2] + digits[4] + digits[6] + digits[8]
+        const sum2 = digits[1] + digits[3] + digits[5] + digits[7]
+        const check1 = (sum1 * 7 - sum2) % 10
+        const check2 = (sum1 + sum2 + digits[9]) % 10
+        
+        if (check1 !== digits[9] || check2 !== digits[10]) {
+          newErrors.individualTcNo = "Geçersiz TC Kimlik No"
+        }
       }
     } else {
-      if (!invoiceInfo.corporateName.trim()) {
-        newErrors.corporateName = "Şirket adı zorunludur"
+      const sanitizedCompanyName = sanitizeString(invoiceInfo.corporateName)
+      const sanitizedTaxNo = sanitizeString(invoiceInfo.corporateTaxNo)
+      const sanitizedAddress = sanitizeString(invoiceInfo.corporateAddress)
+
+      if (!sanitizedCompanyName.trim() || sanitizedCompanyName.length < 2) {
+        newErrors.corporateName = "Şirket adı en az 2 karakter olmalıdır"
       }
-      if (!invoiceInfo.corporateTaxNo.trim()) {
+      if (!sanitizedTaxNo.trim()) {
         newErrors.corporateTaxNo = "Vergi No zorunludur"
-      } else if (!/^\d{10}$/.test(invoiceInfo.corporateTaxNo)) {
+      } else if (!/^\d{10}$/.test(sanitizedTaxNo)) {
         newErrors.corporateTaxNo = "Vergi No 10 haneli olmalıdır"
       }
-      if (!invoiceInfo.corporateAddress.trim()) {
-        newErrors.corporateAddress = "Şirket adresi zorunludur"
+      if (!sanitizedAddress.trim() || sanitizedAddress.length < 10) {
+        newErrors.corporateAddress = "Şirket adresi en az 10 karakter olmalıdır"
       }
+    }
+
+    // Validate total amount
+    const sanitizedAmount = sanitizeNumber(totalAmount)
+    if (sanitizedAmount <= 0 || sanitizedAmount > 1000000) {
+      newErrors.submit = "Geçersiz ödeme tutarı"
     }
 
     setErrors(newErrors)
@@ -142,43 +206,70 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Prevent duplicate submissions
+    const formId = `payment-${Date.now()}`
+    if (!submissionGuard.current.canSubmit(formId)) {
+      setErrors({ submit: "İşlem devam ediyor, lütfen bekleyin" })
+      return
+    }
+
     setErrors({})
     setSuccess(false)
 
     if (!validateForm()) {
+      submissionGuard.current.reset(formId)
       return
     }
 
     setIsProcessing(true)
+    
     try {
-      const paymentResult = await processPayment({
-        amount: totalAmount,
-        cardNumber: formData.cardNumber.replace(/\s/g, ''),
-        cardHolder: formData.cardHolder,
-        expiryDate: formData.expiryDate,
-        cvv: formData.cvv,
-        email: userEmail,
-      })
+      // Sanitize all payment data before processing
+      const sanitizedPaymentData = {
+        amount: sanitizeNumber(totalAmount),
+        cardNumber: sanitizeString(formData.cardNumber).replace(/\s/g, ''),
+        cardHolder: sanitizeString(formData.cardHolder),
+        expiryDate: sanitizeString(formData.expiryDate),
+        cvv: sanitizeString(formData.cvv),
+        email: sanitizeString(userEmail),
+      }
+
+      // Additional security checks
+      if (sanitizedPaymentData.amount <= 0 || sanitizedPaymentData.amount > 1000000) {
+        throw new Error("Geçersiz ödeme tutarı")
+      }
+
+      if (sanitizedPaymentData.cardNumber.length < 13 || sanitizedPaymentData.cardNumber.length > 19) {
+        throw new Error("Geçersiz kart numarası uzunluğu")
+      }
+
+      const paymentResult = await processPayment(sanitizedPaymentData)
 
       if (paymentResult.success) {
         setSuccess(true)
+        
+        // Clear sensitive data from memory
+        setFormData({
+          cardNumber: "",
+          cardHolder: "",
+          expiryDate: "",
+          cvv: "",
+        })
+        
         setTimeout(() => {
           onSuccess()
           onClose()
-          // Reset form
-          setFormData({
-            cardNumber: "",
-            cardHolder: "",
-            expiryDate: "",
-            cvv: "",
-          })
           setSuccess(false)
         }, 2000)
       } else {
+        submissionGuard.current.reset(formId)
         setErrors({ submit: paymentResult.message || t('paymentFailed') })
       }
-    } catch (err) {
-      setErrors({ submit: t('paymentFailed') })
+    } catch (err: any) {
+      submissionGuard.current.reset(formId)
+      console.error('Payment error:', err)
+      setErrors({ submit: err.message || t('paymentFailed') })
     } finally {
       setIsProcessing(false)
     }
@@ -249,7 +340,7 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
                 type="text"
                 placeholder="AD SOYAD"
                 value={formData.cardHolder}
-                onChange={(e) => setFormData({ ...formData, cardHolder: e.target.value.toUpperCase() })}
+                onChange={handleCardHolderChange}
                 disabled={isProcessing}
                 required
                 className="h-9 sm:h-10 text-sm"
@@ -286,7 +377,7 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
                   type="text"
                   placeholder="123"
                   value={formData.cvv}
-                  onChange={(e) => setFormData({ ...formData, cvv: e.target.value.replace(/\D/g, '').substring(0, 3) })}
+                  onChange={handleCVVChange}
                   disabled={isProcessing}
                   required
                   maxLength={3}
@@ -331,8 +422,9 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
                       <Input
                         placeholder="Adınız"
                         value={invoiceInfo.individualName}
-                        onChange={(e) => setInvoiceInfo({ ...invoiceInfo, individualName: e.target.value })}
+                        onChange={(e) => setInvoiceInfo({ ...invoiceInfo, individualName: sanitizeString(e.target.value) })}
                         disabled={isProcessing}
+                        maxLength={50}
                         className="h-8 sm:h-9 text-sm"
                       />
                       {errors.individualName && <p className="text-xs text-destructive">{errors.individualName}</p>}
@@ -342,8 +434,9 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
                       <Input
                         placeholder="Soyadınız"
                         value={invoiceInfo.individualSurname}
-                        onChange={(e) => setInvoiceInfo({ ...invoiceInfo, individualSurname: e.target.value })}
+                        onChange={(e) => setInvoiceInfo({ ...invoiceInfo, individualSurname: sanitizeString(e.target.value) })}
                         disabled={isProcessing}
+                        maxLength={50}
                         className="h-8 sm:h-9 text-sm"
                       />
                       {errors.individualSurname && <p className="text-xs text-destructive">{errors.individualSurname}</p>}
@@ -354,7 +447,7 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
                     <Input
                       placeholder="12345678901"
                       value={invoiceInfo.individualTcNo}
-                      onChange={(e) => setInvoiceInfo({ ...invoiceInfo, individualTcNo: e.target.value.replace(/\D/g, '').substring(0, 11) })}
+                      onChange={(e) => setInvoiceInfo({ ...invoiceInfo, individualTcNo: sanitizeString(e.target.value).replace(/\D/g, '').substring(0, 11) })}
                       disabled={isProcessing}
                       maxLength={11}
                       className="h-8 sm:h-9 text-sm"
@@ -374,8 +467,9 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
                       <Input
                         placeholder="Şirket Adı"
                         value={invoiceInfo.corporateName}
-                        onChange={(e) => setInvoiceInfo({ ...invoiceInfo, corporateName: e.target.value })}
+                        onChange={(e) => setInvoiceInfo({ ...invoiceInfo, corporateName: sanitizeString(e.target.value) })}
                         disabled={isProcessing}
+                        maxLength={100}
                         className="h-8 sm:h-9 text-sm"
                       />
                       {errors.corporateName && <p className="text-xs text-destructive">{errors.corporateName}</p>}
@@ -385,7 +479,7 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
                       <Input
                         placeholder="1234567890"
                         value={invoiceInfo.corporateTaxNo}
-                        onChange={(e) => setInvoiceInfo({ ...invoiceInfo, corporateTaxNo: e.target.value.replace(/\D/g, '').substring(0, 10) })}
+                        onChange={(e) => setInvoiceInfo({ ...invoiceInfo, corporateTaxNo: sanitizeString(e.target.value).replace(/\D/g, '').substring(0, 10) })}
                         disabled={isProcessing}
                         maxLength={10}
                         className="h-8 sm:h-9 text-sm"
@@ -397,8 +491,9 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
                       <Input
                         placeholder="Şirket adresi"
                         value={invoiceInfo.corporateAddress}
-                        onChange={(e) => setInvoiceInfo({ ...invoiceInfo, corporateAddress: e.target.value })}
+                        onChange={(e) => setInvoiceInfo({ ...invoiceInfo, corporateAddress: sanitizeString(e.target.value) })}
                         disabled={isProcessing}
+                        maxLength={200}
                         className="h-8 sm:h-9 text-sm"
                       />
                       {errors.corporateAddress && <p className="text-xs text-destructive">{errors.corporateAddress}</p>}
