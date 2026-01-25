@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 // Google Distance Matrix API ile mesafe hesaplama
-// Rota: Ankara → Alış Noktası → Bırakış Noktası → Ankara
+// VIP Transfer: Ankara çıkışlı-varışlı transferler için mesafe x2 hesaplanır
+// Normal Transfer: Ankara → Alış Noktası → Bırakış Noktası → Ankara
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { pickupProvince, pickupDistrict, dropoffProvince, dropoffDistrict } = body
+    const { pickupProvince, pickupDistrict, dropoffProvince, dropoffDistrict, isVipTransfer = false } = body
 
     if (!pickupProvince || !pickupDistrict || !dropoffProvince || !dropoffDistrict) {
       return NextResponse.json(
@@ -20,14 +21,27 @@ export async function POST(request: NextRequest) {
     if (!apiKey) {
       // API key yoksa fallback mesafe hesaplama
       console.warn('Google Maps API key bulunamadı, fallback hesaplama kullanılıyor')
-      const fallbackDistance = calculateFallbackDistance(pickupProvince, dropoffProvince)
+      const fallbackDistance = calculateFallbackDistance(pickupProvince, dropoffProvince, isVipTransfer)
       return NextResponse.json({ 
         totalDistance: fallbackDistance,
         success: true,
-        method: 'fallback'
+        method: 'fallback',
+        isVipTransfer
       })
     }
 
+    // VIP Transfer için özel hesaplama
+    if (isVipTransfer) {
+      const vipDistance = await calculateVipTransferDistance(pickupProvince, dropoffProvince, apiKey)
+      return NextResponse.json({ 
+        totalDistance: vipDistance,
+        success: true,
+        method: 'google-vip',
+        isVipTransfer: true
+      })
+    }
+
+    // Normal transfer hesaplama (mevcut mantık)
     // Konum stringleri oluştur
     const ankaraLocation = 'Ankara, Turkey'
     const pickupLocation = `${pickupDistrict}, ${pickupProvince}, Turkey`
@@ -44,11 +58,12 @@ export async function POST(request: NextRequest) {
 
     if (ankaraToPickup === null || pickupToDropoff === null || dropoffToAnkara === null) {
       // Google API başarısız olursa fallback kullan
-      const fallbackDistance = calculateFallbackDistance(pickupProvince, dropoffProvince)
+      const fallbackDistance = calculateFallbackDistance(pickupProvince, dropoffProvince, isVipTransfer)
       return NextResponse.json({ 
         totalDistance: fallbackDistance,
         success: true,
-        method: 'fallback'
+        method: 'fallback',
+        isVipTransfer
       })
     }
 
@@ -59,6 +74,7 @@ export async function POST(request: NextRequest) {
       totalDistance,
       success: true,
       method: 'google',
+      isVipTransfer: false,
       breakdown: {
         ankaraToPickup,
         pickupToDropoff,
@@ -72,6 +88,34 @@ export async function POST(request: NextRequest) {
       { error: 'Mesafe hesaplanamadı' },
       { status: 500 }
     )
+  }
+}
+
+// VIP Transfer için özel mesafe hesaplama
+async function calculateVipTransferDistance(pickupProvince: string, dropoffProvince: string, apiKey: string): Promise<number> {
+  try {
+    const ankaraLocation = 'Ankara, Turkey'
+    
+    // Ankara çıkışlı transfer: Ankara → Hedef şehir mesafesi x2
+    if (pickupProvince === 'Ankara') {
+      const dropoffLocation = `${dropoffProvince}, Turkey`
+      const distance = await getDistanceFromGoogle(ankaraLocation, dropoffLocation, apiKey)
+      return distance ? Math.round(distance * 2) : calculateVipFallbackDistance(pickupProvince, dropoffProvince)
+    }
+    
+    // Ankara varışlı transfer: Başlangıç şehir → Ankara mesafesi x2
+    if (dropoffProvince === 'Ankara') {
+      const pickupLocation = `${pickupProvince}, Turkey`
+      const distance = await getDistanceFromGoogle(pickupLocation, ankaraLocation, apiKey)
+      return distance ? Math.round(distance * 2) : calculateVipFallbackDistance(pickupProvince, dropoffProvince)
+    }
+    
+    // Ankara çıkışlı-varışlı olmayan transferler için normal hesaplama
+    return calculateFallbackDistance(pickupProvince, dropoffProvince, false)
+    
+  } catch (error) {
+    console.error('VIP transfer mesafe hesaplama hatası:', error)
+    return calculateVipFallbackDistance(pickupProvince, dropoffProvince)
   }
 }
 
@@ -99,8 +143,55 @@ async function getDistanceFromGoogle(origin: string, destination: string, apiKey
   }
 }
 
-// Fallback mesafe hesaplama (Google API yoksa)
-function calculateFallbackDistance(pickupProvince: string, dropoffProvince: string): number {
+// VIP Transfer için fallback mesafe hesaplama
+function calculateVipFallbackDistance(pickupProvince: string, dropoffProvince: string): number {
+  // Ankara'dan diğer illere tek yön mesafeler (km)
+  const distancesFromAnkara: Record<string, number> = {
+    "Ankara": 30,
+    "İstanbul": 450,
+    "İzmir": 577, // Örnekteki değer
+    "Antalya": 480,
+    "Bursa": 380,
+    "Adana": 490,
+    "Konya": 260,
+    "Gaziantep": 670,
+    "Mersin": 480,
+    "Kayseri": 320,
+    "Eskişehir": 230,
+    "Samsun": 440, // Örnekteki değer
+    "Denizli": 480,
+    "Muğla": 600,
+    "Aydın": 550,
+    "Trabzon": 760,
+    "Diyarbakır": 920,
+    "Erzurum": 880,
+    "Malatya": 680,
+    "Van": 1200,
+  }
+
+  // Ankara çıkışlı transfer: Ankara → Hedef şehir x2
+  if (pickupProvince === 'Ankara') {
+    const oneWayDistance = distancesFromAnkara[dropoffProvince] || 300
+    return oneWayDistance * 2
+  }
+  
+  // Ankara varışlı transfer: Başlangıç şehir → Ankara x2
+  if (dropoffProvince === 'Ankara') {
+    const oneWayDistance = distancesFromAnkara[pickupProvince] || 300
+    return oneWayDistance * 2
+  }
+  
+  // Ankara çıkışlı-varışlı olmayan transferler için normal hesaplama
+  return calculateFallbackDistance(pickupProvince, dropoffProvince, false)
+}
+
+// Fallback mesafe hesaplama (Google API yoksa) - Normal transferler için
+function calculateFallbackDistance(pickupProvince: string, dropoffProvince: string, isVipTransfer: boolean = false): number {
+  // VIP transfer ise özel hesaplama kullan
+  if (isVipTransfer) {
+    return calculateVipFallbackDistance(pickupProvince, dropoffProvince)
+  }
+
   // Ankara'dan diğer illere yaklaşık mesafeler (km)
   const distancesFromAnkara: Record<string, number> = {
     "Ankara": 30,

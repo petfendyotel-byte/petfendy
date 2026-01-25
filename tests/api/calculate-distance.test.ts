@@ -354,3 +354,135 @@ describe('Performans', () => {
     expect(duration).toBeLessThan(100)
   })
 })
+// ============================================
+// VIP TRANSFER TESTLERİ
+// ============================================
+describe('VIP Transfer Hesaplamaları', () => {
+  // VIP Transfer için fiyat sabitleri
+  const VIP_PRICE_PER_KM = 25 // VIP transfer için daha yüksek fiyat
+  
+  /**
+   * VIP Transfer için yardımcı fonksiyon
+   */
+  function calculateVipFallbackDistance(pickupProvince: string, dropoffProvince: string): number {
+    const distancesFromAnkara: Record<string, number> = {
+      "Ankara": 30,
+      "İstanbul": 450,
+      "İzmir": 577, // Örnekteki değer
+      "Antalya": 480,
+      "Bursa": 380,
+      "Adana": 490,
+      "Konya": 260,
+      "Gaziantep": 670,
+      "Mersin": 480,
+      "Kayseri": 320,
+      "Eskişehir": 230,
+      "Samsun": 440, // Örnekteki değer
+      "Denizli": 480,
+      "Muğla": 600,
+      "Aydın": 550,
+      "Trabzon": 760,
+      "Diyarbakır": 920,
+      "Erzurum": 880,
+      "Malatya": 680,
+      "Van": 1200,
+    }
+
+    // Ankara çıkışlı transfer: Ankara → Hedef şehir x2
+    if (pickupProvince === 'Ankara') {
+      const oneWayDistance = distancesFromAnkara[dropoffProvince] || 300
+      return oneWayDistance * 2
+    }
+    
+    // Ankara varışlı transfer: Başlangıç şehir → Ankara x2
+    if (dropoffProvince === 'Ankara') {
+      const oneWayDistance = distancesFromAnkara[pickupProvince] || 300
+      return oneWayDistance * 2
+    }
+    
+    // Ankara çıkışlı-varışlı olmayan transferler için normal hesaplama
+    return calculateFallbackDistance(pickupProvince, dropoffProvince)
+  }
+
+  /**
+   * Ankara çıkışlı VIP transfer - Ankara → İzmir = 577x2 = 1154 km
+   */
+  it('Ankara çıkışlı VIP transfer - Ankara → İzmir = 577x2 = 1154 km', () => {
+    const distance = calculateVipFallbackDistance('Ankara', 'İzmir')
+    expect(distance).toBe(1154) // 577 * 2
+  })
+
+  /**
+   * Ankara varışlı VIP transfer - Samsun → Ankara = 440x2 = 880 km
+   */
+  it('Ankara varışlı VIP transfer - Samsun → Ankara = 440x2 = 880 km', () => {
+    const distance = calculateVipFallbackDistance('Samsun', 'Ankara')
+    expect(distance).toBe(880) // 440 * 2
+  })
+
+  /**
+   * Ankara çıkışlı VIP transfer - Ankara → İstanbul = 450x2 = 900 km
+   */
+  it('Ankara çıkışlı VIP transfer - Ankara → İstanbul = 450x2 = 900 km', () => {
+    const distance = calculateVipFallbackDistance('Ankara', 'İstanbul')
+    expect(distance).toBe(900) // 450 * 2
+  })
+
+  /**
+   * Ankara varışlı VIP transfer - İstanbul → Ankara = 450x2 = 900 km
+   */
+  it('Ankara varışlı VIP transfer - İstanbul → Ankara = 450x2 = 900 km', () => {
+    const distance = calculateVipFallbackDistance('İstanbul', 'Ankara')
+    expect(distance).toBe(900) // 450 * 2
+  })
+
+  /**
+   * VIP transfer olmayan durumlar için normal hesaplama yapmalı
+   */
+  it('VIP transfer olmayan durumlar için normal hesaplama yapmalı', () => {
+    const distance = calculateVipFallbackDistance('İstanbul', 'İzmir')
+    // Normal hesaplama: Ankara → İstanbul (450) + İstanbul → İzmir (480) + İzmir → Ankara (577) = 1507
+    expect(distance).toBeGreaterThan(1000)
+    expect(distance).toBeLessThan(2000)
+  })
+
+  /**
+   * VIP transfer fiyat hesaplama testleri
+   */
+  it('VIP transfer fiyatı doğru hesaplanmalı - Ankara → İzmir', () => {
+    const distance = calculateVipFallbackDistance('Ankara', 'İzmir')
+    const price = distance * VIP_PRICE_PER_KM
+    
+    // 1154 km * 25 TL = 28,850 TL
+    expect(distance).toBe(1154)
+    expect(price).toBe(28850)
+  })
+
+  /**
+   * VIP transfer fiyat hesaplama testleri
+   */
+  it('VIP transfer fiyatı doğru hesaplanmalı - Samsun → Ankara', () => {
+    const distance = calculateVipFallbackDistance('Samsun', 'Ankara')
+    const price = distance * VIP_PRICE_PER_KM
+    
+    // 880 km * 25 TL = 22,000 TL
+    expect(distance).toBe(880)
+    expect(price).toBe(22000)
+  })
+
+  /**
+   * Bilinmeyen il için VIP transfer
+   */
+  it('Bilinmeyen il için VIP transfer - varsayılan mesafe x2', () => {
+    const distance = calculateVipFallbackDistance('Ankara', 'Bilinmeyenİl')
+    expect(distance).toBe(600) // 300 * 2
+  })
+
+  /**
+   * Ankara içi VIP transfer
+   */
+  it('Ankara içi VIP transfer - 30x2 = 60 km', () => {
+    const distance = calculateVipFallbackDistance('Ankara', 'Ankara')
+    expect(distance).toBe(60) // 30 * 2
+  })
+})
