@@ -204,6 +204,24 @@ export function AdminDashboard() {
     price: 0
   })
 
+  // Paylaşımlı taksi sabit fiyat listesi
+  const sharedTaxiPrices = {
+    'ankara-istanbul': 4500,
+    'ankara-izmir': 5500,
+    'ankara-antalya': 5000,
+    'ankara-bodrum': 6500,
+    'ankara-bursa': 3500,
+    'ankara-konya': 2500,
+    'ankara-samsun': 3000,
+    'ankara-trabzon': 4000,
+    'ankara-adana': 4000,
+    'ankara-gaziantep': 4500,
+    'istanbul-izmir': 3500,
+    'istanbul-antalya': 4000,
+    'izmir-antalya': 3000,
+    'custom': 0
+  }
+
   const [newGateway, setNewGateway] = useState<{
     provider: "paytr" | "paratika"
     name: string
@@ -2766,24 +2784,102 @@ export function AdminDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-blue-800">Güzergah</label>
-                    <Select value={newSharedTaxiSchedule.route} onValueChange={(value) => setNewSharedTaxiSchedule({...newSharedTaxiSchedule, route: value})}>
+                    <Select value={newSharedTaxiSchedule.route} onValueChange={(value) => {
+                      const suggestedPrice = sharedTaxiPrices[value as keyof typeof sharedTaxiPrices] || 0
+                      setNewSharedTaxiSchedule({
+                        ...newSharedTaxiSchedule, 
+                        route: value,
+                        price: suggestedPrice
+                      })
+                    }}>
                       <SelectTrigger className="border-blue-300 focus:border-blue-500">
                         <SelectValue placeholder="Güzergah seçin" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="ankara-istanbul">Ankara → İstanbul</SelectItem>
-                        <SelectItem value="ankara-izmir">Ankara → İzmir</SelectItem>
-                        <SelectItem value="ankara-antalya">Ankara → Antalya</SelectItem>
-                        <SelectItem value="ankara-bursa">Ankara → Bursa</SelectItem>
-                        <SelectItem value="ankara-konya">Ankara → Konya</SelectItem>
-                        <SelectItem value="ankara-samsun">Ankara → Samsun</SelectItem>
-                        <SelectItem value="ankara-trabzon">Ankara → Trabzon</SelectItem>
-                        <SelectItem value="ankara-adana">Ankara → Adana</SelectItem>
-                        <SelectItem value="ankara-gaziantep">Ankara → Gaziantep</SelectItem>
-                        <SelectItem value="istanbul-izmir">İstanbul → İzmir</SelectItem>
-                        <SelectItem value="istanbul-antalya">İstanbul → Antalya</SelectItem>
-                        <SelectItem value="izmir-antalya">İzmir → Antalya</SelectItem>
-                        <SelectItem value="custom">Özel Güzergah</SelectItem>
+                        <SelectItem value="ankara-istanbul">
+                          <div className="flex justify-between items-center w-full">
+                            <span>Ankara → İstanbul</span>
+                            <span className="text-green-600 font-semibold ml-4">₺4,500</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="ankara-izmir">
+                          <div className="flex justify-between items-center w-full">
+                            <span>Ankara → İzmir</span>
+                            <span className="text-green-600 font-semibold ml-4">₺5,500</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="ankara-antalya">
+                          <div className="flex justify-between items-center w-full">
+                            <span>Ankara → Antalya</span>
+                            <span className="text-green-600 font-semibold ml-4">₺5,000</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="ankara-bodrum">
+                          <div className="flex justify-between items-center w-full">
+                            <span>Ankara → Bodrum</span>
+                            <span className="text-green-600 font-semibold ml-4">₺6,500</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="ankara-bursa">
+                          <div className="flex justify-between items-center w-full">
+                            <span>Ankara → Bursa</span>
+                            <span className="text-green-600 font-semibold ml-4">₺3,500</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="ankara-konya">
+                          <div className="flex justify-between items-center w-full">
+                            <span>Ankara → Konya</span>
+                            <span className="text-green-600 font-semibold ml-4">₺2,500</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="ankara-samsun">
+                          <div className="flex justify-between items-center w-full">
+                            <span>Ankara → Samsun</span>
+                            <span className="text-green-600 font-semibold ml-4">₺3,000</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="ankara-trabzon">
+                          <div className="flex justify-between items-center w-full">
+                            <span>Ankara → Trabzon</span>
+                            <span className="text-green-600 font-semibold ml-4">₺4,000</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="ankara-adana">
+                          <div className="flex justify-between items-center w-full">
+                            <span>Ankara → Adana</span>
+                            <span className="text-green-600 font-semibold ml-4">₺4,000</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="ankara-gaziantep">
+                          <div className="flex justify-between items-center w-full">
+                            <span>Ankara → Gaziantep</span>
+                            <span className="text-green-600 font-semibold ml-4">₺4,500</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="istanbul-izmir">
+                          <div className="flex justify-between items-center w-full">
+                            <span>İstanbul → İzmir</span>
+                            <span className="text-green-600 font-semibold ml-4">₺3,500</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="istanbul-antalya">
+                          <div className="flex justify-between items-center w-full">
+                            <span>İstanbul → Antalya</span>
+                            <span className="text-green-600 font-semibold ml-4">₺4,000</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="izmir-antalya">
+                          <div className="flex justify-between items-center w-full">
+                            <span>İzmir → Antalya</span>
+                            <span className="text-green-600 font-semibold ml-4">₺3,000</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="custom">
+                          <div className="flex justify-between items-center w-full">
+                            <span>Özel Güzergah</span>
+                            <span className="text-gray-500 font-semibold ml-4">Manuel</span>
+                          </div>
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -2843,15 +2939,27 @@ export function AdminDashboard() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-blue-800">Fiyat (₺)</label>
-                    <Input 
-                      type="number" 
-                      value={newSharedTaxiSchedule.price || ''}
-                      onChange={(e) => setNewSharedTaxiSchedule({...newSharedTaxiSchedule, price: parseFloat(e.target.value) || 0})}
-                      placeholder="Kişi başı fiyat"
-                      min="0"
-                      step="10"
-                      className="border-blue-300 focus:border-blue-500"
-                    />
+                    <div className="relative">
+                      <Input 
+                        type="number" 
+                        value={newSharedTaxiSchedule.price || ''}
+                        onChange={(e) => setNewSharedTaxiSchedule({...newSharedTaxiSchedule, price: parseFloat(e.target.value) || 0})}
+                        placeholder="Kişi başı fiyat"
+                        min="0"
+                        step="100"
+                        className="border-blue-300 focus:border-blue-500"
+                      />
+                      {newSharedTaxiSchedule.route && newSharedTaxiSchedule.route !== 'custom' && (
+                        <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                          <Badge variant="outline" className="text-xs text-green-600">
+                            Önerilen: ₺{sharedTaxiPrices[newSharedTaxiSchedule.route as keyof typeof sharedTaxiPrices]}
+                          </Badge>
+                        </div>
+                      )}
+                    </div>
+                    {newSharedTaxiSchedule.route === 'custom' && (
+                      <p className="text-xs text-gray-500">Özel güzergah için manuel fiyat belirleyin</p>
+                    )}
                   </div>
                 </div>
                 
@@ -2863,6 +2971,51 @@ export function AdminDashboard() {
                   <Button variant="outline" onClick={() => setNewSharedTaxiSchedule({route: '', date: '', time: '', customTime: '', capacity: 4, price: 0})}>
                     Temizle
                   </Button>
+                </div>
+
+                {/* Fiyat Referans Tablosu */}
+                <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-200">
+                  <h4 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
+                    <DollarSign className="w-5 h-5" />
+                    Paylaşımlı Taksi Sabit Fiyat Listesi
+                  </h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                    <div className="flex justify-between p-2 bg-white rounded border">
+                      <span className="font-medium">İstanbul</span>
+                      <span className="text-green-600 font-bold">₺4,500</span>
+                    </div>
+                    <div className="flex justify-between p-2 bg-white rounded border">
+                      <span className="font-medium">İzmir</span>
+                      <span className="text-green-600 font-bold">₺5,500</span>
+                    </div>
+                    <div className="flex justify-between p-2 bg-white rounded border">
+                      <span className="font-medium">Antalya</span>
+                      <span className="text-green-600 font-bold">₺5,000</span>
+                    </div>
+                    <div className="flex justify-between p-2 bg-white rounded border">
+                      <span className="font-medium">Bodrum</span>
+                      <span className="text-green-600 font-bold">₺6,500</span>
+                    </div>
+                    <div className="flex justify-between p-2 bg-white rounded border">
+                      <span className="font-medium">Bursa</span>
+                      <span className="text-green-600 font-bold">₺3,500</span>
+                    </div>
+                    <div className="flex justify-between p-2 bg-white rounded border">
+                      <span className="font-medium">Konya</span>
+                      <span className="text-green-600 font-bold">₺2,500</span>
+                    </div>
+                    <div className="flex justify-between p-2 bg-white rounded border">
+                      <span className="font-medium">Samsun</span>
+                      <span className="text-green-600 font-bold">₺3,000</span>
+                    </div>
+                    <div className="flex justify-between p-2 bg-white rounded border">
+                      <span className="font-medium">Trabzon</span>
+                      <span className="text-green-600 font-bold">₺4,000</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-green-700 mt-3 text-center">
+                    * Fiyatlar kişi başı olup, güzergah seçildiğinde otomatik olarak önerilir
+                  </p>
                 </div>
 
                 {/* Mevcut Seferler */}
