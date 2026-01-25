@@ -388,6 +388,26 @@ describe('VIP Transfer Hesaplamaları', () => {
       "Van": 1200,
     }
 
+    // İller arası direkt mesafeler
+    const interCityDistances: Record<string, number> = {
+      "İzmir-İstanbul": 480,
+      "İstanbul-İzmir": 480,
+      "Konya-İstanbul": 660,
+      "İstanbul-Konya": 660,
+      "Konya-İzmir": 570,
+      "İzmir-Konya": 570,
+      "Konya-Antalya": 300,
+      "Antalya-Konya": 300,
+      "İstanbul-Antalya": 700,
+      "Antalya-İstanbul": 700,
+      "İstanbul-Bursa": 150,
+      "Bursa-İstanbul": 150,
+      "Adana-Mersin": 70,
+      "Mersin-Adana": 70,
+      "Adana-Gaziantep": 220,
+      "Gaziantep-Adana": 220,
+    }
+
     // Ankara çıkışlı transfer: Ankara → Hedef şehir x2
     if (pickupProvince === 'Ankara') {
       const oneWayDistance = distancesFromAnkara[dropoffProvince] || 300
@@ -400,8 +420,26 @@ describe('VIP Transfer Hesaplamaları', () => {
       return oneWayDistance * 2
     }
     
-    // Ankara çıkışlı-varışlı olmayan transferler için normal hesaplama
-    return calculateFallbackDistance(pickupProvince, dropoffProvince)
+    // Ankara dışı çıkışlı transferler: (Ankara → Başlangıç) + (Başlangıç → Bitiş) + (Bitiş → Ankara)
+    const ankaraToPickup = distancesFromAnkara[pickupProvince] || 300
+    const dropoffToAnkara = distancesFromAnkara[dropoffProvince] || 300
+    
+    // Başlangıç → Bitiş mesafesi
+    let pickupToDropoff: number
+    if (pickupProvince === dropoffProvince) {
+      pickupToDropoff = 30 // Aynı il içi
+    } else {
+      const directKey = `${pickupProvince}-${dropoffProvince}`
+      pickupToDropoff = interCityDistances[directKey] || 
+        Math.round(Math.sqrt(
+          Math.pow(distancesFromAnkara[pickupProvince] || 300, 2) + 
+          Math.pow(distancesFromAnkara[dropoffProvince] || 300, 2) - 
+          (distancesFromAnkara[pickupProvince] || 300) * (distancesFromAnkara[dropoffProvince] || 300)
+        ))
+    }
+    
+    // Toplam: (Ankara → Başlangıç) + (Başlangıç → Bitiş) + (Bitiş → Ankara)
+    return ankaraToPickup + pickupToDropoff + dropoffToAnkara
   }
 
   /**
@@ -439,11 +477,37 @@ describe('VIP Transfer Hesaplamaları', () => {
   /**
    * VIP transfer olmayan durumlar için normal hesaplama yapmalı
    */
-  it('VIP transfer olmayan durumlar için normal hesaplama yapmalı', () => {
+  it('Ankara dışı çıkışlı VIP transfer - İzmir → İstanbul hesaplamalı', () => {
+    const distance = calculateVipFallbackDistance('İzmir', 'İstanbul')
+    // (Ankara → İzmir: 577) + (İzmir → İstanbul: 480) + (İstanbul → Ankara: 450) = 1507
+    expect(distance).toBe(1507)
+  })
+
+  /**
+   * Ankara dışı çıkışlı VIP transfer - İstanbul → İzmir hesaplamalı
+   */
+  it('Ankara dışı çıkışlı VIP transfer - İstanbul → İzmir hesaplamalı', () => {
     const distance = calculateVipFallbackDistance('İstanbul', 'İzmir')
-    // Normal hesaplama: Ankara → İstanbul (450) + İstanbul → İzmir (480) + İzmir → Ankara (577) = 1507
-    expect(distance).toBeGreaterThan(1000)
-    expect(distance).toBeLessThan(2000)
+    // (Ankara → İstanbul: 450) + (İstanbul → İzmir: 480) + (İzmir → Ankara: 577) = 1507
+    expect(distance).toBe(1507)
+  })
+
+  /**
+   * Ankara dışı çıkışlı VIP transfer - Konya → Antalya hesaplamalı
+   */
+  it('Ankara dışı çıkışlı VIP transfer - Konya → Antalya hesaplamalı', () => {
+    const distance = calculateVipFallbackDistance('Konya', 'Antalya')
+    // (Ankara → Konya: 260) + (Konya → Antalya: 300) + (Antalya → Ankara: 480) = 1040
+    expect(distance).toBe(1040)
+  })
+
+  /**
+   * Ankara dışı çıkışlı VIP transfer - Bursa → İstanbul hesaplamalı
+   */
+  it('Ankara dışı çıkışlı VIP transfer - Bursa → İstanbul hesaplamalı', () => {
+    const distance = calculateVipFallbackDistance('Bursa', 'İstanbul')
+    // (Ankara → Bursa: 380) + (Bursa → İstanbul: 150) + (İstanbul → Ankara: 450) = 980
+    expect(distance).toBe(980)
   })
 
   /**
@@ -459,15 +523,27 @@ describe('VIP Transfer Hesaplamaları', () => {
   })
 
   /**
-   * VIP transfer fiyat hesaplama testleri
+   * VIP transfer fiyat hesaplama testleri - Ankara dışı çıkışlı
    */
-  it('VIP transfer fiyatı doğru hesaplanmalı - Samsun → Ankara', () => {
-    const distance = calculateVipFallbackDistance('Samsun', 'Ankara')
+  it('VIP transfer fiyatı doğru hesaplanmalı - İzmir → İstanbul', () => {
+    const distance = calculateVipFallbackDistance('İzmir', 'İstanbul')
     const price = distance * VIP_PRICE_PER_KM
     
-    // 880 km * 25 TL = 22,000 TL
-    expect(distance).toBe(880)
-    expect(price).toBe(22000)
+    // 1507 km * 25 TL = 37,675 TL
+    expect(distance).toBe(1507)
+    expect(price).toBe(37675)
+  })
+
+  /**
+   * VIP transfer fiyat hesaplama testleri - Ankara dışı çıkışlı
+   */
+  it('VIP transfer fiyatı doğru hesaplanmalı - Konya → Antalya', () => {
+    const distance = calculateVipFallbackDistance('Konya', 'Antalya')
+    const price = distance * VIP_PRICE_PER_KM
+    
+    // 1040 km * 25 TL = 26,000 TL
+    expect(distance).toBe(1040)
+    expect(price).toBe(26000)
   })
 
   /**

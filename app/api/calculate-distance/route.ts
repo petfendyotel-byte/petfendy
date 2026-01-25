@@ -110,8 +110,25 @@ async function calculateVipTransferDistance(pickupProvince: string, dropoffProvi
       return distance ? Math.round(distance * 2) : calculateVipFallbackDistance(pickupProvince, dropoffProvince)
     }
     
-    // Ankara çıkışlı-varışlı olmayan transferler için normal hesaplama
-    return calculateFallbackDistance(pickupProvince, dropoffProvince, false)
+    // Ankara dışı çıkışlı transferler: (Ankara → Başlangıç) + (Başlangıç → Bitiş) + (Bitiş → Ankara)
+    const pickupLocation = `${pickupProvince}, Turkey`
+    const dropoffLocation = `${dropoffProvince}, Turkey`
+    
+    // 1. Ankara → Başlangıç şehir mesafesi
+    const ankaraToPickup = await getDistanceFromGoogle(ankaraLocation, pickupLocation, apiKey)
+    
+    // 2. Başlangıç → Bitiş şehir mesafesi
+    const pickupToDropoff = await getDistanceFromGoogle(pickupLocation, dropoffLocation, apiKey)
+    
+    // 3. Bitiş → Ankara mesafesi
+    const dropoffToAnkara = await getDistanceFromGoogle(dropoffLocation, ankaraLocation, apiKey)
+    
+    if (ankaraToPickup && pickupToDropoff && dropoffToAnkara) {
+      return Math.round(ankaraToPickup + pickupToDropoff + dropoffToAnkara)
+    }
+    
+    // Google API başarısız olursa fallback kullan
+    return calculateVipFallbackDistance(pickupProvince, dropoffProvince)
     
   } catch (error) {
     console.error('VIP transfer mesafe hesaplama hatası:', error)
@@ -169,6 +186,26 @@ function calculateVipFallbackDistance(pickupProvince: string, dropoffProvince: s
     "Van": 1200,
   }
 
+  // İller arası direkt mesafeler
+  const interCityDistances: Record<string, number> = {
+    "İzmir-İstanbul": 480,
+    "İstanbul-İzmir": 480,
+    "Konya-İstanbul": 660,
+    "İstanbul-Konya": 660,
+    "Konya-İzmir": 570,
+    "İzmir-Konya": 570,
+    "Konya-Antalya": 300,
+    "Antalya-Konya": 300,
+    "İstanbul-Antalya": 700,
+    "Antalya-İstanbul": 700,
+    "İstanbul-Bursa": 150,
+    "Bursa-İstanbul": 150,
+    "Adana-Mersin": 70,
+    "Mersin-Adana": 70,
+    "Adana-Gaziantep": 220,
+    "Gaziantep-Adana": 220,
+  }
+
   // Ankara çıkışlı transfer: Ankara → Hedef şehir x2
   if (pickupProvince === 'Ankara') {
     const oneWayDistance = distancesFromAnkara[dropoffProvince] || 300
@@ -181,8 +218,26 @@ function calculateVipFallbackDistance(pickupProvince: string, dropoffProvince: s
     return oneWayDistance * 2
   }
   
-  // Ankara çıkışlı-varışlı olmayan transferler için normal hesaplama
-  return calculateFallbackDistance(pickupProvince, dropoffProvince, false)
+  // Ankara dışı çıkışlı transferler: (Ankara → Başlangıç) + (Başlangıç → Bitiş) + (Bitiş → Ankara)
+  const ankaraToPickup = distancesFromAnkara[pickupProvince] || 300
+  const dropoffToAnkara = distancesFromAnkara[dropoffProvince] || 300
+  
+  // Başlangıç → Bitiş mesafesi
+  let pickupToDropoff: number
+  if (pickupProvince === dropoffProvince) {
+    pickupToDropoff = 30 // Aynı il içi
+  } else {
+    const directKey = `${pickupProvince}-${dropoffProvince}`
+    pickupToDropoff = interCityDistances[directKey] || 
+      Math.round(Math.sqrt(
+        Math.pow(distancesFromAnkara[pickupProvince] || 300, 2) + 
+        Math.pow(distancesFromAnkara[dropoffProvince] || 300, 2) - 
+        (distancesFromAnkara[pickupProvince] || 300) * (distancesFromAnkara[dropoffProvince] || 300)
+      ))
+  }
+  
+  // Toplam: (Ankara → Başlangıç) + (Başlangıç → Bitiş) + (Bitiş → Ankara)
+  return ankaraToPickup + pickupToDropoff + dropoffToAnkara
 }
 
 // Fallback mesafe hesaplama (Google API yoksa) - Normal transferler için
