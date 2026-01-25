@@ -47,7 +47,7 @@ const content = {
         title: "Genel Sorular",
         faqs: [
           { question: "Petfendy nedir?", answer: "Petfendy, evcil hayvanlarınız için güvenilir pet otel ve pet taksi hizmetleri sunan bir platformdur. 2020 yılından beri binlerce evcil hayvan sahibine hizmet vermekteyiz." },
-          { question: "Hangi şehirlerde hizmet veriyorsunuz?", answer: "Şu anda Türkiye genelinde 20'den fazla ilde pet otel ve pet taksi hizmeti sunmaktayız. Ankara merkezli olarak tüm Türkiye'ye ulaşım sağlıyoruz." },
+          { question: "Hangi şehirlerde hizmet veriyorsunuz?", answer: "Sadece Ankara'da otel ve kreş hizmeti, 81 ilde taksi hizmeti sunuyoruz. Ankara merkezli olarak tüm Türkiye'ye ulaşım sağlıyoruz." },
           { question: "Hangi hayvan türlerini kabul ediyorsunuz?", answer: "Köpek, kedi ve diğer evcil hayvanları kabul ediyoruz. Özel bakım gerektiren hayvanlar için lütfen önceden bizimle iletişime geçin." }
         ]
       },
@@ -115,7 +115,7 @@ const content = {
         title: "General Questions",
         faqs: [
           { question: "What is Petfendy?", answer: "Petfendy is a platform that offers reliable pet hotel and pet taxi services for your pets. We have been serving thousands of pet owners since 2020." },
-          { question: "Which cities do you serve?", answer: "We currently offer pet hotel and pet taxi services in more than 20 provinces across Turkey. We provide transportation to all of Turkey from our Ankara headquarters." },
+          { question: "Which cities do you serve?", answer: "We offer hotel and daycare services only in Ankara, and taxi services in all 81 provinces. We provide transportation to all of Turkey from our Ankara headquarters." },
           { question: "Which animal species do you accept?", answer: "We accept dogs, cats and other pets. Please contact us in advance for animals that require special care." }
         ]
       },

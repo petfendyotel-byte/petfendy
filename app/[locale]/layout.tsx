@@ -32,7 +32,7 @@ export function generateStaticParams() {
 
 export const metadata = {
   title: "Pet Otel Ankara | Pet Taksi Ankara | Pet Kreş Ankara - Petfendy",
-  description: "Ankara'nın #1 pet otel, pet taksi ve pet kreş hizmeti. Kedi köpek oteli, güvenli hayvan taksi, günlük pet kreş. 7/24 profesyonel bakım. ⭐ 5 yıldızlı hizmet ⭐",
+  description: "Ankara'da pet otel ve pet kreş, 81 ilde pet taksi hizmeti. Kedi köpek oteli, güvenli hayvan taksi, günlük pet kreş. 7/24 profesyonel bakım. ⭐ 5 yıldızlı hizmet ⭐",
   keywords: "pet otel ankara, pet taksi ankara, pet kreş ankara, ankara pet otel, ankara pet taksi, ankara pet kreş, hayvan oteli ankara, kedi oteli ankara, köpek oteli ankara, evcil hayvan oteli ankara, hayvan taksi ankara, pet pansiyonu ankara, hayvan pansiyonu ankara, kedi pansiyonu ankara, köpek pansiyonu ankara, pet hotel ankara, animal hotel ankara, pet boarding ankara, dog hotel ankara, cat hotel ankara, pet daycare ankara, petfendy ankara, etimesgut pet otel, ankara evcil hayvan bakım, pet kuaför ankara, köpek eğitimi ankara",
   authors: [{ name: "Petfendy Pet Otel Ankara" }],
   creator: "Petfendy - Ankara Pet Otel & Pet Taksi",
@@ -52,7 +52,7 @@ export const metadata = {
   },
   openGraph: {
     title: "Pet Otel Ankara | Pet Taksi Ankara | Pet Kreş Ankara - Petfendy",
-    description: "Ankara'nın en güvenilir pet oteli, pet taksi ve pet kreş hizmeti. Kedi, köpek ve tüm evcil hayvanlarınız için 7/24 profesyonel bakım. Etimesgut merkezli, Ankara geneli hizmet.",
+    description: "Ankara'da güvenilir pet oteli ve pet kreş, 81 ilde pet taksi hizmeti. Kedi, köpek ve tüm evcil hayvanlarınız için 7/24 profesyonel bakım. Etimesgut merkezli, Ankara geneli hizmet.",
     type: "website",
     locale: "tr_TR",
     alternateLocale: "en_US",
@@ -70,7 +70,7 @@ export const metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Pet Otel Ankara | Pet Taksi Ankara | Pet Kreş Ankara - Petfendy",
-    description: "Ankara'nın #1 pet oteli, pet taksi ve pet kreş hizmeti. 7/24 profesyonel bakım, güvenli konaklama.",
+    description: "Ankara'da pet otel ve pet kreş, 81 ilde pet taksi hizmeti. 7/24 profesyonel bakım, güvenli konaklama.",
     images: ["/images/og-image.jpg"],
     site: "@petfendy",
   },
@@ -102,7 +102,7 @@ const jsonLd = {
   '@id': 'https://petfendy.com',
   name: 'Petfendy - Ankara Pet Otel, Pet Taksi ve Pet Kreş',
   alternateName: ['Petfendy Hayvan Oteli', 'Ankara Pet Otel', 'Ankara Pet Taksi', 'Ankara Pet Kreş'],
-  description: 'Ankara\'nın #1 pet otel, pet taksi ve pet kreş hizmeti. Kedi köpek oteli, güvenli hayvan taksi, günlük pet kreş. Etimesgut merkezli, Ankara geneli hizmet.',
+  description: 'Ankara\'da pet otel ve pet kreş, 81 ilde pet taksi hizmeti. Kedi köpek oteli, güvenli hayvan taksi, günlük pet kreş. Etimesgut merkezli, Ankara geneli hizmet.',
   url: 'https://petfendy.com',
   telephone: '+905323073264',
   email: 'petfendyotel@gmail.com',

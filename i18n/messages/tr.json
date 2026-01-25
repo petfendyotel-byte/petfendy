@@ -112,7 +112,7 @@
   "common": {
     "appName": "Petfendy",
     "appFullName": "Petfendy Pet Otel Ankara - Pet Taksi - Pet Kreş",
-    "appTagline": "Ankara'nın #1 pet otel, pet taksi ve pet kreş hizmeti ⭐ 7/24 güvenli bakım",
+    "appTagline": "Ankara'da pet otel ve pet kreş, 81 ilde pet taksi hizmeti ⭐ 7/24 güvenli bakım",
     "welcome": "Hoş geldiniz",
     "logout": "Çıkış Yap",
     "login": "Giriş Yap",
@@ -244,7 +244,7 @@
     "loginToContinue": "Devam etmek için giriş yapın veya kayıt olun"
   },
   "homepage": {
-    "trustBadge": "Ankara'nın #1 Pet Otel ve Pet Taksi Hizmeti ⭐",
+    "trustBadge": "Ankara'da Pet Otel ve Pet Kreş, 81 İlde Pet Taksi Hizmeti ⭐",
     "heroTitle": "Petfendy",
     "heroSubtitle": "Pet Otel Ankara | Pet Taksi | Pet Kreş",
     "heroDescription": "Ankara'da kedi köpek oteli, güvenli pet taksi ve günlük pet kreş hizmetleri. 7/24 profesyonel bakım ile evcil dostlarınız güvende.",
@@ -307,7 +307,7 @@
     },
     "newHome": {
       "heroTitle": "Pet Otel Ankara | Pet Taksi | Pet Kreş",
-      "heroSubtitle": "Ankara'nın #1 pet otel, pet taksi ve pet kreş hizmeti. Evcil dostlarınız için güvenli konaklama ve ulaşım.",
+      "heroSubtitle": "Ankara'da pet otel ve pet kreş, 81 ilde pet taksi hizmeti. Evcil dostlarınız için güvenli konaklama ve ulaşım.",
       "hotelButton": "Pet Otel Ankara Rezervasyonu",
       "taxiButton": "Pet Taksi Ankara Rezervasyonu",
       "petHotelTitle": "Pet Otel Ankara",
@@ -343,7 +343,7 @@
       "instagramTitle": "Ankara Pet Otel Instagram'dan Takip Edin",
       "instagramButton": "Pet Otel Instagram'ı Ziyaret Edin",
       "safetyBannerTitle": "Ankara'da Minik Dostlarınız Petfendy Pet Otel'de Güvende",
-      "safetyBannerDesc": "Petfendy, Ankara genelinde profesyonel pet otel, pet taksi ve pet kreş hizmetleri sunmaktadır. Evcil dostlarınız için güvenli pet otel konaklama, konforlu pet taksi ulaşım ve eğlenceli pet kreş gündüz bakımı tek çatı altında! Etimesgut merkezli, Ankara'nın tüm ilçelerine hizmet.",
+      "safetyBannerDesc": "Petfendy, sadece Ankara'da profesyonel pet otel ve pet kreş hizmetleri, 81 ilde pet taksi hizmetleri sunmaktadır. Evcil dostlarınız için güvenli pet otel konaklama, konforlu pet taksi ulaşım ve eğlenceli pet kreş gündüz bakımı tek çatı altında! Etimesgut merkezli, Ankara'nın tüm ilçelerine hizmet.",
       "safetyBannerButton1": "Pet Otel Rezervasyonu Yap",
       "safetyBannerButton2": "Pet Otel Hakkında Bilgi",
       "safetyBannerAlt": "Ankara Pet Otel, Pet Taksi ve Pet Kreş Hizmetleri",

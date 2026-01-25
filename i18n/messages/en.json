@@ -112,7 +112,7 @@
   "common": {
     "appName": "Petfendy",
     "appFullName": "Petfendy Pet Hotel And Dog Training Center",
-    "appTagline": "Ankara's cat, dog and pet hotel",
+    "appTagline": "Pet hotel and daycare in Ankara, pet taxi in 81 provinces",
     "welcome": "Welcome",
     "logout": "Logout",
     "login": "Login",
@@ -244,7 +244,7 @@
     "loginToContinue": "Login or register to continue"
   },
   "homepage": {
-    "trustBadge": "Ankara's Most Trusted Hotel",
+    "trustBadge": "Pet Hotel & Daycare in Ankara, Pet Taxi in 81 Provinces ⭐",
     "heroTitle": "Petfendy",
     "heroSubtitle": "Pet Hotel",
     "heroDescription": "Your little friends are safe with dog training, cage-free accommodation and pet taxi services",
@@ -307,7 +307,7 @@
     },
     "newHome": {
       "heroTitle": "Pet Hotel & Pet Taxi",
-      "heroSubtitle": "Safe hotel and intercity taxi service for your beloved pets",
+      "heroSubtitle": "Pet hotel and daycare in Ankara, pet taxi service in 81 provinces",
       "hotelButton": "Hotel Reservation",
       "taxiButton": "Taxi Reservation",
       "petHotelTitle": "Pet Hotel",
@@ -343,7 +343,7 @@
       "instagramTitle": "Follow Us on Instagram",
       "instagramButton": "Visit Instagram",
       "safetyBannerTitle": "Your Little Friends Are Safe With Us",
-      "safetyBannerDesc": "Petfendy provides professional pet hotel, pet taxi and pet daycare services throughout Ankara. Safe accommodation, comfortable transportation and fun daycare for your furry friends, all under one roof!",
+      "safetyBannerDesc": "Petfendy provides professional pet hotel and pet daycare services only in Ankara, and pet taxi services in all 81 provinces. Safe accommodation, comfortable transportation and fun daycare for your furry friends, all under one roof!",
       "safetyBannerButton1": "Book Now",
       "safetyBannerButton2": "Learn More",
       "safetyBannerAlt": "Pet Hotel and Pet Taxi Services",
