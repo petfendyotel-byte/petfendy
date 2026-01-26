@@ -684,9 +684,6 @@ export function AdminDashboard() {
       setIsLoading(false)
     }
   }
-      setIsLoading(false)
-    }
-  }
 
   const handleUpdatePage = async (updatedPage: any) => {
     setIsLoading(true)
