@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { distanceCalculator } from '@/lib/distance-calculator'
-import { distanceCacheService } from '@/lib/distance-cache'
+import { distanceCalculator } from '../../../lib/distance-calculator'
+import { distanceCacheService } from '../../../lib/distance-cache'
 
 // Enhanced Distance Calculation API with Caching
 // Aynı rotalar için her zaman aynı mesafeyi döndürür
