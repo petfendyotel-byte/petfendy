@@ -647,37 +647,43 @@ export function AdminDashboard() {
         menuOrder: parseInt(newPage.menuOrder.toString()) || 0
       }
 
-      await createPageAPI(pageData)
-      await fetchPages() // Refresh pages list
+      const result = await createPageAPI(pageData)
+      if (result) {
+        await fetchPages() // Refresh pages list
 
-      setNewPage({
-        title: "",
-        slug: "",
-        content: "",
-        excerpt: "",
-        metaTitle: "",
-        metaDescription: "",
-        heroImage: "",
-        published: false,
-        showInMenu: false,
-        menuOrder: 0,
-        parentSlug: "",
-        pageType: "page",
-        customFields: {}
-      })
-      setShowAddPage(false)
+        setNewPage({
+          title: "",
+          slug: "",
+          content: "",
+          excerpt: "",
+          metaTitle: "",
+          metaDescription: "",
+          heroImage: "",
+          published: false,
+          showInMenu: false,
+          menuOrder: 0,
+          parentSlug: "",
+          pageType: "page",
+          customFields: {}
+        })
+        setShowAddPage(false)
 
-      toast({
-        title: "✅ Başarılı",
-        description: `${pageData.title} sayfası eklendi`,
-      })
+        toast({
+          title: "✅ Başarılı",
+          description: `${pageData.title} sayfası eklendi`,
+        })
+      }
     } catch (error: any) {
+      console.error('Page creation error:', error)
       toast({
         title: "Hata",
-        description: error.message || "Sayfa eklenirken hata oluştu",
+        description: error.message || "Sayfa eklenirken hata oluştu. Database bağlantısını kontrol edin.",
         variant: "destructive"
       })
     } finally {
+      setIsLoading(false)
+    }
+  }
       setIsLoading(false)
     }
   }
