@@ -104,7 +104,7 @@ export default function HizmetlerPage() {
           </h1>
           
           <p className="text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto mb-8">
-            Petfendy olarak sadece Ankara'da evcil hayvanlarınız için pet otel, pet kreş, 
+            Petfendy olarak Ankara'da evcil hayvanlarınız için pet otel, pet kreş, 
             pet kuaför ve köpek eğitimi hizmetleri, 81 ilde pet taksi hizmetleri sunuyoruz. Tek çatı altında tüm pet hizmetleri.
           </p>
 

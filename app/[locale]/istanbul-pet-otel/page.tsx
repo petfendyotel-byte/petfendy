@@ -180,7 +180,7 @@ export default function IstanbulPetOtelPage() {
               ⚠️ Önemli Bilgilendirme
             </h3>
             <p className="text-amber-700">
-              Şu anda pet otel hizmetimiz sadece <strong>Ankara</strong> bölgesinde aktiftir. 
+              Şu anda pet otel hizmetimiz <strong>Ankara</strong> bölgesinde aktiftir. 
               İstanbul için hizmet başlangıç tarihi hakkında bilgi almak için iletişime geçin.
             </p>
             <div className="mt-4">
