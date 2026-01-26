@@ -1,564 +1,483 @@
 /**
- * Calculate Distance API Testleri
+ * Enhanced Calculate Distance API Tests
  * 
- * Bu dosya /api/calculate-distance endpoint'ini test eder.
- * Taksi fiyat hesaplaması için mesafe hesaplama API'si.
- * 
- * Rota: Ankara → Alış Noktası → Bırakış Noktası → Ankara
+ * Bu dosya yeni cache sistemi ile geliştirilmiş /api/calculate-distance endpoint'ini test eder.
+ * Aynı rotalar için tutarlı mesafe sonuçları sağlar.
  * 
  * Test Kategorileri:
- * 1. Fallback Mesafe Hesaplama - Google API olmadan hesaplama
- * 2. Şehir Mesafeleri - Ankara'dan diğer illere mesafeler
- * 3. İller Arası Mesafeler - Direkt şehirler arası mesafeler
- * 4. Edge Cases - Aynı il, bilinmeyen il durumları
+ * 1. Distance Consistency - Aynı rotalar için tutarlı sonuçlar
+ * 2. Cache Behavior - Cache hit/miss durumları
+ * 3. VIP Transfer Calculations - VIP transfer hesaplama doğruluğu
+ * 4. Google API Integration - API entegrasyonu
+ * 5. Fallback Calculations - Fallback hesaplama doğruluğu
+ * 6. Property-Based Tests - Tutarlılık özellikleri
  */
 
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { distanceCalculator } from '@/lib/distance-calculator'
+import { distanceCacheService } from '@/lib/distance-cache'
 
-/**
- * calculateFallbackDistance fonksiyonunu test etmek için
- * API route'tan bağımsız olarak fonksiyonu yeniden tanımlıyoruz.
- * Bu, unit test için izole edilmiş test sağlar.
- */
-
-// Ankara'dan diğer illere yaklaşık mesafeler (km)
-const distancesFromAnkara: Record<string, number> = {
-  "Ankara": 30,
-  "İstanbul": 450,
-  "İzmir": 580,
-  "Antalya": 480,
-  "Bursa": 380,
-  "Adana": 490,
-  "Konya": 260,
-  "Gaziantep": 670,
-  "Mersin": 480,
-  "Kayseri": 320,
-  "Eskişehir": 230,
-  "Samsun": 420,
-  "Denizli": 480,
-  "Muğla": 600,
-  "Aydın": 550,
-  "Trabzon": 760,
-  "Diyarbakır": 920,
-  "Erzurum": 880,
-  "Malatya": 680,
-  "Van": 1200,
-}
-
-// İller arası direkt mesafeler
-const interCityDistances: Record<string, number> = {
-  "Konya-İstanbul": 660,
-  "İstanbul-Konya": 660,
-  "Konya-İzmir": 570,
-  "İzmir-Konya": 570,
-  "Konya-Antalya": 300,
-  "Antalya-Konya": 300,
-  "İstanbul-İzmir": 480,
-  "İzmir-İstanbul": 480,
-  "İstanbul-Antalya": 700,
-  "Antalya-İstanbul": 700,
-  "İstanbul-Bursa": 150,
-  "Bursa-İstanbul": 150,
-  "Adana-Mersin": 70,
-  "Mersin-Adana": 70,
-  "Adana-Gaziantep": 220,
-  "Gaziantep-Adana": 220,
-}
-
-/**
- * Fallback mesafe hesaplama fonksiyonu
- * Google API yoksa kullanılır
- * 
- * @param pickupProvince - Alış ili
- * @param dropoffProvince - Bırakış ili
- * @returns Toplam mesafe (km): Ankara → Alış → Bırakış → Ankara
- */
-function calculateFallbackDistance(pickupProvince: string, dropoffProvince: string): number {
-  // Ankara'dan alış noktasına mesafe
-  const ankaraToPickup = distancesFromAnkara[pickupProvince] || 300
-  
-  // Alış noktasından bırakış noktasına mesafe
-  let pickupToDropoff: number
-  if (pickupProvince === dropoffProvince) {
-    // Aynı il içi transfer
-    pickupToDropoff = 30
-  } else {
-    // Farklı iller arası
-    const directKey = `${pickupProvince}-${dropoffProvince}`
-    pickupToDropoff = interCityDistances[directKey] || 
-      // Direkt mesafe yoksa geometrik hesaplama
-      Math.round(Math.sqrt(
-        Math.pow(distancesFromAnkara[pickupProvince] || 300, 2) + 
-        Math.pow(distancesFromAnkara[dropoffProvince] || 300, 2) - 
-        (distancesFromAnkara[pickupProvince] || 300) * (distancesFromAnkara[dropoffProvince] || 300)
-      ))
+// Mock environment variables
+vi.mock('process', () => ({
+  env: {
+    GOOGLE_MAPS_API_KEY: 'test-api-key'
   }
+}))
 
-  // Bırakış noktasından Ankara'ya dönüş mesafesi
-  const dropoffToAnkara = distancesFromAnkara[dropoffProvince] || 300
+// Mock fetch for Google API calls
+global.fetch = vi.fn()
 
-  // Toplam: Ankara → Alış → Bırakış → Ankara
-  return ankaraToPickup + pickupToDropoff + dropoffToAnkara
-}
-
-// ============================================
-// ANKARA'DAN MESAFE TESTLERİ
-// ============================================
-describe('Ankara\'dan Mesafe Hesaplama', () => {
-  /**
-   * Ankara içi transfer - minimum mesafe
-   */
-  it('Ankara içi transfer için ~60 km hesaplamalı', () => {
-    const distance = calculateFallbackDistance('Ankara', 'Ankara')
-    
-    // Ankara → Ankara (30) + Ankara içi (30) + Ankara → Ankara (30) = 90
-    expect(distance).toBe(90)
+describe('Enhanced Distance Calculation API', () => {
+  beforeEach(() => {
+    // Clear cache before each test
+    distanceCacheService.invalidate()
+    vi.clearAllMocks()
   })
 
-  /**
-   * İstanbul'a transfer
-   */
-  it('İstanbul transferi için doğru mesafe hesaplamalı', () => {
-    const distance = calculateFallbackDistance('İstanbul', 'İstanbul')
-    
-    // Ankara → İstanbul (450) + İstanbul içi (30) + İstanbul → Ankara (450) = 930
-    expect(distance).toBe(930)
+  // ============================================
+  // DISTANCE CONSISTENCY TESTS
+  // ============================================
+  describe('Distance Consistency', () => {
+    it('should return identical distances for identical routes', async () => {
+      const pickup = { province: 'Ankara', district: 'Çankaya' }
+      const dropoff = { province: 'Edirne', district: 'Merkez' }
+
+      // Mock Google API response
+      const mockResponse = {
+        status: 'OK',
+        rows: [{
+          elements: [{
+            status: 'OK',
+            distance: { value: 577000 } // 577 km in meters
+          }]
+        }]
+      }
+
+      ;(global.fetch as any).mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResponse)
+      })
+
+      // First calculation
+      const result1 = await distanceCalculator.calculateDistance(pickup, dropoff, false)
+      
+      // Second calculation (should use cache)
+      const result2 = await distanceCalculator.calculateDistance(pickup, dropoff, false)
+
+      // Third calculation with force refresh
+      const result3 = await distanceCalculator.calculateDistance(pickup, dropoff, false, true)
+
+      // All results should have identical distances
+      expect(result1.totalDistance).toBe(result2.totalDistance)
+      expect(result2.totalDistance).toBe(result3.totalDistance)
+      
+      // Second result should be cached
+      expect(result1.cached).toBe(false)
+      expect(result2.cached).toBe(true)
+      expect(result3.cached).toBe(false) // Force refresh
+    })
+
+    it('should maintain consistency across multiple identical requests', async () => {
+      const pickup = { province: 'İstanbul', district: 'Beyoğlu' }
+      const dropoff = { province: 'İzmir', district: 'Konak' }
+
+      // Mock Google API responses
+      const mockResponse = {
+        status: 'OK',
+        rows: [{
+          elements: [{
+            status: 'OK',
+            distance: { value: 480000 } // 480 km
+          }]
+        }]
+      }
+
+      ;(global.fetch as any).mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResponse)
+      })
+
+      // Multiple parallel requests
+      const promises = Array(10).fill(null).map(() => 
+        distanceCalculator.calculateDistance(pickup, dropoff, false)
+      )
+
+      const results = await Promise.all(promises)
+
+      // All results should be identical
+      const distances = results.map(r => r.totalDistance)
+      const uniqueDistances = [...new Set(distances)]
+      
+      expect(uniqueDistances).toHaveLength(1)
+      expect(results[0].totalDistance).toBeGreaterThan(0)
+    })
   })
 
-  /**
-   * İzmir'e transfer
-   */
-  it('İzmir transferi için doğru mesafe hesaplamalı', () => {
-    const distance = calculateFallbackDistance('İzmir', 'İzmir')
-    
-    // Ankara → İzmir (580) + İzmir içi (30) + İzmir → Ankara (580) = 1190
-    expect(distance).toBe(1190)
-  })
-})
+  // ============================================
+  // CACHE BEHAVIOR TESTS
+  // ============================================
+  describe('Cache Behavior', () => {
+    it('should cache Google API results', async () => {
+      const pickup = { province: 'Ankara', district: 'Keçiören' }
+      const dropoff = { province: 'Konya', district: 'Selçuklu' }
 
-// ============================================
-// İLLER ARASI MESAFE TESTLERİ
-// ============================================
-describe('İller Arası Mesafe Hesaplama', () => {
-  /**
-   * İstanbul → Ankara transferi
-   */
-  it('İstanbul\'dan Ankara\'ya transfer hesaplamalı', () => {
-    const distance = calculateFallbackDistance('İstanbul', 'Ankara')
-    
-    // Ankara → İstanbul (450) + İstanbul → Ankara (direkt yok, hesaplanır) + Ankara → Ankara (30)
-    expect(distance).toBeGreaterThan(500)
-  })
+      const mockResponse = {
+        status: 'OK',
+        rows: [{
+          elements: [{
+            status: 'OK',
+            distance: { value: 260000 } // 260 km
+          }]
+        }]
+      }
 
-  /**
-   * Konya → İstanbul transferi (direkt mesafe var)
-   */
-  it('Konya\'dan İstanbul\'a transfer - direkt mesafe kullanmalı', () => {
-    const distance = calculateFallbackDistance('Konya', 'İstanbul')
-    
-    // Ankara → Konya (260) + Konya → İstanbul (660) + İstanbul → Ankara (450) = 1370
-    expect(distance).toBe(1370)
-  })
+      ;(global.fetch as any).mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResponse)
+      })
 
-  /**
-   * Adana → Mersin transferi (yakın şehirler)
-   */
-  it('Adana\'dan Mersin\'e transfer - yakın şehirler', () => {
-    const distance = calculateFallbackDistance('Adana', 'Mersin')
-    
-    // Ankara → Adana (490) + Adana → Mersin (70) + Mersin → Ankara (480) = 1040
-    expect(distance).toBe(1040)
-  })
+      // First call - should hit Google API
+      const result1 = await distanceCalculator.calculateDistance(pickup, dropoff, false)
+      expect(result1.method).toBe('google')
+      expect(result1.cached).toBe(false)
 
-  /**
-   * İstanbul → İzmir transferi
-   */
-  it('İstanbul\'dan İzmir\'e transfer hesaplamalı', () => {
-    const distance = calculateFallbackDistance('İstanbul', 'İzmir')
-    
-    // Ankara → İstanbul (450) + İstanbul → İzmir (480) + İzmir → Ankara (580) = 1510
-    expect(distance).toBe(1510)
-  })
-})
+      // Second call - should use cache
+      const result2 = await distanceCalculator.calculateDistance(pickup, dropoff, false)
+      expect(result2.method).toBe('cached')
+      expect(result2.cached).toBe(true)
+      expect(result2.totalDistance).toBe(result1.totalDistance)
 
-// ============================================
-// BİLİNMEYEN İL TESTLERİ
-// ============================================
-describe('Bilinmeyen İl Durumları', () => {
-  /**
-   * Bilinmeyen il için varsayılan mesafe kullanmalı
-   */
-  it('bilinmeyen il için 300 km varsayılan mesafe kullanmalı', () => {
-    const distance = calculateFallbackDistance('BilinmeyenİL', 'BilinmeyenİL')
-    
-    // Ankara → Bilinmeyen (300) + Bilinmeyen içi (30) + Bilinmeyen → Ankara (300) = 630
-    expect(distance).toBe(630)
+      // Verify Google API was called only once
+      expect(global.fetch).toHaveBeenCalledTimes(3) // 3 segments for normal transfer
+    })
+
+    it('should generate consistent cache keys', () => {
+      const key1 = distanceCacheService.generateKey('Ankara', 'Çankaya', 'İstanbul', 'Beyoğlu', false)
+      const key2 = distanceCacheService.generateKey('ankara', 'çankaya', 'istanbul', 'beyoğlu', false)
+      const key3 = distanceCacheService.generateKey('ANKARA', 'ÇANKAYA', 'İSTANBUL', 'BEYOĞLU', false)
+
+      // Keys should be identical regardless of case
+      expect(key1).toBe(key2)
+      expect(key2).toBe(key3)
+    })
+
+    it('should differentiate VIP and regular transfers in cache', () => {
+      const regularKey = distanceCacheService.generateKey('Ankara', 'Çankaya', 'İstanbul', 'Beyoğlu', false)
+      const vipKey = distanceCacheService.generateKey('Ankara', 'Çankaya', 'İstanbul', 'Beyoğlu', true)
+
+      expect(regularKey).not.toBe(vipKey)
+      expect(regularKey).toContain('regular')
+      expect(vipKey).toContain('vip')
+    })
   })
 
-  /**
-   * Bir il bilinen, diğeri bilinmeyen
-   */
-  it('karma durum - bir il bilinen, diğeri bilinmeyen', () => {
-    const distance = calculateFallbackDistance('İstanbul', 'BilinmeyenİL')
-    
-    // Hesaplama yapılmalı, hata vermemeli
-    expect(distance).toBeGreaterThan(0)
-    expect(typeof distance).toBe('number')
-  })
-})
+  // ============================================
+  // VIP TRANSFER TESTS
+  // ============================================
+  describe('VIP Transfer Calculations', () => {
+    it('should calculate Ankara departure VIP transfer correctly (distance x2)', async () => {
+      const pickup = { province: 'Ankara', district: 'Çankaya' }
+      const dropoff = { province: 'İzmir', district: 'Konak' }
 
-// ============================================
-// UZAK MESAFE TESTLERİ
-// ============================================
-describe('Uzak Mesafe Hesaplamaları', () => {
-  /**
-   * Van transferi - en uzak illerden biri
-   */
-  it('Van transferi için yüksek mesafe hesaplamalı', () => {
-    const distance = calculateFallbackDistance('Van', 'Van')
-    
-    // Ankara → Van (1200) + Van içi (30) + Van → Ankara (1200) = 2430
-    expect(distance).toBe(2430)
-  })
+      const mockResponse = {
+        status: 'OK',
+        rows: [{
+          elements: [{
+            status: 'OK',
+            distance: { value: 577000 } // 577 km
+          }]
+        }]
+      }
 
-  /**
-   * Trabzon transferi
-   */
-  it('Trabzon transferi hesaplamalı', () => {
-    const distance = calculateFallbackDistance('Trabzon', 'Trabzon')
-    
-    // Ankara → Trabzon (760) + Trabzon içi (30) + Trabzon → Ankara (760) = 1550
-    expect(distance).toBe(1550)
-  })
+      ;(global.fetch as any).mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResponse)
+      })
 
-  /**
-   * Diyarbakır → Erzurum transferi
-   */
-  it('Diyarbakır\'dan Erzurum\'a transfer hesaplamalı', () => {
-    const distance = calculateFallbackDistance('Diyarbakır', 'Erzurum')
-    
-    // Hesaplama yapılmalı
-    expect(distance).toBeGreaterThan(1500)
-  })
-})
+      const result = await distanceCalculator.calculateDistance(pickup, dropoff, true)
 
-// ============================================
-// YAKIN MESAFE TESTLERİ
-// ============================================
-describe('Yakın Mesafe Hesaplamaları', () => {
-  /**
-   * Eskişehir transferi - Ankara'ya yakın
-   */
-  it('Eskişehir transferi için düşük mesafe hesaplamalı', () => {
-    const distance = calculateFallbackDistance('Eskişehir', 'Eskişehir')
-    
-    // Ankara → Eskişehir (230) + Eskişehir içi (30) + Eskişehir → Ankara (230) = 490
-    expect(distance).toBe(490)
-  })
+      expect(result.totalDistance).toBe(1154) // 577 * 2
+      expect(result.isVipTransfer).toBe(true)
+      expect(result.segments).toHaveLength(2) // Round trip
+      expect(result.method).toBe('google')
+    })
 
-  /**
-   * Konya transferi
-   */
-  it('Konya transferi hesaplamalı', () => {
-    const distance = calculateFallbackDistance('Konya', 'Konya')
-    
-    // Ankara → Konya (260) + Konya içi (30) + Konya → Ankara (260) = 550
-    expect(distance).toBe(550)
-  })
-})
+    it('should calculate Ankara arrival VIP transfer correctly (distance x2)', async () => {
+      const pickup = { province: 'Samsun', district: 'İlkadım' }
+      const dropoff = { province: 'Ankara', district: 'Çankaya' }
 
-// ============================================
-// SİMETRİ TESTLERİ
-// ============================================
-describe('Mesafe Simetrisi', () => {
-  /**
-   * A → B ve B → A aynı mesafe olmalı
-   */
-  it('İstanbul → İzmir ve İzmir → İstanbul aynı mesafe olmalı', () => {
-    const distance1 = calculateFallbackDistance('İstanbul', 'İzmir')
-    const distance2 = calculateFallbackDistance('İzmir', 'İstanbul')
-    
-    expect(distance1).toBe(distance2)
+      const mockResponse = {
+        status: 'OK',
+        rows: [{
+          elements: [{
+            status: 'OK',
+            distance: { value: 440000 } // 440 km
+          }]
+        }]
+      }
+
+      ;(global.fetch as any).mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResponse)
+      })
+
+      const result = await distanceCalculator.calculateDistance(pickup, dropoff, true)
+
+      expect(result.totalDistance).toBe(880) // 440 * 2
+      expect(result.isVipTransfer).toBe(true)
+      expect(result.segments).toHaveLength(2) // Round trip
+    })
+
+    it('should calculate non-Ankara VIP transfer correctly (3-segment)', async () => {
+      const pickup = { province: 'İzmir', district: 'Konak' }
+      const dropoff = { province: 'İstanbul', district: 'Beyoğlu' }
+
+      const mockResponses = [
+        { status: 'OK', rows: [{ elements: [{ status: 'OK', distance: { value: 577000 } }] }] }, // Ankara → İzmir
+        { status: 'OK', rows: [{ elements: [{ status: 'OK', distance: { value: 480000 } }] }] }, // İzmir → İstanbul
+        { status: 'OK', rows: [{ elements: [{ status: 'OK', distance: { value: 450000 } }] }] }  // İstanbul → Ankara
+      ]
+
+      ;(global.fetch as any)
+        .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockResponses[0]) })
+        .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockResponses[1]) })
+        .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockResponses[2]) })
+
+      const result = await distanceCalculator.calculateDistance(pickup, dropoff, true)
+
+      expect(result.totalDistance).toBe(1507) // 577 + 480 + 450
+      expect(result.isVipTransfer).toBe(true)
+      expect(result.segments).toHaveLength(3)
+      expect(result.breakdown).toBeDefined()
+      expect(result.breakdown?.ankaraToPickup).toBe(577)
+      expect(result.breakdown?.pickupToDropoff).toBe(480)
+      expect(result.breakdown?.dropoffToAnkara).toBe(450)
+    })
   })
 
-  /**
-   * Konya → Antalya simetrisi
-   */
-  it('Konya → Antalya ve Antalya → Konya aynı mesafe olmalı', () => {
-    const distance1 = calculateFallbackDistance('Konya', 'Antalya')
-    const distance2 = calculateFallbackDistance('Antalya', 'Konya')
-    
-    expect(distance1).toBe(distance2)
-  })
-})
+  // ============================================
+  // FALLBACK CALCULATION TESTS
+  // ============================================
+  describe('Fallback Calculations', () => {
+    it('should use fallback when Google API fails', async () => {
+      const pickup = { province: 'Ankara', district: 'Çankaya' }
+      const dropoff = { province: 'İzmir', district: 'Konak' }
 
-// ============================================
-// FİYAT HESAPLAMA TESTLERİ
-// ============================================
-describe('Fiyat Hesaplama Entegrasyonu', () => {
-  const VIP_PRICE_PER_KM = 15
-  const SHARED_PRICE_PER_KM = 8
+      // Mock API failure
+      ;(global.fetch as any).mockRejectedValue(new Error('API Error'))
 
-  /**
-   * VIP taksi fiyat hesaplama
-   */
-  it('VIP taksi fiyatı doğru hesaplanmalı', () => {
-    const distance = calculateFallbackDistance('İstanbul', 'İstanbul')
-    const price = distance * VIP_PRICE_PER_KM
-    
-    // 930 km * 15 TL = 13,950 TL
-    expect(price).toBe(13950)
-  })
+      const result = await distanceCalculator.calculateDistance(pickup, dropoff, false)
 
-  /**
-   * Paylaşımlı taksi fiyat hesaplama
-   */
-  it('Paylaşımlı taksi fiyatı doğru hesaplanmalı', () => {
-    const distance = calculateFallbackDistance('İstanbul', 'İstanbul')
-    const price = distance * SHARED_PRICE_PER_KM
-    
-    // 930 km * 8 TL = 7,440 TL
-    expect(price).toBe(7440)
-  })
+      expect(result.method).toBe('fallback')
+      expect(result.totalDistance).toBeGreaterThan(0)
+      expect(result.segments).toHaveLength(3)
+    })
 
-  /**
-   * Kısa mesafe fiyat hesaplama
-   */
-  it('Ankara içi transfer fiyatı hesaplanmalı', () => {
-    const distance = calculateFallbackDistance('Ankara', 'Ankara')
-    const vipPrice = distance * VIP_PRICE_PER_KM
-    const sharedPrice = distance * SHARED_PRICE_PER_KM
-    
-    // 90 km * 15 TL = 1,350 TL (VIP)
-    // 90 km * 8 TL = 720 TL (Paylaşımlı)
-    expect(vipPrice).toBe(1350)
-    expect(sharedPrice).toBe(720)
-  })
-})
+    it('should provide consistent fallback results', async () => {
+      const pickup = { province: 'İstanbul', district: 'Beyoğlu' }
+      const dropoff = { province: 'Antalya', district: 'Muratpaşa' }
 
-// ============================================
-// PERFORMANS TESTLERİ
-// ============================================
-describe('Performans', () => {
-  /**
-   * Hesaplama hızlı olmalı
-   */
-  it('1000 hesaplama 100ms altında tamamlanmalı', () => {
-    const start = Date.now()
-    
-    for (let i = 0; i < 1000; i++) {
-      calculateFallbackDistance('İstanbul', 'İzmir')
-    }
-    
-    const duration = Date.now() - start
-    expect(duration).toBeLessThan(100)
-  })
-})
-// ============================================
-// VIP TRANSFER TESTLERİ
-// ============================================
-describe('VIP Transfer Hesaplamaları', () => {
-  // VIP Transfer için fiyat sabitleri
-  const VIP_PRICE_PER_KM = 25 // VIP transfer için daha yüksek fiyat
-  
-  /**
-   * VIP Transfer için yardımcı fonksiyon
-   */
-  function calculateVipFallbackDistance(pickupProvince: string, dropoffProvince: string): number {
-    const distancesFromAnkara: Record<string, number> = {
-      "Ankara": 30,
-      "İstanbul": 450,
-      "İzmir": 577, // Örnekteki değer
-      "Antalya": 480,
-      "Bursa": 380,
-      "Adana": 490,
-      "Konya": 260,
-      "Gaziantep": 670,
-      "Mersin": 480,
-      "Kayseri": 320,
-      "Eskişehir": 230,
-      "Samsun": 440, // Örnekteki değer
-      "Denizli": 480,
-      "Muğla": 600,
-      "Aydın": 550,
-      "Trabzon": 760,
-      "Diyarbakır": 920,
-      "Erzurum": 880,
-      "Malatya": 680,
-      "Van": 1200,
-    }
+      // Mock API failure
+      ;(global.fetch as any).mockRejectedValue(new Error('API Error'))
 
-    // İller arası direkt mesafeler
-    const interCityDistances: Record<string, number> = {
-      "İzmir-İstanbul": 480,
-      "İstanbul-İzmir": 480,
-      "Konya-İstanbul": 660,
-      "İstanbul-Konya": 660,
-      "Konya-İzmir": 570,
-      "İzmir-Konya": 570,
-      "Konya-Antalya": 300,
-      "Antalya-Konya": 300,
-      "İstanbul-Antalya": 700,
-      "Antalya-İstanbul": 700,
-      "İstanbul-Bursa": 150,
-      "Bursa-İstanbul": 150,
-      "Adana-Mersin": 70,
-      "Mersin-Adana": 70,
-      "Adana-Gaziantep": 220,
-      "Gaziantep-Adana": 220,
-    }
+      const result1 = await distanceCalculator.calculateDistance(pickup, dropoff, false)
+      const result2 = await distanceCalculator.calculateDistance(pickup, dropoff, false)
 
-    // Ankara çıkışlı transfer: Ankara → Hedef şehir x2
-    if (pickupProvince === 'Ankara') {
-      const oneWayDistance = distancesFromAnkara[dropoffProvince] || 300
-      return oneWayDistance * 2
-    }
-    
-    // Ankara varışlı transfer: Başlangıç şehir → Ankara x2
-    if (dropoffProvince === 'Ankara') {
-      const oneWayDistance = distancesFromAnkara[pickupProvince] || 300
-      return oneWayDistance * 2
-    }
-    
-    // Ankara dışı çıkışlı transferler: (Ankara → Başlangıç) + (Başlangıç → Bitiş) + (Bitiş → Ankara)
-    const ankaraToPickup = distancesFromAnkara[pickupProvince] || 300
-    const dropoffToAnkara = distancesFromAnkara[dropoffProvince] || 300
-    
-    // Başlangıç → Bitiş mesafesi
-    let pickupToDropoff: number
-    if (pickupProvince === dropoffProvince) {
-      pickupToDropoff = 30 // Aynı il içi
-    } else {
-      const directKey = `${pickupProvince}-${dropoffProvince}`
-      pickupToDropoff = interCityDistances[directKey] || 
-        Math.round(Math.sqrt(
-          Math.pow(distancesFromAnkara[pickupProvince] || 300, 2) + 
-          Math.pow(distancesFromAnkara[dropoffProvince] || 300, 2) - 
-          (distancesFromAnkara[pickupProvince] || 300) * (distancesFromAnkara[dropoffProvince] || 300)
-        ))
-    }
-    
-    // Toplam: (Ankara → Başlangıç) + (Başlangıç → Bitiş) + (Bitiş → Ankara)
-    return ankaraToPickup + pickupToDropoff + dropoffToAnkara
-  }
+      expect(result1.totalDistance).toBe(result2.totalDistance)
+      expect(result1.method).toBe('fallback')
+      expect(result2.method).toBe('cached') // Second call uses cache
+    })
 
-  /**
-   * Ankara çıkışlı VIP transfer - Ankara → İzmir = 577x2 = 1154 km
-   */
-  it('Ankara çıkışlı VIP transfer - Ankara → İzmir = 577x2 = 1154 km', () => {
-    const distance = calculateVipFallbackDistance('Ankara', 'İzmir')
-    expect(distance).toBe(1154) // 577 * 2
+    it('should handle VIP fallback calculations correctly', async () => {
+      const pickup = { province: 'Ankara', district: 'Çankaya' }
+      const dropoff = { province: 'İzmir', district: 'Konak' }
+
+      // Mock API failure
+      ;(global.fetch as any).mockRejectedValue(new Error('API Error'))
+
+      const result = await distanceCalculator.calculateDistance(pickup, dropoff, true)
+
+      expect(result.method).toBe('fallback')
+      expect(result.isVipTransfer).toBe(true)
+      expect(result.totalDistance).toBe(1154) // 577 * 2 from fallback data
+    })
   })
 
-  /**
-   * Ankara varışlı VIP transfer - Samsun → Ankara = 440x2 = 880 km
-   */
-  it('Ankara varışlı VIP transfer - Samsun → Ankara = 440x2 = 880 km', () => {
-    const distance = calculateVipFallbackDistance('Samsun', 'Ankara')
-    expect(distance).toBe(880) // 440 * 2
+  // ============================================
+  // PROPERTY-BASED TESTS
+  // ============================================
+  describe('Property-Based Tests', () => {
+    it('should satisfy distance consistency property', async () => {
+      const testRoutes = [
+        { pickup: { province: 'Ankara', district: 'Çankaya' }, dropoff: { province: 'İstanbul', district: 'Beyoğlu' } },
+        { pickup: { province: 'İzmir', district: 'Konak' }, dropoff: { province: 'Antalya', district: 'Muratpaşa' } },
+        { pickup: { province: 'Bursa', district: 'Osmangazi' }, dropoff: { province: 'Konya', district: 'Selçuklu' } }
+      ]
+
+      // Mock consistent API responses
+      const mockResponse = {
+        status: 'OK',
+        rows: [{
+          elements: [{
+            status: 'OK',
+            distance: { value: 300000 } // 300 km
+          }]
+        }]
+      }
+
+      ;(global.fetch as any).mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResponse)
+      })
+
+      for (const route of testRoutes) {
+        const results = await Promise.all([
+          distanceCalculator.calculateDistance(route.pickup, route.dropoff, false),
+          distanceCalculator.calculateDistance(route.pickup, route.dropoff, false),
+          distanceCalculator.calculateDistance(route.pickup, route.dropoff, false)
+        ])
+
+        // All results for the same route should be identical
+        const distances = results.map(r => r.totalDistance)
+        const uniqueDistances = [...new Set(distances)]
+        expect(uniqueDistances).toHaveLength(1)
+      }
+    })
+
+    it('should satisfy VIP transfer calculation property', async () => {
+      const ankaraRoutes = [
+        { pickup: { province: 'Ankara', district: 'Çankaya' }, dropoff: { province: 'İstanbul', district: 'Beyoğlu' } },
+        { pickup: { province: 'İzmir', district: 'Konak' }, dropoff: { province: 'Ankara', district: 'Keçiören' } }
+      ]
+
+      const mockResponse = {
+        status: 'OK',
+        rows: [{
+          elements: [{
+            status: 'OK',
+            distance: { value: 400000 } // 400 km
+          }]
+        }]
+      }
+
+      ;(global.fetch as any).mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResponse)
+      })
+
+      for (const route of ankaraRoutes) {
+        const vipResult = await distanceCalculator.calculateDistance(route.pickup, route.dropoff, true)
+        
+        // VIP transfers involving Ankara should use x2 calculation
+        if (route.pickup.province === 'Ankara' || route.dropoff.province === 'Ankara') {
+          expect(vipResult.totalDistance).toBe(800) // 400 * 2
+          expect(vipResult.segments).toHaveLength(2) // Round trip
+        }
+      }
+    })
+
+    it('should satisfy cache behavior property', async () => {
+      const pickup = { province: 'Ankara', district: 'Çankaya' }
+      const dropoff = { province: 'Konya', district: 'Selçuklu' }
+
+      const mockResponse = {
+        status: 'OK',
+        rows: [{
+          elements: [{
+            status: 'OK',
+            distance: { value: 260000 } // 260 km
+          }]
+        }]
+      }
+
+      ;(global.fetch as any).mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResponse)
+      })
+
+      // Fresh calculation
+      const freshResult = await distanceCalculator.calculateDistance(pickup, dropoff, false, true)
+      
+      // Cached calculation
+      const cachedResult = await distanceCalculator.calculateDistance(pickup, dropoff, false, false)
+
+      // Results should be identical
+      expect(freshResult.totalDistance).toBe(cachedResult.totalDistance)
+      expect(freshResult.cached).toBe(false)
+      expect(cachedResult.cached).toBe(true)
+    })
   })
 
-  /**
-   * Ankara çıkışlı VIP transfer - Ankara → İstanbul = 450x2 = 900 km
-   */
-  it('Ankara çıkışlı VIP transfer - Ankara → İstanbul = 450x2 = 900 km', () => {
-    const distance = calculateVipFallbackDistance('Ankara', 'İstanbul')
-    expect(distance).toBe(900) // 450 * 2
-  })
+  // ============================================
+  // PERFORMANCE TESTS
+  // ============================================
+  describe('Performance', () => {
+    it('should complete cached calculations quickly', async () => {
+      const pickup = { province: 'Ankara', district: 'Çankaya' }
+      const dropoff = { province: 'İstanbul', district: 'Beyoğlu' }
 
-  /**
-   * Ankara varışlı VIP transfer - İstanbul → Ankara = 450x2 = 900 km
-   */
-  it('Ankara varışlı VIP transfer - İstanbul → Ankara = 450x2 = 900 km', () => {
-    const distance = calculateVipFallbackDistance('İstanbul', 'Ankara')
-    expect(distance).toBe(900) // 450 * 2
-  })
+      // First calculation to populate cache
+      const mockResponse = {
+        status: 'OK',
+        rows: [{
+          elements: [{
+            status: 'OK',
+            distance: { value: 450000 }
+          }]
+        }]
+      }
 
-  /**
-   * VIP transfer olmayan durumlar için normal hesaplama yapmalı
-   */
-  it('Ankara dışı çıkışlı VIP transfer - İzmir → İstanbul hesaplamalı', () => {
-    const distance = calculateVipFallbackDistance('İzmir', 'İstanbul')
-    // (Ankara → İzmir: 577) + (İzmir → İstanbul: 480) + (İstanbul → Ankara: 450) = 1507
-    expect(distance).toBe(1507)
-  })
+      ;(global.fetch as any).mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResponse)
+      })
 
-  /**
-   * Ankara dışı çıkışlı VIP transfer - İstanbul → İzmir hesaplamalı
-   */
-  it('Ankara dışı çıkışlı VIP transfer - İstanbul → İzmir hesaplamalı', () => {
-    const distance = calculateVipFallbackDistance('İstanbul', 'İzmir')
-    // (Ankara → İstanbul: 450) + (İstanbul → İzmir: 480) + (İzmir → Ankara: 577) = 1507
-    expect(distance).toBe(1507)
-  })
+      await distanceCalculator.calculateDistance(pickup, dropoff, false)
 
-  /**
-   * Ankara dışı çıkışlı VIP transfer - Konya → Antalya hesaplamalı
-   */
-  it('Ankara dışı çıkışlı VIP transfer - Konya → Antalya hesaplamalı', () => {
-    const distance = calculateVipFallbackDistance('Konya', 'Antalya')
-    // (Ankara → Konya: 260) + (Konya → Antalya: 300) + (Antalya → Ankara: 480) = 1040
-    expect(distance).toBe(1040)
-  })
+      // Measure cached calculation time
+      const start = Date.now()
+      await distanceCalculator.calculateDistance(pickup, dropoff, false)
+      const duration = Date.now() - start
 
-  /**
-   * Ankara dışı çıkışlı VIP transfer - Bursa → İstanbul hesaplamalı
-   */
-  it('Ankara dışı çıkışlı VIP transfer - Bursa → İstanbul hesaplamalı', () => {
-    const distance = calculateVipFallbackDistance('Bursa', 'İstanbul')
-    // (Ankara → Bursa: 380) + (Bursa → İstanbul: 150) + (İstanbul → Ankara: 450) = 980
-    expect(distance).toBe(980)
-  })
+      expect(duration).toBeLessThan(10) // Should be very fast from cache
+    })
 
-  /**
-   * VIP transfer fiyat hesaplama testleri
-   */
-  it('VIP transfer fiyatı doğru hesaplanmalı - Ankara → İzmir', () => {
-    const distance = calculateVipFallbackDistance('Ankara', 'İzmir')
-    const price = distance * VIP_PRICE_PER_KM
-    
-    // 1154 km * 25 TL = 28,850 TL
-    expect(distance).toBe(1154)
-    expect(price).toBe(28850)
-  })
+    it('should handle multiple concurrent requests efficiently', async () => {
+      const pickup = { province: 'Ankara', district: 'Çankaya' }
+      const dropoff = { province: 'İzmir', district: 'Konak' }
 
-  /**
-   * VIP transfer fiyat hesaplama testleri - Ankara dışı çıkışlı
-   */
-  it('VIP transfer fiyatı doğru hesaplanmalı - İzmir → İstanbul', () => {
-    const distance = calculateVipFallbackDistance('İzmir', 'İstanbul')
-    const price = distance * VIP_PRICE_PER_KM
-    
-    // 1507 km * 25 TL = 37,675 TL
-    expect(distance).toBe(1507)
-    expect(price).toBe(37675)
-  })
+      const mockResponse = {
+        status: 'OK',
+        rows: [{
+          elements: [{
+            status: 'OK',
+            distance: { value: 577000 }
+          }]
+        }]
+      }
 
-  /**
-   * VIP transfer fiyat hesaplama testleri - Ankara dışı çıkışlı
-   */
-  it('VIP transfer fiyatı doğru hesaplanmalı - Konya → Antalya', () => {
-    const distance = calculateVipFallbackDistance('Konya', 'Antalya')
-    const price = distance * VIP_PRICE_PER_KM
-    
-    // 1040 km * 25 TL = 26,000 TL
-    expect(distance).toBe(1040)
-    expect(price).toBe(26000)
-  })
+      ;(global.fetch as any).mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResponse)
+      })
 
-  /**
-   * Bilinmeyen il için VIP transfer
-   */
-  it('Bilinmeyen il için VIP transfer - varsayılan mesafe x2', () => {
-    const distance = calculateVipFallbackDistance('Ankara', 'Bilinmeyenİl')
-    expect(distance).toBe(600) // 300 * 2
-  })
+      const start = Date.now()
+      
+      // 50 concurrent requests
+      const promises = Array(50).fill(null).map(() =>
+        distanceCalculator.calculateDistance(pickup, dropoff, false)
+      )
 
-  /**
-   * Ankara içi VIP transfer
-   */
-  it('Ankara içi VIP transfer - 30x2 = 60 km', () => {
-    const distance = calculateVipFallbackDistance('Ankara', 'Ankara')
-    expect(distance).toBe(60) // 30 * 2
+      const results = await Promise.all(promises)
+      const duration = Date.now() - start
+
+      // All results should be identical
+      const distances = results.map(r => r.totalDistance)
+      const uniqueDistances = [...new Set(distances)]
+      expect(uniqueDistances).toHaveLength(1)
+
+      // Should complete reasonably quickly
+      expect(duration).toBeLessThan(5000) // 5 seconds max
+    })
   })
 })
