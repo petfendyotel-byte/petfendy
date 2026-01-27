@@ -10,8 +10,23 @@ export default defineConfig({
     setupFiles: ['./tests/setup.ts'],
     include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx'],
     coverage: {
+      provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      exclude: ['node_modules/', 'tests/']
+      exclude: [
+        'node_modules/',
+        'tests/',
+        '**/*.d.ts',
+        '**/*.config.*',
+        '**/coverage/**',
+        '**/.next/**',
+        '**/dist/**'
+      ],
+      include: [
+        'app/**/*.{ts,tsx}',
+        'components/**/*.{ts,tsx}',
+        'lib/**/*.{ts,tsx}',
+        'hooks/**/*.{ts,tsx}'
+      ]
     }
   },
   resolve: {

@@ -7,6 +7,7 @@ import { AuthProvider } from "@/components/auth-context"
 import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from "@/components/theme-provider"
 import { WhatsAppButton } from "@/components/whatsapp-button"
+import { RecaptchaProvider } from "@/components/recaptcha-provider"
 
 const geistSans = Geist({ 
   subsets: ["latin"],
@@ -394,11 +395,13 @@ export default async function LocaleLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <NextIntlClientProvider messages={messages} locale={locale}>
-            <AuthProvider>{children}</AuthProvider>
-            <Toaster />
-            <WhatsAppButton />
-          </NextIntlClientProvider>
+          <RecaptchaProvider siteKey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}>
+            <NextIntlClientProvider messages={messages} locale={locale}>
+              <AuthProvider>{children}</AuthProvider>
+              <Toaster />
+              <WhatsAppButton />
+            </NextIntlClientProvider>
+          </RecaptchaProvider>
         </ThemeProvider>
       </body>
     </html>

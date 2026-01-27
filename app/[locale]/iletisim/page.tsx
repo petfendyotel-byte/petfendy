@@ -5,6 +5,7 @@ import { useState, useEffect } from "react"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { Phone, Mail, MapPin, Clock, MessageCircle, Building2, Send, Instagram } from "lucide-react"
+import { ContactForm } from "@/components/contact-form"
 
 const content = {
   tr: {
@@ -203,6 +204,11 @@ export default function ContactPage() {
                 />
               </div>
             </div>
+          </div>
+
+          {/* Contact Form */}
+          <div className="mt-8">
+            <ContactForm locale={locale} />
           </div>
         </div>
       </section>

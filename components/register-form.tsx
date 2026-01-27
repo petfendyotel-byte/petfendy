@@ -19,11 +19,14 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useTranslations } from 'next-intl';
+import { useRecaptchaContext } from "@/components/recaptcha-provider"
+import { Shield } from "lucide-react"
 import type { User } from "@/lib/types"
 
 export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
   const { register } = useAuth()
   const t = useTranslations('auth');
+  const { executeRecaptcha, isLoaded } = useRecaptchaContext()
   const [showVerification, setShowVerification] = useState(false)
   const [formData, setFormData] = useState({
     email: "",
@@ -74,6 +77,32 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
 
     setIsLoading(true)
     try {
+      // Execute reCAPTCHA
+      const recaptchaToken = await executeRecaptcha('register')
+      if (!recaptchaToken) {
+        setErrors({ submit: "Güvenlik doğrulaması başarısız. Lütfen tekrar deneyin." })
+        return
+      }
+
+      // Verify reCAPTCHA token
+      const recaptchaResponse = await fetch('/api/verify-recaptcha', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: recaptchaToken,
+          action: 'register',
+          minScore: 0.5
+        })
+      })
+
+      const recaptchaResult = await recaptchaResponse.json()
+      if (!recaptchaResult.success) {
+        setErrors({ submit: "Güvenlik doğrulaması başarısız. Lütfen tekrar deneyin." })
+        return
+      }
+
       // Generate verification code
       const verificationCode = Math.floor(100000 + Math.random() * 900000).toString()
       const expiry = new Date()
@@ -279,9 +308,25 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
             {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Kayıt yapılıyor..." : t('registerTitle')}
+          <Button type="submit" className="w-full" disabled={isLoading || !isLoaded}>
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Kayıt yapılıyor...
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4" />
+                {t('registerTitle')}
+              </div>
+            )}
           </Button>
+
+          {!isLoaded && (
+            <div className="text-xs text-muted-foreground text-center">
+              Güvenlik doğrulaması yükleniyor...
+            </div>
+          )}
         </form>
       </CardContent>
     </Card>

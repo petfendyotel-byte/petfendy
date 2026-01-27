@@ -14,11 +14,13 @@ import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { useRecaptchaContext } from "@/components/recaptcha-provider"
 
 export function TaxiBooking() {
   const router = useRouter()
   const params = useParams()
   const locale = (params?.locale as string) || 'tr'
+  const { executeRecaptcha, isLoaded } = useRecaptchaContext()
   
   const [services] = useState<TaxiService[]>(mockTaxiServices)
   const [cityPricings] = useState<CityPricing[]>(mockCityPricings)
@@ -110,7 +112,7 @@ export function TaxiBooking() {
     return totalPrice
   }
 
-  const handleBooking = () => {
+  const handleBooking = async () => {
     setError("")
     setSuccess("")
 
@@ -134,39 +136,70 @@ export function TaxiBooking() {
       return
     }
 
-    const distance = getDistance()
-    const price = calculatePrice()
-    const cityPricing = getCityPricing()
+    try {
+      // Execute reCAPTCHA
+      const recaptchaToken = await executeRecaptcha('taxi_booking')
+      if (!recaptchaToken) {
+        setError("Güvenlik doğrulaması başarısız. Lütfen tekrar deneyin.")
+        return
+      }
 
-    // Store taxi reservation using storage utility
-    const taxiReservation = {
-      serviceName: selectedService.name,
-      vehicleId: selectedVehicle.id,
-      vehicleName: selectedVehicle.name,
-      vehicleType: selectedVehicle.type,
-      pickupCity: fromCity,
-      dropoffCity: toCity,
-      distance,
-      scheduledDate,
-      basePrice: selectedService.basePrice,
-      pricePerKm: selectedVehicle.pricePerKm,
-      additionalFee: cityPricing?.additionalFee || 0,
-      discount: cityPricing?.discount || 0,
-      totalPrice: price,
+      // Verify reCAPTCHA token
+      const recaptchaResponse = await fetch('/api/verify-recaptcha', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: recaptchaToken,
+          action: 'taxi_booking',
+          minScore: 0.5
+        })
+      })
+
+      const recaptchaResult = await recaptchaResponse.json()
+      if (!recaptchaResult.success) {
+        setError("Güvenlik doğrulaması başarısız. Lütfen tekrar deneyin.")
+        return
+      }
+
+      const distance = getDistance()
+      const price = calculatePrice()
+      const cityPricing = getCityPricing()
+
+      // Store taxi reservation using storage utility
+      const taxiReservation = {
+        serviceName: selectedService.name,
+        vehicleId: selectedVehicle.id,
+        vehicleName: selectedVehicle.name,
+        vehicleType: selectedVehicle.type,
+        pickupCity: fromCity,
+        dropoffCity: toCity,
+        distance,
+        scheduledDate,
+        basePrice: selectedService.basePrice,
+        pricePerKm: selectedVehicle.pricePerKm,
+        additionalFee: cityPricing?.additionalFee || 0,
+        discount: cityPricing?.discount || 0,
+        totalPrice: price,
+      }
+
+      setTempTaxiReservation(taxiReservation)
+
+      toast({
+        title: "✅ Rezervasyon Hazır!",
+        description: `${selectedService.name} - ${selectedVehicle.name}. Ödeme sayfasına yönlendiriliyorsunuz...`,
+        duration: 2000,
+      })
+
+      // Redirect to checkout
+      setTimeout(() => {
+        router.push(`/${locale}/checkout`)
+      }, 500)
+    } catch (error) {
+      console.error('Taxi booking error:', error)
+      setError("Rezervasyon oluşturulamadı. Lütfen tekrar deneyin.")
     }
-
-    setTempTaxiReservation(taxiReservation)
-
-    toast({
-      title: "✅ Rezervasyon Hazır!",
-      description: `${selectedService.name} - ${selectedVehicle.name}. Ödeme sayfasına yönlendiriliyorsunuz...`,
-      duration: 2000,
-    })
-
-    // Redirect to checkout
-    setTimeout(() => {
-      router.push(`/${locale}/checkout`)
-    }, 500)
   }
 
   return (
@@ -354,8 +387,15 @@ export function TaxiBooking() {
               </div>
             )}
 
-            <Button onClick={handleBooking} className="w-full" size="lg">
-              Sepete Ekle
+            <Button onClick={handleBooking} className="w-full" size="lg" disabled={!isLoaded}>
+              {!isLoaded ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Güvenlik doğrulaması yükleniyor...
+                </div>
+              ) : (
+                "Sepete Ekle"
+              )}
             </Button>
           </CardContent>
         </Card>

@@ -187,7 +187,7 @@ class EmailService {
     return this.sendEmail({ to: email, subject: "Petfendy - E-posta Doğrulama", html: htmlContent })
   }
 
-  async sendContactFormEmail(data: { name: string; email: string; phone: string; message: string }): Promise<boolean> {
+  async sendContactFormEmail(ownerEmail: string, data: { name: string; email: string; phone: string; subject: string; message: string }): Promise<boolean> {
     const htmlContent = `
       <!DOCTYPE html>
       <html>
@@ -214,6 +214,7 @@ class EmailService {
               <div class="info-row">👤 <strong>Gönderen:</strong> ${data.name}</div>
               <div class="info-row">📧 <strong>E-posta:</strong> ${data.email}</div>
               <div class="info-row">📱 <strong>Telefon:</strong> ${data.phone || 'Belirtilmedi'}</div>
+              <div class="info-row">📝 <strong>Konu:</strong> ${data.subject}</div>
               <div class="info-row">📅 <strong>Tarih:</strong> ${new Date().toLocaleString('tr-TR')}</div>
             </div>
             <div class="message-box">
@@ -230,8 +231,52 @@ class EmailService {
       </html>
     `
     return this.sendEmail({ 
-      to: "info@petfendy.com", 
-      subject: `📧 Yeni İletişim Mesajı - ${data.name}`, 
+      to: ownerEmail, 
+      subject: `📧 Yeni İletişim Mesajı - ${data.subject}`, 
+      html: htmlContent 
+    })
+  }
+
+  async sendContactConfirmationEmail(email: string, name: string, subject: string): Promise<boolean> {
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: #10B981; color: white; padding: 20px; text-align: center; border-radius: 12px 12px 0 0; }
+          .content { padding: 30px; background: #f9fafb; }
+          .confirmation-box { background: white; padding: 25px; border-radius: 12px; text-align: center; margin: 20px 0; }
+          .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>✅ Mesajınız Alındı!</h1>
+            <p>Petfendy İletişim</p>
+          </div>
+          <div class="content">
+            <div class="confirmation-box">
+              <h2>Merhaba ${name}! 👋</h2>
+              <p>Mesajınız başarıyla alındı. En kısa sürede size dönüş yapacağız.</p>
+              <p><strong>Konu:</strong> ${subject}</p>
+              <p><strong>Gönderim Tarihi:</strong> ${new Date().toLocaleString('tr-TR')}</p>
+            </div>
+            <p>Acil durumlar için bizi arayabilirsiniz: <strong>+90 532 307 32 64</strong></p>
+            <p>Sevgilerle,<br><strong>Petfendy Ekibi</strong> 🐕🐈</p>
+          </div>
+          <div class="footer">
+            <p>© 2025 Petfendy | petfendyotel@gmail.com</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+    return this.sendEmail({ 
+      to: email, 
+      subject: "✅ Mesajınız Alındı - Petfendy", 
       html: htmlContent 
     })
   }

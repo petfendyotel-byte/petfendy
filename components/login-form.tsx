@@ -10,10 +10,13 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useTranslations } from 'next-intl';
+import { useRecaptchaContext } from "@/components/recaptcha-provider"
+import { Shield } from "lucide-react"
 
 export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
   const { login } = useAuth()
   const t = useTranslations('auth');
+  const { executeRecaptcha, isLoaded } = useRecaptchaContext()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -37,6 +40,32 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
 
     setIsLoading(true)
     try {
+      // Execute reCAPTCHA
+      const recaptchaToken = await executeRecaptcha('login')
+      if (!recaptchaToken) {
+        setError("Güvenlik doğrulaması başarısız. Lütfen tekrar deneyin.")
+        return
+      }
+
+      // Verify reCAPTCHA token
+      const recaptchaResponse = await fetch('/api/verify-recaptcha', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: recaptchaToken,
+          action: 'login',
+          minScore: 0.5
+        })
+      })
+
+      const recaptchaResult = await recaptchaResponse.json()
+      if (!recaptchaResult.success) {
+        setError("Güvenlik doğrulaması başarısız. Lütfen tekrar deneyin.")
+        return
+      }
+
       await login(sanitizedEmail, password)
       onSuccess?.()
       
@@ -103,9 +132,25 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
             />
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Giriş yapılıyor..." : t('loginTitle')}
+          <Button type="submit" className="w-full" disabled={isLoading || !isLoaded}>
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Giriş yapılıyor...
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4" />
+                {t('loginTitle')}
+              </div>
+            )}
           </Button>
+
+          {!isLoaded && (
+            <div className="text-xs text-muted-foreground text-center">
+              Güvenlik doğrulaması yükleniyor...
+            </div>
+          )}
         </form>
       </CardContent>
     </Card>

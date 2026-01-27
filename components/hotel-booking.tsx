@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { useTranslations } from 'next-intl';
+import { useRecaptchaContext } from "@/components/recaptcha-provider"
 import { toast } from "@/components/ui/use-toast"
 import { RoomDetailModal } from "@/components/room-detail-modal"
 import { Info, Play } from "lucide-react"
@@ -21,6 +22,7 @@ export function HotelBooking() {
   const router = useRouter()
   const params = useParams()
   const locale = (params?.locale as string) || 'tr'
+  const { executeRecaptcha, isLoaded } = useRecaptchaContext()
   
   const [rooms, setRooms] = useState<HotelRoom[]>(mockHotelRooms)
   const [selectedRoom, setSelectedRoom] = useState<HotelRoom | null>(null)
@@ -89,7 +91,7 @@ export function HotelBooking() {
     return basePrice + additionalPetFee
   }
 
-  const handleBooking = () => {
+  const handleBooking = async () => {
     setError("")
     setSuccess("")
 
@@ -121,37 +123,68 @@ export function HotelBooking() {
       return
     }
 
-    const nights = calculateNights()
-    const total = calculateTotal()
+    try {
+      // Execute reCAPTCHA
+      const recaptchaToken = await executeRecaptcha('hotel_booking')
+      if (!recaptchaToken) {
+        setError("Güvenlik doğrulaması başarısız. Lütfen tekrar deneyin.")
+        return
+      }
 
-    // Create reservation data
-    const reservationData = {
-      roomId: selectedRoom.id,
-      roomName: selectedRoom.name,
-      checkInDate,
-      checkOutDate,
-      nights,
-      petCount,
-      specialRequests,
-      additionalServices: [], // No additional services in this old component
-      basePrice: total,
-      servicesTotal: 0,
-      totalPrice: total,
+      // Verify reCAPTCHA token
+      const recaptchaResponse = await fetch('/api/verify-recaptcha', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: recaptchaToken,
+          action: 'hotel_booking',
+          minScore: 0.5
+        })
+      })
+
+      const recaptchaResult = await recaptchaResponse.json()
+      if (!recaptchaResult.success) {
+        setError("Güvenlik doğrulaması başarısız. Lütfen tekrar deneyin.")
+        return
+      }
+
+      const nights = calculateNights()
+      const total = calculateTotal()
+
+      // Create reservation data
+      const reservationData = {
+        roomId: selectedRoom.id,
+        roomName: selectedRoom.name,
+        checkInDate,
+        checkOutDate,
+        nights,
+        petCount,
+        specialRequests,
+        additionalServices: [], // No additional services in this old component
+        basePrice: total,
+        servicesTotal: 0,
+        totalPrice: total,
+      }
+
+      setTempReservation(reservationData)
+
+      // Show toast notification
+      toast({
+        title: "✅ Rezervasyon Hazır!",
+        description: `${selectedRoom.name} - ${petCount} hayvan, ${nights} gece. Ödeme sayfasına yönlendiriliyorsunuz...`,
+        duration: 2000,
+      })
+
+      // Redirect to checkout
+      setTimeout(() => {
+        router.push(`/${locale}/checkout`)
+      }, 500)
+    } catch (error) {
+      console.error('Booking error:', error)
+      setError("Rezervasyon oluşturulamadı. Lütfen tekrar deneyin.")
     }
-
-    setTempReservation(reservationData)
-
-    // Show toast notification
-    toast({
-      title: "✅ Rezervasyon Hazır!",
-      description: `${selectedRoom.name} - ${petCount} hayvan, ${nights} gece. Ödeme sayfasına yönlendiriliyorsunuz...`,
-      duration: 2000,
-    })
-
-    // Redirect to checkout
-    setTimeout(() => {
-      router.push(`/${locale}/checkout`)
-    }, 500)
   }
 
   return (
@@ -346,8 +379,15 @@ export function HotelBooking() {
               </div>
             )}
 
-            <Button onClick={handleBooking} className="w-full" size="lg">
-              Satın Al
+            <Button onClick={handleBooking} className="w-full" size="lg" disabled={!isLoaded}>
+              {!isLoaded ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Güvenlik doğrulaması yükleniyor...
+                </div>
+              ) : (
+                "Satın Al"
+              )}
             </Button>
           </CardContent>
         </Card>
