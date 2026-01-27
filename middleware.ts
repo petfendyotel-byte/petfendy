@@ -38,8 +38,12 @@ export default function middleware(request: NextRequest) {
   }
 
   // 2. Rate limiting - stricter for payment endpoints
+  // More lenient in development
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
   if (isPaymentEndpoint(url)) {
-    const paymentRateLimit = checkPaymentRateLimit(clientIP);
+    const maxRequests = isDevelopment ? 200 : 50; // Much higher in dev
+    const paymentRateLimit = checkPaymentRateLimit(clientIP, maxRequests);
     if (!paymentRateLimit.allowed) {
       logSecurityEvent({
         type: 'PAYMENT_RATE_LIMIT_EXCEEDED',
@@ -58,8 +62,9 @@ export default function middleware(request: NextRequest) {
     }
   }
 
-  // General rate limiting
-  const rateLimit = checkRateLimit(clientIP);
+  // General rate limiting - very lenient in development
+  const maxGeneralRequests = isDevelopment ? 1000 : 300; // Much higher in dev
+  const rateLimit = checkRateLimit(clientIP, maxGeneralRequests);
   if (!rateLimit.allowed) {
     logSecurityEvent({
       type: 'RATE_LIMIT_EXCEEDED',

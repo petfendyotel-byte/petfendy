@@ -142,7 +142,7 @@ export function securityMiddleware(request: NextRequest) {
  */
 export function checkRateLimit(
   ip: string,
-  maxRequests: number = 100,
+  maxRequests: number = 300, // Increased from 100 to 300
   windowMs: number = 15 * 60 * 1000 // 15 minutes
 ): { allowed: boolean; remaining: number } {
   const now = Date.now();
@@ -179,8 +179,8 @@ export function checkRateLimit(
  */
 export function checkPaymentRateLimit(
   ip: string,
-  maxRequests: number = 10,
-  windowMs: number = 60 * 1000 // 1 minute - very strict for payment
+  maxRequests: number = 50, // Increased from 10 to 50
+  windowMs: number = 60 * 1000 // 1 minute - still strict for payment
 ): { allowed: boolean; remaining: number; retryAfter: number } {
   const now = Date.now();
   const record = paymentRateLimitStore.get(ip);
