@@ -25,7 +25,12 @@ export class RecaptchaService {
    * Verify reCAPTCHA token with Google's API
    */
   async verifyToken(token: string, remoteip?: string): Promise<RecaptchaVerificationResult> {
+    console.log('🔍 [reCAPTCHA Service] Starting token verification')
+    console.log('🎫 [reCAPTCHA Service] Token length:', token?.length || 0)
+    console.log('🌐 [reCAPTCHA Service] Remote IP:', remoteip || 'not provided')
+    
     if (!token) {
+      console.log('❌ [reCAPTCHA Service] No token provided')
       return {
         success: false,
         score: 0,
@@ -35,6 +40,7 @@ export class RecaptchaService {
     }
 
     if (!this.secretKey) {
+      console.log('❌ [reCAPTCHA Service] No secret key configured')
       return {
         success: false,
         score: 0,
@@ -42,6 +48,8 @@ export class RecaptchaService {
         error: 'reCAPTCHA secret key is not configured'
       }
     }
+
+    console.log('🔑 [reCAPTCHA Service] Using secret key:', this.secretKey.substring(0, 15) + '...')
 
     try {
       const params = new URLSearchParams({
@@ -53,6 +61,7 @@ export class RecaptchaService {
         params.append('remoteip', remoteip)
       }
 
+      console.log('📡 [reCAPTCHA Service] Making request to Google API...')
       const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
         method: 'POST',
         headers: {
@@ -61,15 +70,20 @@ export class RecaptchaService {
         body: params.toString()
       })
 
+      console.log('📊 [reCAPTCHA Service] Google API response status:', response.status)
+
       if (!response.ok) {
+        console.error('❌ [reCAPTCHA Service] HTTP error:', response.status, response.statusText)
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
       const data: RecaptchaResponse = await response.json()
+      console.log('📋 [reCAPTCHA Service] Google API response data:', data)
 
       if (!data.success) {
         const errorCodes = data['error-codes'] || []
         const errorMessage = this.getErrorMessage(errorCodes)
+        console.error('❌ [reCAPTCHA Service] Verification failed:', errorMessage, errorCodes)
         
         return {
           success: false,
@@ -79,13 +93,17 @@ export class RecaptchaService {
         }
       }
 
+      console.log('✅ [reCAPTCHA Service] Verification successful')
+      console.log('📊 [reCAPTCHA Service] Score:', data.score)
+      console.log('🎯 [reCAPTCHA Service] Action:', data.action)
+
       return {
         success: true,
         score: data.score || 0,
         action: data.action || ''
       }
     } catch (error) {
-      console.error('reCAPTCHA verification error:', error)
+      console.error('❌ [reCAPTCHA Service] Verification error:', error)
       
       return {
         success: false,
