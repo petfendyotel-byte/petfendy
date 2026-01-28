@@ -79,13 +79,20 @@ export function useRecaptcha({ siteKey, action = 'submit' }: UseRecaptchaOptions
     }
 
     try {
+      const actionToUse = customAction || action
+      console.log('🎯 [reCAPTCHA Hook] Executing with action:', actionToUse)
+      console.log('🔑 [reCAPTCHA Hook] Site key:', siteKey.substring(0, 15) + '...')
+      
       const token = await window.grecaptcha.execute(siteKey, {
-        action: customAction || action
+        action: actionToUse
       })
+      
+      console.log('🎫 [reCAPTCHA Hook] Token generated successfully, length:', token?.length || 0)
       setError(null)
       return token
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'reCAPTCHA execution failed'
+      console.error('❌ [reCAPTCHA Hook] Execution error:', errorMessage)
       setError(errorMessage)
       return null
     }

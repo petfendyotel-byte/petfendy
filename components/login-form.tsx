@@ -42,9 +42,10 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
     try {
       // Execute reCAPTCHA with production keys
       if (isLoaded) {
-        console.log('🔄 [Login] Executing reCAPTCHA...')
+        console.log('🔄 [Login] Executing reCAPTCHA with action: login')
         const recaptchaToken = await executeRecaptcha('login')
         console.log('🎫 [Login] reCAPTCHA token received:', !!recaptchaToken)
+        console.log('🎫 [Login] Token length:', recaptchaToken?.length || 0)
         
         if (!recaptchaToken) {
           console.error('❌ [Login] No reCAPTCHA token received')
@@ -53,7 +54,7 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
         }
 
         // Verify reCAPTCHA token
-        console.log('🔍 [Login] Verifying reCAPTCHA token...')
+        console.log('🔍 [Login] Verifying reCAPTCHA token with action: login')
         const recaptchaResponse = await fetch('/api/verify-recaptcha', {
           method: 'POST',
           headers: {
@@ -70,8 +71,16 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
         
         if (!recaptchaResponse.ok) {
           const errorText = await recaptchaResponse.text()
-          console.error('❌ [Login] reCAPTCHA API error:', errorText)
-          setError(`Güvenlik doğrulaması hatası (${recaptchaResponse.status}). Lütfen tekrar deneyin.`)
+          console.error('❌ [Login] reCAPTCHA API error response:', errorText)
+          
+          try {
+            const errorJson = JSON.parse(errorText)
+            console.error('❌ [Login] reCAPTCHA API error:', errorJson)
+            setError(`Güvenlik doğrulaması hatası: ${errorJson.error || 'Bilinmeyen hata'}`)
+          } catch {
+            console.error('❌ [Login] reCAPTCHA API error (raw):', errorText)
+            setError(`Güvenlik doğrulaması hatası (${recaptchaResponse.status}). Lütfen tekrar deneyin.`)
+          }
           return
         }
 

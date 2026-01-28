@@ -78,12 +78,13 @@ export class RecaptchaService {
       }
 
       const data: RecaptchaResponse = await response.json()
-      console.log('📋 [reCAPTCHA Service] Google API response data:', data)
+      console.log('📋 [reCAPTCHA Service] Google API response data:', JSON.stringify(data, null, 2))
 
       if (!data.success) {
         const errorCodes = data['error-codes'] || []
         const errorMessage = this.getErrorMessage(errorCodes)
         console.error('❌ [reCAPTCHA Service] Verification failed:', errorMessage, errorCodes)
+        console.error('❌ [reCAPTCHA Service] Full response:', data)
         
         return {
           success: false,
@@ -95,7 +96,8 @@ export class RecaptchaService {
 
       console.log('✅ [reCAPTCHA Service] Verification successful')
       console.log('📊 [reCAPTCHA Service] Score:', data.score)
-      console.log('🎯 [reCAPTCHA Service] Action:', data.action)
+      console.log('🎯 [reCAPTCHA Service] Action from Google:', JSON.stringify(data.action))
+      console.log('🎯 [reCAPTCHA Service] Action length:', (data.action || '').length)
 
       return {
         success: true,
