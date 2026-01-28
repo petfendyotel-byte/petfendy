@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     const realIp = headersList.get('x-real-ip')
     const remoteip = forwarded?.split(',')[0] || realIp || undefined
 
-    // Verify reCAPTCHA token
+    // Verify reCAPTCHA token with production keys
     const result = await recaptchaService.validateRecaptcha(
       token,
       action,

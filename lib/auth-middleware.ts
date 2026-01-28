@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken } from './security'
 import { RateLimiter } from './security'
 import { protectAPI } from './api-waf-middleware'
+import { jwtService } from './jwt-service'
+import { prisma } from './prisma'
 
 // Rate limiter instances
 const authRateLimiter = new RateLimiter(10, 15 * 60 * 1000) // 10 attempts per 15 minutes
@@ -12,6 +14,7 @@ export interface AuthenticatedUser {
   userId: string
   email: string
   role: 'user' | 'admin'
+  emailVerified: boolean
 }
 
 export interface AuthResult {
@@ -57,7 +60,7 @@ function getClientIP(request: NextRequest): string {
 }
 
 /**
- * Authenticate API request
+ * Authenticate API request with enhanced JWT service
  */
 export async function authenticateRequest(request: NextRequest): Promise<AuthResult> {
   const clientIP = getClientIP(request)
@@ -79,30 +82,62 @@ export async function authenticateRequest(request: NextRequest): Promise<AuthRes
     }
   }
 
-  // Verify token
-  const verification = verifyToken(token)
-  if (!verification.valid) {
+  // Use enhanced JWT service for validation
+  const validation = jwtService.validateAccessToken(token)
+  if (!validation.valid) {
+    if (validation.expired) {
+      return {
+        success: false,
+        error: 'Token expired'
+      }
+    }
     return {
       success: false,
-      error: verification.error || 'Invalid token'
+      error: validation.error || 'Invalid token'
     }
   }
 
-  // Extract user info from payload
-  const payload = verification.payload
-  if (!payload.userId || !payload.email || !payload.role) {
+  if (!validation.payload?.userId) {
     return {
       success: false,
       error: 'Invalid token payload'
     }
   }
 
-  return {
-    success: true,
-    user: {
-      userId: payload.userId,
-      email: payload.email,
-      role: payload.role
+  // Fetch user details from database to ensure they're still active
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: validation.payload.userId },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        active: true,
+        emailVerified: true
+      }
+    })
+
+    if (!user || !user.active) {
+      return {
+        success: false,
+        error: 'User not found or inactive'
+      }
+    }
+
+    return {
+      success: true,
+      user: {
+        userId: user.id,
+        email: user.email,
+        role: user.role as 'user' | 'admin',
+        emailVerified: user.emailVerified
+      }
+    }
+  } catch (dbError) {
+    console.error('❌ [Auth] Database error during authentication:', dbError)
+    return {
+      success: false,
+      error: 'Authentication failed'
     }
   }
 }
@@ -165,6 +200,58 @@ export function requireAdmin(handler: (request: NextRequest, user: Authenticated
     if (user.role !== 'admin') {
       return NextResponse.json(
         { error: 'Admin access required' },
+        { status: 403 }
+      )
+    }
+    
+    return await handler(request, user)
+  })
+}
+
+/**
+ * Require email verification middleware
+ */
+export function requireEmailVerification(handler: (request: NextRequest, user: AuthenticatedUser) => Promise<NextResponse>) {
+  return requireAuth(async (request: NextRequest, user: AuthenticatedUser) => {
+    if (!user.emailVerified) {
+      return NextResponse.json(
+        { 
+          error: 'Email verification required',
+          code: 'EMAIL_VERIFICATION_REQUIRED',
+          message: 'Bu işlem için email adresinizi doğrulamanız gerekiyor.',
+          user: {
+            id: user.userId,
+            email: user.email,
+            emailVerified: user.emailVerified
+          }
+        },
+        { status: 403 }
+      )
+    }
+    
+    return await handler(request, user)
+  })
+}
+
+/**
+ * Require admin with email verification
+ */
+export function requireAdminWithEmailVerification(handler: (request: NextRequest, user: AuthenticatedUser) => Promise<NextResponse>) {
+  return requireAuth(async (request: NextRequest, user: AuthenticatedUser) => {
+    if (user.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Admin access required' },
+        { status: 403 }
+      )
+    }
+    
+    if (!user.emailVerified) {
+      return NextResponse.json(
+        { 
+          error: 'Admin email verification required',
+          code: 'ADMIN_EMAIL_VERIFICATION_REQUIRED',
+          message: 'Yönetici hesabı için email doğrulaması gereklidir.'
+        },
         { status: 403 }
       )
     }

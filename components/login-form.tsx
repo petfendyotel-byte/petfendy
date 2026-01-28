@@ -40,29 +40,34 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
 
     setIsLoading(true)
     try {
-      // Execute reCAPTCHA
-      const recaptchaToken = await executeRecaptcha('login')
-      if (!recaptchaToken) {
-        setError("Güvenlik doğrulaması başarısız. Lütfen tekrar deneyin.")
-        return
-      }
+      // Execute reCAPTCHA with production keys
+      if (isLoaded) {
+        const recaptchaToken = await executeRecaptcha('login')
+        if (!recaptchaToken) {
+          setError("Güvenlik doğrulaması başarısız. Lütfen tekrar deneyin.")
+          return
+        }
 
-      // Verify reCAPTCHA token
-      const recaptchaResponse = await fetch('/api/verify-recaptcha', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          token: recaptchaToken,
-          action: 'login',
-          minScore: 0.5
+        // Verify reCAPTCHA token
+        const recaptchaResponse = await fetch('/api/verify-recaptcha', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            token: recaptchaToken,
+            action: 'login',
+            minScore: 0.5
+          })
         })
-      })
 
-      const recaptchaResult = await recaptchaResponse.json()
-      if (!recaptchaResult.success) {
-        setError("Güvenlik doğrulaması başarısız. Lütfen tekrar deneyin.")
+        const recaptchaResult = await recaptchaResponse.json()
+        if (!recaptchaResult.success) {
+          setError("Güvenlik doğrulaması başarısız. Lütfen tekrar deneyin.")
+          return
+        }
+      } else {
+        setError("Güvenlik doğrulaması yükleniyor. Lütfen bekleyin.")
         return
       }
 

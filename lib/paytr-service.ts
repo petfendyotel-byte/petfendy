@@ -183,10 +183,16 @@ class PayTRService {
   }
 
   /**
-   * PayTR callback doğrulama
+   * PayTR callback doğrulama - Enhanced Security
    */
-  verifyCallback(callbackData: PayTRCallbackData): boolean {
+  verifyCallback(callbackData: PayTRCallbackData): { valid: boolean; error?: string } {
     try {
+      // 1. Required fields check
+      if (!callbackData.merchant_oid || !callbackData.status || !callbackData.total_amount || !callbackData.hash) {
+        return { valid: false, error: 'Missing required callback fields' }
+      }
+
+      // 2. Hash verification
       const hashStr = [
         callbackData.merchant_oid,
         this.merchantSalt,
@@ -199,9 +205,61 @@ class PayTRService {
         .update(hashStr)
         .digest('base64')
 
-      return expectedHash === callbackData.hash
+      if (expectedHash !== callbackData.hash) {
+        console.error('❌ [PayTR] Hash mismatch:', { expected: expectedHash, received: callbackData.hash })
+        return { valid: false, error: 'Invalid callback signature' }
+      }
+
+      // 3. Amount validation (prevent amount manipulation)
+      const amount = parseFloat(callbackData.total_amount)
+      if (isNaN(amount) || amount <= 0) {
+        return { valid: false, error: 'Invalid payment amount' }
+      }
+
+      // 4. Status validation
+      if (!['success', 'failed'].includes(callbackData.status)) {
+        return { valid: false, error: 'Invalid payment status' }
+      }
+
+      // 5. Test mode consistency check
+      const isTestCallback = callbackData.test_mode === '1'
+      if (isTestCallback !== this.testMode) {
+        console.warn('⚠️ [PayTR] Test mode mismatch:', { callbackTest: isTestCallback, configTest: this.testMode })
+      }
+
+      console.log('✅ [PayTR] Callback verification successful:', callbackData.merchant_oid)
+      return { valid: true }
+
     } catch (error) {
       console.error('❌ [PayTR] Callback verification failed:', error)
+      return { valid: false, error: 'Callback verification error' }
+    }
+  }
+
+  /**
+   * Webhook signature validation (additional security layer)
+   */
+  verifyWebhookSignature(payload: string, signature: string): boolean {
+    if (!this.webhookSecret) {
+      console.warn('⚠️ [PayTR] Webhook secret not configured')
+      return true // Allow if not configured (backward compatibility)
+    }
+
+    try {
+      const expectedSignature = crypto
+        .createHmac('sha256', this.webhookSecret)
+        .update(payload)
+        .digest('hex')
+
+      const receivedSignature = signature.replace('sha256=', '')
+      
+      // Constant-time comparison to prevent timing attacks
+      return crypto.timingSafeEqual(
+        Buffer.from(expectedSignature, 'hex'),
+        Buffer.from(receivedSignature, 'hex')
+      )
+    } catch (error) {
+      console.error('❌ [PayTR] Webhook signature verification failed:', error)
       return false
     }
   }

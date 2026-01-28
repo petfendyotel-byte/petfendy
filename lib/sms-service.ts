@@ -15,6 +15,41 @@ export interface SMSMessage {
   message: string
 }
 
+// SMS Rate Limiting - Prevent SMS bombing
+const smsRateLimiter = new Map<string, { count: number; resetTime: number }>()
+
+function checkSMSRateLimit(phone: string): { allowed: boolean; remaining: number; resetMs: number } {
+  const now = Date.now()
+  const windowMs = 60 * 60 * 1000 // 1 hour
+  const maxSMS = 5 // 5 SMS per hour per phone number
+  
+  const record = smsRateLimiter.get(phone)
+  
+  // Clean up old entries periodically
+  if (now % 10000 < 100) {
+    for (const [key, value] of smsRateLimiter.entries()) {
+      if (now > value.resetTime) {
+        smsRateLimiter.delete(key)
+      }
+    }
+  }
+  
+  if (!record || now > record.resetTime) {
+    smsRateLimiter.set(phone, {
+      count: 1,
+      resetTime: now + windowMs
+    })
+    return { allowed: true, remaining: maxSMS - 1, resetMs: windowMs }
+  }
+  
+  if (record.count >= maxSMS) {
+    return { allowed: false, remaining: 0, resetMs: record.resetTime - now }
+  }
+  
+  record.count++
+  return { allowed: true, remaining: maxSMS - record.count, resetMs: record.resetTime - now }
+}
+
 class SMSService {
   private config: SMSConfig = { provider: 'mock' }
 
@@ -125,6 +160,15 @@ class SMSService {
 
   async sendSMS(data: SMSMessage, isCommercial: boolean = false): Promise<boolean> {
     const formattedPhone = this.formatPhoneNumber(data.to)
+    
+    // SMS Rate Limiting Check - Prevent SMS bombing
+    const rateLimitCheck = checkSMSRateLimit(formattedPhone)
+    if (!rateLimitCheck.allowed) {
+      console.warn(`🚫 [SMS] Rate limit exceeded for ${formattedPhone}. Remaining: ${rateLimitCheck.remaining}, Reset in: ${Math.ceil(rateLimitCheck.resetMs / 1000 / 60)} minutes`)
+      return false
+    }
+    
+    console.log(`📱 [SMS] Rate limit OK for ${formattedPhone}. Remaining: ${rateLimitCheck.remaining}`)
     
     try {
       switch (this.config.provider) {
