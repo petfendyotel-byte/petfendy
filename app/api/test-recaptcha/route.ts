@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { recaptchaService } from '@/lib/recaptcha-service'
+import { protectAPI } from '@/lib/api-waf-middleware'
 
 export async function GET() {
   const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
@@ -15,6 +16,17 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  // WAF Protection for test endpoint
+  const protection = await protectAPI(request, {
+    endpoint: 'test-recaptcha',
+    maxRequests: 50,
+    windowMs: 60 * 1000
+  })
+
+  if (!protection.allowed) {
+    return protection.response!
+  }
+
   try {
     const { token, action = 'test' } = await request.json()
 

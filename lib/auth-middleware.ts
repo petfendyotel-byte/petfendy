@@ -1,7 +1,8 @@
-// API Authentication Middleware
+// API Authentication Middleware with WAF Integration
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken } from './security'
 import { RateLimiter } from './security'
+import { protectAPI } from './api-waf-middleware'
 
 // Rate limiter instances
 const authRateLimiter = new RateLimiter(10, 15 * 60 * 1000) // 10 attempts per 15 minutes
@@ -107,13 +108,26 @@ export async function authenticateRequest(request: NextRequest): Promise<AuthRes
 }
 
 /**
- * Require authentication middleware
+ * Require authentication middleware with WAF protection
  */
 export function requireAuth(handler: (request: NextRequest, user: AuthenticatedUser) => Promise<NextResponse>) {
   return async (request: NextRequest): Promise<NextResponse> => {
+    // WAF Protection first
+    const wafProtection = await protectAPI(request, {
+      endpoint: 'auth-required',
+      maxRequests: 200,
+      windowMs: 60 * 1000,
+      enableWAF: true,
+      enableRateLimit: true
+    })
+
+    if (!wafProtection.allowed) {
+      return wafProtection.response!
+    }
+
     const clientIP = getClientIP(request)
     
-    // API rate limiting
+    // Legacy API rate limiting (keeping for backward compatibility)
     if (apiRateLimiter.isLimited(clientIP)) {
       return NextResponse.json(
         { error: 'Too many requests. Please slow down.' },

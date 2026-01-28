@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { recaptchaService } from '@/lib/recaptcha-service'
 import { emailService } from '@/lib/email-service'
 import { sanitizeInput, validateEmail, validatePhone } from '@/lib/security'
+import { protectAPI } from '@/lib/api-waf-middleware'
 import { headers } from 'next/headers'
 
 interface ContactFormData {
@@ -14,6 +15,19 @@ interface ContactFormData {
 }
 
 export async function POST(request: NextRequest) {
+  // WAF Protection - Strict for contact forms (spam target)
+  const protection = await protectAPI(request, {
+    endpoint: 'contact-form',
+    maxRequests: 10, // Very strict - 10 submissions per minute
+    windowMs: 60 * 1000,
+    enableWAF: true,
+    enableRateLimit: true
+  })
+
+  if (!protection.allowed) {
+    return protection.response!
+  }
+
   try {
     const body: ContactFormData = await request.json()
     const { name, email, phone, subject, message, recaptchaToken } = body
