@@ -42,19 +42,14 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
     try {
       // Execute reCAPTCHA with production keys
       if (isLoaded) {
-        console.log('🔄 [Login] Executing reCAPTCHA with action: login')
         const recaptchaToken = await executeRecaptcha('login')
-        console.log('🎫 [Login] reCAPTCHA token received:', !!recaptchaToken)
-        console.log('🎫 [Login] Token length:', recaptchaToken?.length || 0)
         
         if (!recaptchaToken) {
-          console.error('❌ [Login] No reCAPTCHA token received')
           setError("Güvenlik doğrulaması başarısız. Lütfen sayfayı yenileyin ve tekrar deneyin.")
           return
         }
 
         // Verify reCAPTCHA token
-        console.log('🔍 [Login] Verifying reCAPTCHA token with action: login')
         const recaptchaResponse = await fetch('/api/verify-recaptcha', {
           method: 'POST',
           headers: {
@@ -66,36 +61,28 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
             minScore: 0.5
           })
         })
-
-        console.log('📡 [Login] reCAPTCHA API response status:', recaptchaResponse.status)
         
         if (!recaptchaResponse.ok) {
           const errorText = await recaptchaResponse.text()
-          console.error('❌ [Login] reCAPTCHA API error response:', errorText)
           
           try {
             const errorJson = JSON.parse(errorText)
-            console.error('❌ [Login] reCAPTCHA API error:', errorJson)
             setError(`Güvenlik doğrulaması hatası: ${errorJson.error || 'Bilinmeyen hata'}`)
           } catch {
-            console.error('❌ [Login] reCAPTCHA API error (raw):', errorText)
             setError(`Güvenlik doğrulaması hatası (${recaptchaResponse.status}). Lütfen tekrar deneyin.`)
           }
           return
         }
 
         const recaptchaResult = await recaptchaResponse.json()
-        console.log('📊 [Login] reCAPTCHA result:', recaptchaResult)
         
         if (!recaptchaResult.success) {
-          console.error('❌ [Login] reCAPTCHA verification failed:', recaptchaResult.error)
           setError(`Güvenlik doğrulaması başarısız: ${recaptchaResult.error || 'Bilinmeyen hata'}`)
           return
         }
         
         console.log('✅ [Login] reCAPTCHA verification successful, score:', recaptchaResult.score)
       } else {
-        console.error('❌ [Login] reCAPTCHA not loaded')
         setError("Güvenlik doğrulaması yükleniyor. Lütfen bekleyin ve tekrar deneyin.")
         return
       }
