@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, optionalAuth, validateInput, sanitizeInputData, logSecurityEvent } from '@/lib/auth-middleware'
 import { createBookingWithValidation, validateBooking } from '@/lib/booking-service'
 import { sanitizeInput } from '@/lib/security'
+import { smsService } from '@/lib/sms-service'
 
 // Booking validation schema
 const bookingSchema = {
@@ -195,6 +196,47 @@ export async function POST(request: NextRequest) {
         totalPrice: result.booking.totalPrice
       }
     })
+
+    // Send SMS notifications for successful booking
+    try {
+      const customerName = result.booking.user?.name || result.booking.guestName || 'Müşteri'
+      const customerPhone = result.booking.user?.phone || result.booking.guestPhone
+      
+      if (customerPhone) {
+        let bookingDetails = ''
+        let bookingType: 'hotel' | 'taxi' | 'daycare' = 'hotel'
+        
+        if (result.booking.type === 'HOTEL') {
+          bookingType = 'hotel'
+          const startDate = new Date(result.booking.startDate).toLocaleDateString('tr-TR')
+          const endDate = new Date(result.booking.endDate).toLocaleDateString('tr-TR')
+          const roomName = result.booking.room?.name || 'Oda'
+          bookingDetails = `${roomName} - ${startDate} / ${endDate}`
+        } else if (result.booking.type === 'TAXI') {
+          bookingType = 'taxi'
+          const startDate = new Date(result.booking.startDate).toLocaleDateString('tr-TR')
+          const startTime = new Date(result.booking.startDate).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+          const pickup = result.booking.pickupLocation || 'Belirtilmemiş'
+          const dropoff = result.booking.dropoffLocation || 'Belirtilmemiş'
+          bookingDetails = `${startDate}, Saat: ${startTime} - ${pickup} → ${dropoff}`
+        }
+        
+        // Send SMS notifications to both customer and admin
+        await smsService.sendNewBookingNotifications(
+          bookingType,
+          customerName,
+          customerPhone,
+          bookingDetails
+        )
+        
+        console.log(`📱 [Booking] SMS notifications sent for booking ${result.booking.id}`)
+      } else {
+        console.warn(`📱 [Booking] No phone number available for SMS notifications - booking ${result.booking.id}`)
+      }
+    } catch (smsError) {
+      console.error('📱 [Booking] SMS notification error:', smsError)
+      // Don't fail the booking if SMS fails
+    }
 
     return NextResponse.json({
       success: true,

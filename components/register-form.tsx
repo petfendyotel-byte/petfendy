@@ -174,8 +174,7 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
 
         // İşletme sahibine SMS bildirimi gönder
         try {
-          await smsService.sendNewUserNotificationSMS(
-            OWNER_PHONE,
+          await smsService.sendNewUserNotificationToAdmin(
             verifiedUser.name,
             verifiedUser.email,
             verifiedUser.phone

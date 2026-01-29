@@ -3,214 +3,149 @@ import { smsService } from '@/lib/sms-service'
 
 export async function POST(request: NextRequest) {
   try {
-    const { phone, type = 'welcome', name = 'Test Kullanıcı' } = await request.json()
+    const body = await request.json()
+    const { phone, type, name } = body
 
     if (!phone) {
-      return NextResponse.json(
-        { success: false, error: 'Telefon numarası gerekli' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Phone number is required' }, { status: 400 })
     }
 
-    console.log(`📱 [SMS Test] Testing ${type} SMS to ${phone}`)
+    if (!type) {
+      return NextResponse.json({ error: 'SMS type is required' }, { status: 400 })
+    }
 
-    let result = false
-    let message = ''
-    let testData: any = {}
+    let result: any = { success: false }
 
     switch (type) {
-      case 'welcome':
-        result = await smsService.sendWelcomeSMS(phone, name)
-        message = 'Hoş geldin SMS\'i gönderildi'
-        testData = { name }
+      case 'test':
+        result.success = await smsService.sendTestInformationalSMS(phone)
+        result.message = 'Test SMS sent'
         break
-      
+
+      case 'welcome':
+        if (!name) {
+          return NextResponse.json({ error: 'Name is required for welcome SMS' }, { status: 400 })
+        }
+        result.success = await smsService.sendWelcomeSMS(phone, name)
+        result.message = 'Welcome SMS sent'
+        break
+
       case 'new-user':
-        const testResult = await smsService.sendNewUserNotifications(
+        if (!name) {
+          return NextResponse.json({ error: 'Name is required for new user notifications' }, { status: 400 })
+        }
+        result = await smsService.sendNewUserNotifications(
           name,
-          'test@example.com',
+          `${name.toLowerCase().replace(' ', '.')}@example.com`,
           phone
         )
-        result = testResult.userSMS && testResult.adminSMS
-        message = `Yeni üye bildirimleri gönderildi - Kullanıcı: ${testResult.userSMS ? '✅' : '❌'}, Admin: ${testResult.adminSMS ? '✅' : '❌'}`
-        testData = { userSMS: testResult.userSMS, adminSMS: testResult.adminSMS }
+        result.message = 'New user notifications sent'
         break
-      
-      case 'booking':
-        result = await smsService.sendBookingConfirmationSMS(
-          phone, 
-          'hotel', 
-          '25-27 Ocak 2026'
-        )
-        message = 'Pet Otel rezervasyon onay SMS\'i gönderildi'
-        testData = { bookingType: 'hotel', details: '25-27 Ocak 2026' }
-        break
-      
-      case 'booking-daycare':
-        result = await smsService.sendBookingConfirmationSMS(
-          phone, 
-          'daycare', 
-          'Pazartesi-Cuma 09:00-17:00'
-        )
-        message = 'Pet Kreş kayıt onay SMS\'i gönderildi'
-        testData = { bookingType: 'daycare', details: 'Pazartesi-Cuma 09:00-17:00' }
-        break
-      
-      case 'booking-taxi':
-        result = await smsService.sendBookingConfirmationSMS(
-          phone, 
-          'taxi', 
-          '25 Ocak 2026, Saat: 14:00'
-        )
-        message = 'Pet Taksi rezervasyon onay SMS\'i gönderildi'
-        testData = { bookingType: 'taxi', details: '25 Ocak 2026, Saat: 14:00' }
-        break
-      
+
       case 'new-booking':
-        const bookingResult = await smsService.sendNewBookingNotifications(
+        if (!name) {
+          return NextResponse.json({ error: 'Name is required for booking notifications' }, { status: 400 })
+        }
+        result = await smsService.sendNewBookingNotifications(
           'hotel',
           name,
           phone,
-          '25-27 Ocak 2026'
+          'Pet Otel - 25 Ocak 2026, Saat: 14:00'
         )
-        result = bookingResult.userSMS && bookingResult.adminSMS
-        message = `Pet Otel rezervasyon bildirimleri gönderildi - Kullanıcı: ${bookingResult.userSMS ? '✅' : '❌'}, Admin: ${bookingResult.adminSMS ? '✅' : '❌'}`
-        testData = { userSMS: bookingResult.userSMS, adminSMS: bookingResult.adminSMS }
+        result.message = 'Hotel booking notifications sent'
         break
-      
+
       case 'new-booking-daycare':
-        const daycareResult = await smsService.sendNewBookingNotifications(
+        if (!name) {
+          return NextResponse.json({ error: 'Name is required for booking notifications' }, { status: 400 })
+        }
+        result = await smsService.sendNewBookingNotifications(
           'daycare',
           name,
           phone,
-          'Pazartesi-Cuma 09:00-17:00'
+          'Pet Kreş - 25 Ocak 2026, Saat: 09:00'
         )
-        result = daycareResult.userSMS && daycareResult.adminSMS
-        message = `Pet Kreş kayıt bildirimleri gönderildi - Kullanıcı: ${daycareResult.userSMS ? '✅' : '❌'}, Admin: ${daycareResult.adminSMS ? '✅' : '❌'}`
-        testData = { userSMS: daycareResult.userSMS, adminSMS: daycareResult.adminSMS }
+        result.message = 'Daycare booking notifications sent'
         break
-      
+
       case 'new-booking-taxi':
-        const taxiResult = await smsService.sendNewBookingNotifications(
+        if (!name) {
+          return NextResponse.json({ error: 'Name is required for booking notifications' }, { status: 400 })
+        }
+        result = await smsService.sendNewBookingNotifications(
           'taxi',
           name,
           phone,
-          '25 Ocak 2026, Saat: 14:00'
+          'Pet Taksi - 25 Ocak 2026, Saat: 15:30 - Kızılay → Çankaya'
         )
-        result = taxiResult.userSMS && taxiResult.adminSMS
-        message = `Pet Taksi rezervasyon bildirimleri gönderildi - Kullanıcı: ${taxiResult.userSMS ? '✅' : '❌'}, Admin: ${taxiResult.adminSMS ? '✅' : '❌'}`
-        testData = { userSMS: taxiResult.userSMS, adminSMS: taxiResult.adminSMS }
+        result.message = 'Taxi booking notifications sent'
         break
-      
-      case 'test-info':
-        result = await smsService.sendTestInformationalSMS(phone)
-        message = 'Bilgilendirme test SMS\'i gönderildi (İYS kontrolsüz)'
-        testData = { type: 'informational', iysControl: false }
+
+      case 'booking':
+        result.success = await smsService.sendBookingConfirmationSMS(
+          phone,
+          'hotel',
+          'Pet Otel - 25 Ocak 2026, Saat: 14:00'
+        )
+        result.message = 'Hotel booking confirmation SMS sent'
         break
-      
+
+      case 'booking-daycare':
+        result.success = await smsService.sendBookingConfirmationSMS(
+          phone,
+          'daycare',
+          'Pet Kreş - 25 Ocak 2026, Saat: 09:00'
+        )
+        result.message = 'Daycare booking confirmation SMS sent'
+        break
+
+      case 'booking-taxi':
+        result.success = await smsService.sendBookingConfirmationSMS(
+          phone,
+          'taxi',
+          'Pet Taksi - 25 Ocak 2026, Saat: 15:30 - Kızılay → Çankaya'
+        )
+        result.message = 'Taxi booking confirmation SMS sent'
+        break
+
       default:
-        return NextResponse.json(
-          { success: false, error: 'Geçersiz SMS türü. Geçerli türler: welcome, new-user, booking, booking-daycare, booking-taxi, new-booking, new-booking-daycare, new-booking-taxi' },
-          { status: 400 }
-        )
+        return NextResponse.json({ error: 'Invalid SMS type' }, { status: 400 })
     }
 
-    const response = {
-      success: result,
-      message: result ? message : 'SMS gönderilemedi - NetGSM hata kodu console\'da görüntülenecek',
-      phone,
-      type,
-      testData,
-      timestamp: new Date().toISOString(),
-      note: result ? 'SMS başarıyla gönderildi' : 'Hata detayları için server console\'unu kontrol edin'
-    }
+    return NextResponse.json({
+      success: result.success || (result.userSMS && result.adminSMS),
+      message: result.message,
+      details: result
+    })
 
-    console.log(`📱 [SMS Test] Result:`, response)
-
-    return NextResponse.json(response)
-
-  } catch (error) {
-    console.error('SMS Test Error:', error)
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: 'SMS test hatası',
-        details: error instanceof Error ? error.message : 'Bilinmeyen hata'
-      },
-      { status: 500 }
-    )
+  } catch (error: any) {
+    console.error('Test SMS error:', error)
+    return NextResponse.json({ 
+      error: 'SMS test failed',
+      details: error.message 
+    }, { status: 500 })
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   return NextResponse.json({
-    message: 'Petfendy SMS Test API - Sadeleştirilmiş Versiyon',
-    status: 'SMS servisi aktif (NetGSM XML API)',
-    usage: {
-      method: 'POST',
-      endpoint: '/api/test-sms',
-      body: {
-        phone: '05321234567 (zorunlu)',
-        type: 'welcome | new-user | booking | booking-daycare | booking-taxi | new-booking | new-booking-daycare | new-booking-taxi',
-        name: 'Test Kullanıcı (opsiyonel)'
-      }
-    },
-    smsTypes: {
-      welcome: 'Sadece kullanıcıya hoş geldin SMS\'i',
-      'new-user': 'Hem kullanıcıya hem admin\'e yeni üye bildirimi',
-      booking: 'Sadece kullanıcıya Pet Otel rezervasyon onay SMS\'i',
-      'booking-daycare': 'Sadece kullanıcıya Pet Kreş kayıt onay SMS\'i',
-      'booking-taxi': 'Sadece kullanıcıya Pet Taksi rezervasyon onay SMS\'i',
-      'new-booking': 'Hem kullanıcıya hem admin\'e Pet Otel rezervasyon bildirimi',
-      'new-booking-daycare': 'Hem kullanıcıya hem admin\'e Pet Kreş kayıt bildirimi',
-      'new-booking-taxi': 'Hem kullanıcıya hem admin\'e Pet Taksi rezervasyon bildirimi'
-    },
-    examples: [
-      {
-        description: 'Hoş geldin SMS\'i test et',
-        body: { phone: '05321234567', type: 'welcome', name: 'Ahmet Yılmaz' }
-      },
-      {
-        description: 'Yeni üye bildirimleri test et (kullanıcı + admin)',
-        body: { phone: '05321234567', type: 'new-user', name: 'Ahmet Yılmaz' }
-      },
-      {
-        description: 'Pet Otel rezervasyon onay SMS\'i test et',
-        body: { phone: '05321234567', type: 'booking' }
-      },
-      {
-        description: 'Pet Kreş kayıt onay SMS\'i test et',
-        body: { phone: '05321234567', type: 'booking-daycare' }
-      },
-      {
-        description: 'Pet Taksi rezervasyon onay SMS\'i test et',
-        body: { phone: '05321234567', type: 'booking-taxi' }
-      },
-      {
-        description: 'Pet Otel rezervasyon bildirimleri test et (kullanıcı + admin)',
-        body: { phone: '05321234567', type: 'new-booking', name: 'Ahmet Yılmaz' }
-      },
-      {
-        description: 'Pet Kreş kayıt bildirimleri test et (kullanıcı + admin)',
-        body: { phone: '05321234567', type: 'new-booking-daycare', name: 'Ahmet Yılmaz' }
-      },
-      {
-        description: 'Pet Taksi rezervasyon bildirimleri test et (kullanıcı + admin)',
-        body: { phone: '05321234567', type: 'new-booking-taxi', name: 'Ahmet Yılmaz' }
-      }
+    message: 'SMS Test API',
+    usage: 'POST with { phone, type, name? }',
+    types: [
+      'test - Simple test SMS',
+      'welcome - Welcome SMS (requires name)',
+      'new-user - New user notifications (requires name)',
+      'new-booking - Hotel booking notifications (requires name)',
+      'new-booking-daycare - Daycare booking notifications (requires name)',
+      'new-booking-taxi - Taxi booking notifications (requires name)',
+      'booking - Hotel booking confirmation only',
+      'booking-daycare - Daycare booking confirmation only',
+      'booking-taxi - Taxi booking confirmation only'
     ],
-    adminPhone: process.env.ADMIN_PHONE || 'Tanımlı değil',
-    netgsmInfo: {
-      altKullanici: 'bilge.corumlu@gmail.com',
-      apiYetkilisi: 'BİLGE GÜLER (petfendyotel@gmail.com)',
-      gondericiAdi: 'PETFENDY',
-      apiEndpoint: 'https://api.netgsm.com.tr/sms/send/xml',
-      encoding: 'TR (Türkçe karakter desteği)',
-      kullanim: 'Sadece yeni üyelik ve rezervasyon bildirimleri',
-      iysUyumluluk: {
-        ticariSMS: 'Kullanıcılara gönderilen SMS\'ler (İYS kontrollü)',
-        bilgilendirmeSMS: 'Admin\'e gönderilen SMS\'ler (İYS kontrolsüz)'
-      }
+    example: {
+      phone: '05321234567',
+      type: 'new-user',
+      name: 'Ahmet Yılmaz'
     }
   })
 }
