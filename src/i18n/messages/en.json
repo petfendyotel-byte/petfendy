@@ -1,0 +1,247 @@
+{
+  "common": {
+    "appName": "Petfendy",
+    "appFullName": "Petfendy Pet Hotel And Dog Training Center",
+    "appTagline": "Ankara's cat, dog and pet hotel",
+    "welcome": "Welcome",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "selectLanguage": "Select Language",
+    "turkish": "Türkçe",
+    "english": "English"
+  },
+  "auth": {
+    "loginTitle": "Login",
+    "registerTitle": "Register",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "name": "Full Name",
+    "phone": "Phone",
+    "forgotPassword": "Forgot Password",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "emailVerification": "Email Verification",
+    "verificationSent": "Verification email sent. Please check your email.",
+    "verificationCode": "Verification Code",
+    "verify": "Verify",
+    "resendCode": "Resend Code",
+    "emailVerified": "Your email has been verified!",
+    "invalidCode": "Invalid verification code",
+    "platformSubtitle": "Pet Services Platform"
+  },
+  "home": {
+    "welcomeMessage": "Welcome, {name}"
+  },
+  "tabs": {
+    "hotel": "Pet Hotel",
+    "taxi": "Pet Taxi",
+    "pets": "Pets",
+    "cart": "Cart",
+    "invoices": "Invoices",
+    "reports": "Reports",
+    "profile": "Profile",
+    "admin": "Admin"
+  },
+  "hotel": {
+    "title": "Pet Hotel Reservation",
+    "selectRoom": "Select Room",
+    "roomDetails": "{roomName} - Reservation Details",
+    "capacity": "Capacity",
+    "price": "Price",
+    "perNight": "/night",
+    "amenities": "Amenities",
+    "checkIn": "Check-in Date",
+    "checkOut": "Check-out Date",
+    "specialRequests": "Special Requests",
+    "specialRequestsPlaceholder": "E.g: Hypoallergenic food, extra toys, etc.",
+    "nights": "Number of Nights",
+    "nightPrice": "Night Price",
+    "total": "Total",
+    "addToCart": "Add to Cart",
+    "addedToCart": "{roomName} added to cart!",
+    "selectRoomError": "Please select a room",
+    "selectDatesError": "Please select check-in and check-out dates",
+    "dateValidationError": "Check-out date must be after check-in date",
+    "pets": "pets",
+    "roomTypes": {
+      "standard": "Standard",
+      "deluxe": "Deluxe",
+      "suite": "Suite"
+    }
+  },
+  "profile": {
+    "title": "My Profile",
+    "personalInfo": "Personal Information",
+    "myReservations": "My Reservations",
+    "noReservations": "You don't have any reservations yet.",
+    "reservationType": "Reservation Type",
+    "status": "Status",
+    "totalPrice": "Total Price",
+    "createdAt": "Created At",
+    "viewDetails": "View Details",
+    "cancelReservation": "Cancel Reservation",
+    "hotelReservation": "Hotel Reservation",
+    "taxiReservation": "Taxi Reservation",
+    "statusTypes": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "reservationDetails": {
+      "room": "Room",
+      "checkIn": "Check-in",
+      "checkOut": "Check-out",
+      "nights": "Nights",
+      "pickupLocation": "Pickup Location",
+      "dropoffLocation": "Dropoff Location",
+      "scheduledDate": "Date",
+      "distance": "Distance",
+      "roundTrip": "Round Trip"
+    }
+  },
+  "payment": {
+    "title": "Payment",
+    "cardNumber": "Card Number",
+    "cardHolder": "Card Holder",
+    "expiryDate": "Expiry Date",
+    "cvv": "CVV",
+    "payNow": "Pay Now",
+    "paymentSuccess": "Payment successful! Your reservation has been created.",
+    "paymentFailed": "Payment failed. Please try again.",
+    "totalAmount": "Total Amount",
+    "processing": "Processing..."
+  },
+  "cart": {
+    "title": "My Cart",
+    "empty": "Your cart is empty",
+    "removeItem": "Remove",
+    "checkout": "Checkout",
+    "total": "Total",
+    "continueAsGuest": "Continue as Guest",
+    "loginToContinue": "Login or register to continue"
+  },
+  "homepage": {
+    "trustBadge": "Ankara's Most Trusted Hotel",
+    "heroTitle": "Petfendy",
+    "heroSubtitle": "Pet Hotel",
+    "heroDescription": "Your little friends are safe with dog training, cage-free accommodation and pet taxi services",
+    "makeReservation": "Make Reservation",
+    "cart": "Cart",
+    "stats": {
+      "guestPets": "Guest Friends",
+      "trainedDogs": "Trained Dogs",
+      "daycare": "Daycare & Socialization"
+    },
+    "whyPetfendy": "Why Petfendy?",
+    "features": {
+      "cageFree": {
+        "title": "Cage-Free Accommodation",
+        "description": "24/7 open, comfortable and spacious areas"
+      },
+      "training": {
+        "title": "Professional Training",
+        "description": "Basic and advanced dog training"
+      },
+      "care": {
+        "title": "Caring Service",
+        "description": "Pet grooming and special care services"
+      },
+      "security": {
+        "title": "Safe Environment",
+        "description": "24-hour veterinary support and security"
+      }
+    },
+    "reservation": {
+      "title": "Make a Reservation",
+      "hotel": "Hotel Reservation",
+      "taxi": "Taxi Reservation",
+      "dateSelection": "Date Selection",
+      "dateSelectionDesc": "First select your accommodation dates, let's see available rooms",
+      "availableRooms": "{count} rooms available for selected dates",
+      "noRoomsAvailable": "No rooms available for selected dates.",
+      "changeDates": "Change Dates",
+      "makeReservation": "Make Reservation",
+      "continueToCheckout": "You will be redirected to reservation and payment page"
+    },
+    "cta": {
+      "title": "Choose the Best for Your Pet Friend",
+      "description": "Your pet friends are safe with our cage-free accommodation, professional training and caring service",
+      "button": "Book Now"
+    },
+    "footer": {
+      "contact": "Contact",
+      "address": "Şehit Hikmet Özer St. No:101\nEtimesgut/Ankara",
+      "phone": "Phone: +90 532 307 3264",
+      "email": "Email: petfendyotel@gmail.com",
+      "workingHours": "Working Hours",
+      "hours": "Monday - Sunday\n08:00 - 20:00",
+      "services": "Services",
+      "dogTraining": "Dog Training",
+      "petHotel": "Cat - Dog Hotel",
+      "petGrooming": "Pet Grooming",
+      "daycare": "Daycare & Socialization",
+      "copyright": "© 2025 Petfendy Pet Hotel. All rights reserved."
+    },
+    "newHome": {
+      "heroTitle": "Pet Hotel & Pet Taxi",
+      "heroSubtitle": "Safe hotel and intercity taxi service for your beloved pets",
+      "hotelButton": "Hotel Reservation",
+      "taxiButton": "Taxi Reservation",
+      "petHotelTitle": "Pet Hotel",
+      "petHotelDesc": "Comfortable and safe accommodation for your pet friends. Peaceful vacation with our professional care team.",
+      "petTaxiTitle": "Pet Taxi",
+      "petTaxiDesc": "Safe intercity pet taxi service. Transparent distance-based pricing to transport your loved ones safely.",
+      "hotelSecurityTitle": "Pet Hotel Security",
+      "hotelSecurityDesc": "Your pets are safe with 24/7 surveillance, comfortable rooms and expert care team",
+      "taxiSecurityTitle": "Pet Taxi Security",
+      "taxiSecurityDesc": "Safe transportation with regularly maintained, clean vehicles and experienced drivers",
+      "howItWorksTitle": "How It Works?",
+      "howItWorksSubtitle": "Safely hand over your friend, enjoy your vacation",
+      "step1Title": "Create Profile",
+      "step1Desc": "Enter your pet's information: name, breed, age, vaccination status",
+      "step2Title": "Choose Service",
+      "step2Desc": "Browse hotels by location, select date and room",
+      "step3Title": "Make Payment",
+      "step3Desc": "Complete your reservation with secure payment",
+      "step4Title": "Track",
+      "step4Desc": "Track the entire process safely from your personal screen",
+      "whyPetfendyTitle": "Why Petfendy?",
+      "feature1": "Secure Payment",
+      "feature2": "SMS Notification",
+      "feature3": "24/7 Support",
+      "feature4": "Professional Care",
+      "feature5": "Distance Tracking",
+      "feature6": "Safe Transportation",
+      "instagramTitle": "Follow Us on Instagram",
+      "instagramButton": "Visit Instagram",
+      "safetyBannerTitle": "Your Little Friends Are Safe With Us",
+      "safetyBannerDesc": "Petfendy brings together carefully selected, supervised and licensed pet hotels for your pet. Make your reservation now and guarantee your friend's comfort!",
+      "safetyBannerButton1": "Book Now",
+      "safetyBannerButton2": "Learn More",
+      "safetyBannerAlt": "Pet Hotel and Pet Taxi Services",
+      "footerSlogan": "Reliable service for your pet friends",
+      "quickLinks": "Quick Links",
+      "help": "Help",
+      "faq": "FAQ",
+      "contact": "Contact",
+      "support": "Support",
+      "blog": "Blog",
+      "privacy": "Privacy",
+      "cookies": "Cookies"
+    }
+  }
+}
+
