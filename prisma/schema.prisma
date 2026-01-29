@@ -19,6 +19,8 @@ model User {
   passwordHash          String
   role                  UserRole  @default(USER)
   emailVerified         Boolean   @default(false)
+  emailVerifiedAt       DateTime?
+  active                Boolean   @default(true)
   verificationCode      String?
   verificationCodeExpiry DateTime?
   createdAt             DateTime  @default(now())

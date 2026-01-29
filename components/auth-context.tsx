@@ -74,76 +74,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error('Geçerli bir email adresi giriniz')
       }
 
-      // Rate limiting check (simple client-side implementation)
-      const loginAttempts = localStorage.getItem(`login_attempts_${email}`)
-      const attempts = loginAttempts ? JSON.parse(loginAttempts) : { count: 0, lastAttempt: 0 }
-      const now = Date.now()
-      const fiveMinutes = 5 * 60 * 1000
+      // Get reCAPTCHA token (this should be passed from the login form)
+      // For now, we'll skip reCAPTCHA in the context and handle it in the form
+      const recaptchaToken = (window as any).lastRecaptchaToken || ''
 
-      // Reset attempts if more than 5 minutes have passed
-      if (now - attempts.lastAttempt > fiveMinutes) {
-        attempts.count = 0
+      // Call login API
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          recaptchaToken
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Giriş başarısız')
       }
 
-      // Block if too many attempts
-      if (attempts.count >= 5) {
-        const timeLeft = Math.ceil((fiveMinutes - (now - attempts.lastAttempt)) / 1000 / 60)
-        throw new Error(`Çok fazla başarısız deneme. ${timeLeft} dakika sonra tekrar deneyin.`)
+      if (!data.success) {
+        throw new Error(data.error || 'Giriş başarısız')
       }
 
-      // Look up user in test database
-      const userRecord = TEST_USERS_DB.get(email)
-
-      if (!userRecord) {
-        // Simulate timing to prevent user enumeration
-        await new Promise(resolve => setTimeout(resolve, 500))
-        
-        // Increment failed attempts
-        attempts.count++
-        attempts.lastAttempt = now
-        localStorage.setItem(`login_attempts_${email}`, JSON.stringify(attempts))
-        
-        throw new Error('Geçersiz email veya şifre')
+      // Store tokens and user data
+      if (data.tokens) {
+        setAuthToken(data.tokens.accessToken)
+        // Store refresh token securely (in production, use httpOnly cookies)
+        localStorage.setItem('petfendy_refresh_token', data.tokens.refreshToken)
       }
 
-      // Verify password against hash
-      let isValidPassword = false
-      try {
-        isValidPassword = await verifyPassword(password, userRecord.passwordHash)
-      } catch (verifyError) {
-        console.error('Password verification error:', verifyError)
-        // Fallback: direct comparison for demo (NOT SECURE - only for testing)
-        // The hash for 'ErikUzum52707+.' is known
-        if (password === 'ErikUzum52707+.' && email === 'petfendyotel@gmail.com') {
-          isValidPassword = true
-        }
-      }
+      setCurrentUser(data.user)
+      setUser(data.user)
 
-      if (!isValidPassword) {
-        // Increment failed attempts
-        attempts.count++
-        attempts.lastAttempt = now
-        localStorage.setItem(`login_attempts_${email}`, JSON.stringify(attempts))
-        
-        throw new Error('Geçersiz email veya şifre')
-      }
-
-      // Clear failed attempts on successful login
-      localStorage.removeItem(`login_attempts_${email}`)
-
-      // Generate secure JWT token
-      const token = generateToken(
-        userRecord.user.id!,
-        userRecord.user.email!,
-        userRecord.user.role
-      )
-
-      setAuthToken(token)
-      setCurrentUser(userRecord.user)
-      setUser(userRecord.user)
-
-      // Log successful login (for security monitoring)
-      console.log(`✅ User logged in: ${email} (${userRecord.user.role})`)
+      console.log(`✅ User logged in: ${email} (${data.user.role})`)
       
     } catch (error) {
       console.error("Login error:", error)
@@ -186,44 +154,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error('Şifre en az bir büyük harf, bir küçük harf ve bir rakam içermelidir')
       }
 
-      // Check if user already exists
-      if (TEST_USERS_DB.has(email)) {
-        throw new Error('Bu email adresi zaten kayıtlı')
-      }
+      // Get reCAPTCHA token (this should be passed from the register form)
+      const recaptchaToken = (window as any).lastRecaptchaToken || ''
 
-      // Sanitize inputs
-      const sanitizedName = name.trim().replace(/[<>]/g, '')
-      const sanitizedPhone = phone ? phone.trim().replace(/[<>]/g, '') : ''
-
-      // Hash password securely
-      const passwordHash = await hashPassword(password)
-
-      // Create new user
-      const newUser: Partial<User> = {
-        id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        email: email.toLowerCase().trim(),
-        name: sanitizedName,
-        phone: sanitizedPhone,
-        role: "user",
-        emailVerified: false, // In production, send verification email
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
-
-      // Store in test database
-      TEST_USERS_DB.set(email, {
-        passwordHash,
-        user: newUser
+      // Call register API
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          name,
+          phone,
+          recaptchaToken
+        })
       })
 
-      // Generate secure JWT token
-      const token = generateToken(newUser.id!, email, 'user')
+      const data = await response.json()
 
-      setAuthToken(token)
-      setCurrentUser(newUser)
-      setUser(newUser)
+      if (!response.ok) {
+        throw new Error(data.error || 'Kayıt başarısız')
+      }
 
-      // Log successful registration (for security monitoring)
+      if (!data.success) {
+        throw new Error(data.error || 'Kayıt başarısız')
+      }
+
+      // Store tokens and user data
+      if (data.tokens) {
+        setAuthToken(data.tokens.accessToken)
+        // Store refresh token securely (in production, use httpOnly cookies)
+        localStorage.setItem('petfendy_refresh_token', data.tokens.refreshToken)
+      }
+
+      setCurrentUser(data.user)
+      setUser(data.user)
+
       console.log(`✅ New user registered: ${email}`)
       
     } catch (error) {

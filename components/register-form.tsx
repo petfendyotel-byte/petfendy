@@ -84,24 +84,8 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
         return
       }
 
-      // Verify reCAPTCHA token
-      const recaptchaResponse = await fetch('/api/verify-recaptcha', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          token: recaptchaToken,
-          action: 'register',
-          minScore: 0.5
-        })
-      })
-
-      const recaptchaResult = await recaptchaResponse.json()
-      if (!recaptchaResult.success) {
-        setErrors({ submit: "Güvenlik doğrulaması başarısız. Lütfen tekrar deneyin." })
-        return
-      }
+      // Store token globally for auth context to use
+      ;(window as any).lastRecaptchaToken = recaptchaToken
 
       // Generate verification code
       const verificationCode = Math.floor(100000 + Math.random() * 900000).toString()

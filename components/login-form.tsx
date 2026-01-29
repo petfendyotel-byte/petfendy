@@ -49,55 +49,20 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
           return
         }
 
-        // Verify reCAPTCHA token
-        const recaptchaResponse = await fetch('/api/verify-recaptcha', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            token: recaptchaToken,
-            action: 'login',
-            minScore: 0.5
-          })
-        })
+        // Store token globally for auth context to use
+        ;(window as any).lastRecaptchaToken = recaptchaToken
+
+        await login(sanitizedEmail, password)
+        onSuccess?.()
         
-        if (!recaptchaResponse.ok) {
-          const errorText = await recaptchaResponse.text()
-          
-          try {
-            const errorJson = JSON.parse(errorText)
-            setError(`Güvenlik doğrulaması hatası: ${errorJson.error || 'Bilinmeyen hata'}`)
-          } catch {
-            setError(`Güvenlik doğrulaması hatası (${recaptchaResponse.status}). Lütfen tekrar deneyin.`)
+        // Check if user has items in cart and redirect to cart
+        if (typeof window !== 'undefined') {
+          const cart = localStorage.getItem('petfendy_cart')
+          if (cart && JSON.parse(cart).length > 0) {
+            // User will be redirected to cart tab automatically by parent component
+            console.log('User has items in cart, will be redirected to cart')
           }
-          return
         }
-
-        const recaptchaResult = await recaptchaResponse.json()
-        
-        if (!recaptchaResult.success) {
-          setError(`Güvenlik doğrulaması başarısız: ${recaptchaResult.error || 'Bilinmeyen hata'}`)
-          return
-        }
-        
-        console.log('✅ [Login] reCAPTCHA verification successful, score:', recaptchaResult.score)
-      } else {
-        setError("Güvenlik doğrulaması yükleniyor. Lütfen bekleyin ve tekrar deneyin.")
-        return
-      }
-
-      await login(sanitizedEmail, password)
-      onSuccess?.()
-      
-      // Check if user has items in cart and redirect to cart
-      if (typeof window !== 'undefined') {
-        const cart = localStorage.getItem('petfendy_cart')
-        if (cart && JSON.parse(cart).length > 0) {
-          // User will be redirected to cart tab automatically by parent component
-          console.log('User has items in cart, will be redirected to cart')
-        }
-      }
     } catch (err: any) {
       // Show the actual error message from auth context
       const errorMessage = err?.message || "Giriş başarısız. Lütfen bilgilerinizi kontrol edin."
