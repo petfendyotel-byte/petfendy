@@ -100,6 +100,7 @@ class SMSService {
         </mainbody>`
 
       console.log(`📱 [NetGSM] Sending SMS to ${to}, Commercial: ${isCommercial}`)
+      console.log(`📱 [NetGSM] Using credentials: ${username} / ${sender}`)
 
       const response = await fetch('https://api.netgsm.com.tr/sms/send/xml', {
         method: 'POST',
@@ -111,6 +112,7 @@ class SMSService {
       })
 
       const result = await response.text()
+      console.log(`📱 [NetGSM] HTTP Status: ${response.status}`)
       console.log(`📱 [NetGSM] Response: ${result}`)
       
       // NetGSM başarı kodları ve jobid kontrolü
@@ -133,6 +135,16 @@ class SMSService {
         const errorCode = result.trim()
         const errorMessage = errorMessages[errorCode] || `Bilinmeyen hata: ${result}`
         console.error(`❌ [NetGSM] Error ${errorCode}: ${errorMessage}`)
+        
+        // Specific error handling
+        if (errorCode === '40') {
+          console.error(`❌ [NetGSM] CRITICAL: Gönderici adı "${sender}" NetGSM panelinde onaylanmamış!`)
+          console.error(`❌ [NetGSM] Çözüm: NetGSM panelinde gönderici adı onaylatın veya SMS_FORCE_MOCK=true yapın`)
+        } else if (errorCode === '30') {
+          console.error(`❌ [NetGSM] CRITICAL: Kullanıcı adı/şifre hatalı veya API yetkisi yok!`)
+          console.error(`❌ [NetGSM] Çözüm: NetGSM panelinde API yetkilerini kontrol edin`)
+        }
+        
         return false
       }
     } catch (error) {
@@ -313,7 +325,13 @@ export const smsService = new SMSService()
 export function initSMSService(): void {
   const provider = process.env.SMS_PROVIDER as 'netgsm' | 'twilio' | 'mock' || 'mock'
   
-  if (provider === 'netgsm') {
+  // TEMPORARY: Force mock mode for testing until NetGSM issues are resolved
+  const forceMockMode = process.env.SMS_FORCE_MOCK === 'true'
+  
+  if (forceMockMode) {
+    smsService.configure({ provider: 'mock' })
+    console.log('📱 SMS Service: FORCED Mock mode (SMS_FORCE_MOCK=true)')
+  } else if (provider === 'netgsm') {
     smsService.configure({
       provider: 'netgsm',
       username: process.env.NETGSM_USERNAME,

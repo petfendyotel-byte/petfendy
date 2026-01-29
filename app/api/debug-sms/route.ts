@@ -7,6 +7,7 @@ export async function GET(request: NextRequest) {
     const netgsmPassword = process.env.NETGSM_PASSWORD
     const netgsmSender = process.env.NETGSM_SENDER
     const adminPhone = process.env.ADMIN_PHONE
+    const forceMock = process.env.SMS_FORCE_MOCK
 
     return NextResponse.json({
       status: 'SMS Configuration Debug',
@@ -15,6 +16,11 @@ export async function GET(request: NextRequest) {
         exists: !!smsProvider,
         value: smsProvider || 'not set',
         isValid: ['netgsm', 'twilio', 'mock'].includes(smsProvider || '')
+      },
+      forceMockMode: {
+        exists: !!forceMock,
+        value: forceMock || 'false',
+        enabled: forceMock === 'true'
       },
       netgsmUsername: {
         exists: !!netgsmUsername,
@@ -33,6 +39,11 @@ export async function GET(request: NextRequest) {
         value: adminPhone ? adminPhone.substring(0, 3) + '***' + adminPhone.slice(-2) : 'not set'
       },
       configured: !!(smsProvider && netgsmUsername && netgsmPassword),
+      recommendations: [
+        forceMock === 'true' ? '✅ Mock mode enabled - SMS will be logged only' : '⚠️ Real SMS mode - check NetGSM panel',
+        !netgsmSender ? '❌ NETGSM_SENDER not set' : '✅ Sender configured',
+        !adminPhone ? '❌ ADMIN_PHONE not set' : '✅ Admin phone configured'
+      ],
       timestamp: new Date().toISOString()
     })
 
