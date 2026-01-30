@@ -63,6 +63,10 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
             console.log('User has items in cart, will be redirected to cart')
           }
         }
+      } else {
+        setError("Güvenlik doğrulaması yüklenemedi. Lütfen sayfayı yenileyin.")
+        return
+      }
     } catch (err: any) {
       // Show the actual error message from auth context
       const errorMessage = err?.message || "Giriş başarısız. Lütfen bilgilerinizi kontrol edin."
