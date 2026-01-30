@@ -23,7 +23,7 @@ console.log('3️⃣  ENCRYPTION_KEY:');
 console.log(crypto.randomBytes(32).toString('base64'));
 console.log('');
 
-console.log('4️⃣  PAYTR_WEBHOOK_SECRET (opsiyonel):');
+console.log('4️⃣  IYZICO_WEBHOOK_SECRET (opsiyonel):');
 console.log(crypto.randomBytes(32).toString('hex'));
 console.log('');
 

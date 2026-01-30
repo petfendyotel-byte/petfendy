@@ -65,18 +65,18 @@ export function securityMiddleware(request: NextRequest) {
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
   // Content-Security-Policy: Prevent XSS and injection attacks
-  // PayTR iframe ve Google Maps için izinler eklendi
+  // İyzico iframe ve Google Maps için izinler eklendi
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.google.com https://*.googleapis.com https://*.gstatic.com https://www.paytr.com https://*.paytr.com", // Next.js, Google Maps, PayTR scripts
-    "style-src 'self' 'unsafe-inline' https://*.googleapis.com https://www.paytr.com https://*.paytr.com", // Tailwind, Google Maps, PayTR styles
-    "img-src 'self' data: https: https://*.google.com https://*.googleapis.com https://*.gstatic.com https://www.paytr.com https://*.paytr.com", // Google Maps, PayTR images
+    "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.google.com https://*.googleapis.com https://*.gstatic.com https://*.iyzipay.com", // Next.js, Google Maps, İyzico scripts
+    "style-src 'self' 'unsafe-inline' https://*.googleapis.com https://*.iyzipay.com", // Tailwind, Google Maps, İyzico styles
+    "img-src 'self' data: https: https://*.google.com https://*.googleapis.com https://*.gstatic.com https://*.iyzipay.com", // Google Maps, İyzico images
     "font-src 'self' data: https://*.googleapis.com https://*.gstatic.com", // Google Maps fonts
-    "connect-src 'self' https: https://*.google.com https://*.googleapis.com https://www.paytr.com https://*.paytr.com", // Google Maps, PayTR API calls
-    "frame-src 'self' https://*.google.com https://www.google.com https://www.paytr.com https://*.paytr.com", // Allow Google Maps and PayTR iframes
-    "frame-ancestors 'self'", // PayTR callback için self izni
+    "connect-src 'self' https: https://*.google.com https://*.googleapis.com https://*.iyzipay.com", // Google Maps, İyzico API calls
+    "frame-src 'self' https://*.google.com https://www.google.com https://*.iyzipay.com", // Allow Google Maps and İyzico iframes
+    "frame-ancestors 'self'", // İyzico callback için self izni
     "base-uri 'self'",
-    "form-action 'self' https://www.paytr.com https://*.paytr.com", // PayTR form submissions
+    "form-action 'self' https://*.iyzipay.com", // İyzico form submissions
   ].join('; ');
 
   response.headers.set('Content-Security-Policy', csp);
@@ -172,7 +172,7 @@ export function detectSuspiciousActivity(request: NextRequest): {
   const userAgent = request.headers.get('user-agent') || '';
   const url = request.url;
 
-  // Check for common bot patterns (PayTR webhook istekleri hariç)
+  // Check for common bot patterns (İyzico webhook istekleri hariç)
   const botPatterns = [
     /crawler/i,
     /spider/i,
