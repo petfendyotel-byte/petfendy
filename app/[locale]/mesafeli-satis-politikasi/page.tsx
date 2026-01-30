@@ -22,15 +22,16 @@ const content = {
           { term: "Bakanlık", desc: "Ticaret Bakanlığı" },
           { term: "Kanun", desc: "6502 sayılı Tüketicinin Korunması Hakkında Kanun" },
           { term: "Yönetmelik", desc: "Mesafeli Sözleşmeler Yönetmeliği" },
-          { term: "Satıcı", desc: "BSG EVCİL HAYVAN BAKIM DIŞ TİCARET PAZARLAMA VE SANAYİ LİMİTED ŞİRKETİ, dijital rezervasyon ve organizasyon hizmeti sunmaktadır." },
-          { term: "Alıcı", desc: "Satıcı'dan dijital rezervasyon ve organizasyon hizmeti satın alan tüketici." },
-          { term: "Hizmet", desc: "Petfendy tarafından sunulan dijital rezervasyon ve organizasyon hizmeti." },
+          { term: "Satıcı", desc: "BSG EVCİL HAYVAN BAKIM DIŞ TİCARET PAZARLAMA VE SANAYİ LİMİTED ŞİRKETİ, dijital rezervasyon ve organizasyon hizmeti sağlayıcısıdır. Hizmet bedeli Satıcı tarafından tahsil edilir." },
+          { term: "Alıcı", desc: "Satıcı'dan dijital rezervasyon ve organizasyon hizmeti satın alan gerçek veya tüzel kişi." },
+          { term: "Hizmet", desc: "Petfendy tarafından kendi adına sunulan dijital rezervasyon ve organizasyon hizmeti." },
+          { term: "Platform", desc: "Satıcı'nın hizmetlerini sunduğu www.petfendy.com internet sitesi." },
         ]
       },
       {
         num: 3,
         title: "Madde 3 - Konu",
-        text: "İşbu sözleşme, Alıcı'nın Satıcı'dan satın aldığı dijital rezervasyon ve organizasyon hizmetine ilişkin tarafların hak ve yükümlülüklerini düzenler."
+        text: "İşbu sözleşme, Alıcı'nın Satıcı'dan satın aldığı dijital rezervasyon ve organizasyon hizmetine ilişkin tarafların hak ve yükümlülüklerini 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve 6563 sayılı Elektronik Ticaretin Düzenlenmesi Hakkında Kanun çerçevesinde düzenler."
       },
       {
         num: 4,
@@ -41,26 +42,33 @@ const content = {
         num: 5,
         title: "Madde 5 - Ödeme ve İade Koşulları",
         items: [
-          "Alıcı, dijital rezervasyon ve organizasyon hizmeti bedelini online ödeme yöntemleriyle gerçekleştirecektir.",
-          "Hizmet başlamadan 24 saat öncesine kadar ücretsiz iptal hakkı bulunmaktadır.",
-          "Hizmet başladıktan sonra iade talepleri değerlendirilmeyecektir."
+          "Hizmet bedeli İyzico güvenli ödeme sistemi ile Satıcı tarafından tahsil edilir.",
+          "Ödemeler kredi kartı, banka kartı ile gerçekleştirilebilir.",
+          "İade işlemleri aynı ödeme yöntemiyle 10-14 iş günü içinde tamamlanır.",
+          "Hizmet başlamadan önce cayma hakkı 6502 sayılı Kanun uyarınca 14 gün süreyle geçerlidir.",
+          "Hizmetin ifasına başlanması durumunda cayma hakkı kullanılamaz."
         ]
       },
       {
         num: 6,
         title: "Madde 6 - Cayma Hakkı",
         items: [
-          "Alıcı, hizmet alımını gerçekleştirdikten sonra 14 gün içinde hiçbir gerekçe göstermeksizin cayma hakkını kullanabilir.",
-          "Cayma hakkının kullanılması durumunda, cayma bildirimi Satıcı'ya yazılı olarak veya platformdaki ilgili bölümden yapılabilir.",
-          "Cayma hakkının kullanılması halinde, hizmet bedeli Alıcı'ya aynı ödeme yöntemi ile iade edilecektir."
+          "Alıcı, 6502 sayılı Tüketicinin Korunması Hakkında Kanun'un 47. maddesi uyarınca, hizmet sözleşmesinin kurulduğu tarihten itibaren 14 gün içinde herhangi bir gerekçe göstermeksizin cayma hakkını kullanabilir.",
+          "Cayma hakkı, hizmetin ifasına başlanmadan önce kullanılabilir. Hizmetin ifasına başlanması durumunda cayma hakkı düşer.",
+          "Cayma bildiriminin yazılı olarak veya kalıcı veri saklayıcısı ile Satıcı'ya (petfendyotel@gmail.com) iletilmesi gerekmektedir.",
+          "Cayma hakkının kullanılması halinde, ödenen bedel 14 iş günü içinde aynı ödeme yöntemiyle iade edilir.",
+          "İade işlemleri İyzico ödeme sistemi üzerinden gerçekleştirilir."
         ]
       },
       {
         num: 7,
         title: "Madde 7 - Satıcı'nın Yükümlülükleri",
         items: [
-          "Satıcı, dijital rezervasyon ve organizasyon hizmetini kendi adına sunmaktadır.",
-          "Satıcı, hizmet kalitesinden ve müşteri memnuniyetinden sorumludur."
+          "Satıcı, dijital rezervasyon ve organizasyon hizmetini kendi adına ve hesabına sunmaktadır.",
+          "Satıcı, hizmet kalitesinden ve müşteri memnuniyetinden doğrudan sorumludur.",
+          "Satıcı, hizmet bedeli tahsilatını İyzico ödeme sistemi üzerinden gerçekleştirir.",
+          "Satıcı, iade işlemlerini aynı ödeme yöntemiyle yapmakla yükümlüdür.",
+          "Satıcı, tüketici haklarına ilişkin yasal yükümlülüklerini yerine getirmekle sorumludur."
         ]
       },
       {

@@ -13,46 +13,50 @@ const content = {
   tr: {
     title: "İPTAL VE İADE POLİTİKASI",
     lastUpdate: "Son Güncelleme: 15 Aralık 2024",
-    intro: "Petfendy, evcil hayvan sahipleri ve hizmet sağlayıcıları için adil ve şeffaf bir platform olarak iptal ve iade süreçlerini aşağıdaki kriterlere göre yönetmektedir:",
-    section1Title: "Pet Sahipleri için İptal ve İade Koşulları",
-    section1_1Title: "Rezervasyon Onayı ve Doğruluk Beyanı",
+    intro: "Petfendy, 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve 6563 sayılı Elektronik Ticaretin Düzenlenmesi Hakkında Kanun uyarınca iptal ve iade süreçlerini aşağıdaki kriterlere göre yönetmektedir:",
+    legalNotice: "YASAL CAYMA HAKKI VE İADE POLİTİKASI",
+    legalNoticeDesc: "Bu politika 6502 sayılı Tüketicinin Korunması Hakkında Kanun'un 47. ve devamı maddelerine uygun olarak hazırlanmıştır.",
+    section1Title: "YASAL CAYMA HAKKI (14 GÜN)",
+    section1_1Title: "Tüketici Cayma Hakkı",
     section1_1Items: [
-      "Pet sahibi, rezervasyonun ön onaylı olduğunu ve işletmenin 24 saat içinde onay/ret hakkı olduğunu kabul eder.",
-      "24 saat içinde yanıtlanmayan rezervasyonlar otomatik olarak onaylanmış sayılır.",
-      "Doğrudan onaylı rezervasyonlarda ödeme tamamlandığında rezervasyon kesinleşir.",
+      "Tüketici, 6502 sayılı Kanun uyarınca hizmet bedelini sözleşme kurulumundan itibaren 14 gün içinde herhangi bir gerekçe göstermeksizin cayma hakkını kullanabilir.",
+      "Cayma hakkı, hizmetin ifasına başlanmadan önce kullanılabilir.",
+      "Cayma bildiriminin yazılı olarak veya kalıcı veri saklayıcısı ile Petfendy'ye iletilmesi gerekmektedir.",
+      "Cayma hakkının kullanılması durumunda, ödenen bedel 14 iş günü içinde aynı ödeme yöntemiyle iade edilir."
     ],
-    section1_1Warning: "Verilen bilgilerin (hastalık, alerji, çip no vb.) doğru olmaması durumunda iade yapılmaz.",
-    section1_2Title: "Ücretsiz İptal Hakkı",
+    section1_2Title: "Cayma Hakkının Kullanılamayacağı Durumlar",
     section1_2Items: [
-      "Rezervasyon sonrası ilk 6 saat içinde ücretsiz iptal hakkı vardır.",
+      "Hizmetin ifasına başlanması durumunda (rezervasyon tarihinin gelmesi)",
+      "Tüketicinin açık onayı ile hizmetin ifasına başlanması halinde",
+      "Acil durum rezervasyonları (24 saat içinde başlayacak hizmetler)"
     ],
-    section1_2Warning: "Rezervasyon tarihine 72 saatten az kaldıysa bu hak geçerli değildir.",
-    section1_3Title: "İptal Sonrası İade Süreci",
+    section1_3Title: "İade Süreci ve Zamanlaması",
     section1_3Items: [
-      "İadeler politika kurallarına göre işlenir.",
-      "Bankanıza bağlı olarak 7–14 iş günü içinde gerçekleşir.",
+      "İade talepleri platform üzerinden veya petfendyotel@gmail.com adresine yazılı olarak yapılabilir",
+      "İade işlemleri İyzico ödeme sistemi üzerinden gerçekleştirilir",
+      "Ödeme, aynı ödeme yöntemiyle (kredi kartı/banka kartı) 10-14 iş günü içinde iade edilir",
+      "İade süreci banka işlem günlerine bağlı olarak değişiklik gösterebilir"
     ],
-    section1_4Title: "Hizmetin Kabul Edilememesi",
-    section1_4Text: "Ön muayenede konaklamaya engel hastalık/politika ihlali tespitinde ilk gece ücreti tahsil edilir.",
-    section1_5Title: "Kısmi Hizmet Kullanımı",
-    section1_5Text: "Hizmetten kısmi faydalanma durumunda iade yapılmaz.",
-    section2Title: "Pet Otelleri için İptal ve İade Koşulları",
-    section2_1Title: "Rezervasyon Türleri ve Onay Süreci",
+    section1_4Title: "Hizmet Özel Durumları",
+    section1_4Text: "Evcil hayvanın sağlık durumu nedeniyle hizmet alınamayacağının veteriner raporu ile belgelenmesi halinde, tam iade yapılır.",
+    section1_5Title: "Mücbir Sebepler",
+    section1_5Text: "Doğal afet, salgın hastalık gibi mücbir sebeplerle hizmet verilemediği durumlarda tam iade veya erteleme hakkı tanınır.",
+    section2Title: "HİZMET SAĞLAYICI KOŞULLARI",
+    section2_1Title: "Rezervasyon Yönetimi",
     section2_1Items: [
-      "İşletme doğrudan onaylı veya ön onaylı rezervasyon modelini seçebilir.",
-      "Ön onaylılarda 24 saat içinde yanıtlanmayan talepler otomatik onaylanır.",
-      "Hizmet saatine 24 saatten az kala benzer şekilde otomatik onaylanır.",
+      "Hizmet sağlayıcılar rezervasyonları 24 saat içinde onaylamak zorundadır.",
+      "Onaylanmayan rezervasyonlar otomatik olarak iptal edilir ve tam iade yapılır.",
+      "Hizmet sağlayıcı tarafından iptal edilen rezervasyonlarda tam iade yapılır."
     ],
-    section2_2Title: "Hizmetin İptali",
-    section2_2Text: "Onaylı rezervasyonun iptali, yalnızca pet sahibinin yazılı onayı ile mümkündür.",
-    section2_3Title: "Mücbir Sebepler",
+    section2_2Title: "Hizmet Kalitesi",
+    section2_2Text: "Hizmet kalitesi ile ilgili geçerli şikayetlerde kısmi veya tam iade yapılabilir. Tekrarlanan şikayetlerde hizmet sağlayıcı platformdan çıkarılabilir.",
+    section2_3Title: "Ödeme ve Kesinti",
     section2_3Items: [
-      "Pet sahibi iptal ederek iade isteyebilir.",
-      "Alternatif tarih için erteleme talep edebilir.",
+      "Ödemeler İyzico güvenli ödeme sistemi ile alınır",
+      "İadeler aynı ödeme yöntemiyle gerçekleştirilir",
+      "Platform komisyonu sadece tamamlanan hizmetlerden alınır"
     ],
-    section2_4Title: "Hizmette Sorun / Eksiklik",
-    section2_4Text: "Geçerli şikayetlerde kısmi/tam iade yükümlülüğü doğabilir. Tekrarında platformdan çıkarma hakkı saklıdır.",
-    section3Title: "Genel Hükümler",
+    section3Title: "İLETİŞİM VE DESTEK",
     supportLine: "Destek Hattı",
     support247: "7/24 Müşteri Desteği",
     workingHours: "Pazartesi - Pazar: 08:00 - 20:00",
@@ -65,46 +69,50 @@ const content = {
   en: {
     title: "CANCELLATION AND REFUND POLICY",
     lastUpdate: "Last Update: December 15, 2024",
-    intro: "Petfendy manages cancellation and refund processes according to the following criteria as a fair and transparent platform for pet owners and service providers:",
-    section1Title: "Cancellation and Refund Terms for Pet Owners",
-    section1_1Title: "Reservation Confirmation and Accuracy Statement",
+    intro: "Petfendy manages cancellation and refund processes in accordance with Law No. 6502 on Consumer Protection and Law No. 6563 on Regulation of Electronic Commerce according to the following criteria:",
+    legalNotice: "LEGAL RIGHT OF WITHDRAWAL AND REFUND POLICY",
+    legalNoticeDesc: "This policy has been prepared in accordance with Article 47 and subsequent articles of Law No. 6502 on Consumer Protection.",
+    section1Title: "LEGAL RIGHT OF WITHDRAWAL (14 DAYS)",
+    section1_1Title: "Consumer Right of Withdrawal",
     section1_1Items: [
-      "The pet owner accepts that the reservation is pre-approved and the business has the right to approve/reject within 24 hours.",
-      "Reservations not responded to within 24 hours are automatically considered approved.",
-      "In directly approved reservations, the reservation is finalized when payment is completed.",
+      "The consumer may exercise the right of withdrawal within 14 days from the establishment of the contract without showing any reason, in accordance with Law No. 6502.",
+      "The right of withdrawal can be used before the performance of the service begins.",
+      "The withdrawal notification must be communicated to Petfendy in writing or via a durable data storage device.",
+      "In case of exercising the right of withdrawal, the paid amount will be refunded within 14 business days using the same payment method."
     ],
-    section1_1Warning: "No refund will be made if the information provided (illness, allergy, chip number, etc.) is incorrect.",
-    section1_2Title: "Free Cancellation Right",
+    section1_2Title: "Cases Where the Right of Withdrawal Cannot Be Used",
     section1_2Items: [
-      "There is a free cancellation right within the first 6 hours after reservation.",
+      "When the performance of the service has begun (arrival of the reservation date)",
+      "When the service performance has begun with the express consent of the consumer",
+      "Emergency reservations (services starting within 24 hours)"
     ],
-    section1_2Warning: "This right is not valid if less than 72 hours remain until the reservation date.",
-    section1_3Title: "Refund Process After Cancellation",
+    section1_3Title: "Refund Process and Timing",
     section1_3Items: [
-      "Refunds are processed according to policy rules.",
-      "It takes place within 7-14 business days depending on your bank.",
+      "Refund requests can be made through the platform or in writing to petfendyotel@gmail.com",
+      "Refund transactions are carried out through the İyzico payment system",
+      "Payment is refunded using the same payment method (credit card/debit card) within 10-14 business days",
+      "The refund process may vary depending on bank business days"
     ],
-    section1_4Title: "Service Not Accepted",
-    section1_4Text: "If a disease/policy violation that prevents accommodation is detected during the preliminary examination, the first night fee is charged.",
-    section1_5Title: "Partial Service Usage",
-    section1_5Text: "No refund is made in case of partial use of the service.",
-    section2Title: "Cancellation and Refund Terms for Pet Hotels",
-    section2_1Title: "Reservation Types and Approval Process",
+    section1_4Title: "Service Special Situations",
+    section1_4Text: "If it is documented with a veterinary report that the service cannot be received due to the health condition of the pet, a full refund is made.",
+    section1_5Title: "Force Majeure",
+    section1_5Text: "In cases where service cannot be provided due to force majeure such as natural disasters, epidemics, full refund or postponement right is granted.",
+    section2Title: "SERVICE PROVIDER CONDITIONS",
+    section2_1Title: "Reservation Management",
     section2_1Items: [
-      "The business can choose direct approval or pre-approval reservation model.",
-      "In pre-approved reservations, requests not responded to within 24 hours are automatically approved.",
-      "Similarly, automatic approval occurs when less than 24 hours remain until service time.",
+      "Service providers must confirm reservations within 24 hours.",
+      "Unconfirmed reservations are automatically cancelled and full refund is made.",
+      "Full refund is made for reservations cancelled by the service provider."
     ],
-    section2_2Title: "Service Cancellation",
-    section2_2Text: "Cancellation of an approved reservation is only possible with the written consent of the pet owner.",
-    section2_3Title: "Force Majeure",
+    section2_2Title: "Service Quality",
+    section2_2Text: "Partial or full refund may be made for valid complaints about service quality. Service providers may be removed from the platform in case of repeated complaints.",
+    section2_3Title: "Payment and Deduction",
     section2_3Items: [
-      "The pet owner can cancel and request a refund.",
-      "Can request postponement for an alternative date.",
+      "Payments are received through İyzico secure payment system",
+      "Refunds are made using the same payment method",
+      "Platform commission is only taken from completed services"
     ],
-    section2_4Title: "Service Problem / Deficiency",
-    section2_4Text: "Partial/full refund obligation may arise in valid complaints. The right to remove from the platform in case of repetition is reserved.",
-    section3Title: "General Provisions",
+    section3Title: "CONTACT AND SUPPORT",
     supportLine: "Support Line",
     support247: "24/7 Customer Support",
     workingHours: "Monday - Sunday: 09:00 - 22:00",
@@ -142,6 +150,25 @@ export default function RefundPolicyPage() {
       <section className="py-8 px-4 bg-white border-b">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-gray-600 leading-relaxed">{t.intro}</p>
+        </div>
+      </section>
+
+      {/* Legal Notice */}
+      <section className="py-8 px-4 bg-blue-50 border-b">
+        <div className="max-w-4xl mx-auto">
+          <Card className="border-blue-200 bg-blue-50">
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
+                  <FileText className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-blue-900 mb-2">{t.legalNotice}</h3>
+                  <p className="text-blue-700 text-sm leading-relaxed">{t.legalNoticeDesc}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
