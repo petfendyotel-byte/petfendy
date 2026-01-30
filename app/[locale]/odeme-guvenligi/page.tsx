@@ -24,9 +24,9 @@ const content = {
     title: "ÖDEME GÜVENLİĞİ",
     subtitle: "Petfendy olarak ödeme güvenliğinizi en üst düzeyde tutmak için endüstri standardı güvenlik önlemleri alıyoruz.",
     
-    paytrSection: {
-      title: "PayTR Güvenli Ödeme Altyapısı",
-      description: "Tüm ödemeleriniz PayTR'nin PCI-DSS sertifikalı güvenli altyapısı üzerinden işlenmektedir.",
+    iyzicoSection: {
+      title: "İyzico Güvenli Ödeme Altyapısı",
+      description: "Tüm ödemeleriniz İyzico'nun PCI-DSS sertifikalı güvenli altyapısı üzerinden işlenmektedir.",
       features: [
         "PCI-DSS Level 1 sertifikası",
         "256-bit SSL şifreleme",
@@ -79,7 +79,7 @@ const content = {
       title: "Kredi Kartı Güvenliği",
       description: "Kredi kartı bilgileriniz hiçbir zaman sunucularımızda saklanmaz.",
       points: [
-        "Kart bilgileri doğrudan PayTR'ye iletilir",
+        "Kart bilgileri doğrudan İyzico'ya iletilir",
         "Petfendy sunucularında kart verisi saklanmaz",
         "PCI-DSS uyumlu ödeme işlemi",
         "Tokenization ile güvenli saklama",
@@ -152,9 +152,9 @@ const content = {
     title: "PAYMENT SECURITY",
     subtitle: "At Petfendy, we implement industry-standard security measures to keep your payment security at the highest level.",
     
-    paytrSection: {
-      title: "PayTR Secure Payment Infrastructure",
-      description: "All your payments are processed through PayTR's PCI-DSS certified secure infrastructure.",
+    iyzicoSection: {
+      title: "İyzico Secure Payment Infrastructure",
+      description: "All your payments are processed through İyzico's PCI-DSS certified secure infrastructure.",
       features: [
         "PCI-DSS Level 1 certification",
         "256-bit SSL encryption",
@@ -207,7 +207,7 @@ const content = {
       title: "Credit Card Security",
       description: "Your credit card information is never stored on our servers.",
       points: [
-        "Card details are sent directly to PayTR",
+        "Card details are sent directly to İyzico",
         "No card data stored on Petfendy servers",
         "PCI-DSS compliant payment processing",
         "Secure storage with tokenization",
@@ -316,7 +316,7 @@ export default function PaymentSecurityPage() {
 
       <div className="max-w-6xl mx-auto px-4 py-12 space-y-12">
         
-        {/* PayTR Section */}
+        {/* İyzico Section */}
         <Card className="border-0 shadow-lg">
           <CardContent className="p-8">
             <div className="flex items-center gap-4 mb-6">
@@ -324,12 +324,12 @@ export default function PaymentSecurityPage() {
                 <CreditCard className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">{t.paytrSection.title}</h2>
-                <p className="text-gray-600">{t.paytrSection.description}</p>
+                <h2 className="text-2xl font-bold text-gray-900">{t.iyzicoSection.title}</h2>
+                <p className="text-gray-600">{t.iyzicoSection.description}</p>
               </div>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {t.paytrSection.features.map((feature, index) => (
+              {t.iyzicoSection.features.map((feature, index) => (
                 <div key={index} className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg">
                   <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
                   <span className="text-gray-700">{feature}</span>

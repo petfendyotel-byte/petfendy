@@ -91,7 +91,7 @@ const content = {
         id: 6,
         title: "Ödeme ve Faturalama",
         content: [
-          "Ödemeler PayTR güvenli ödeme sistemi ile alınır",
+          "Ödemeler İyzico güvenli ödeme sistemi ile alınır",
           "Kredi kartı, banka kartı ve havale seçenekleri mevcuttur",
           "Faturalar elektronik ortamda düzenlenir",
           "KDV dahil fiyatlar gösterilir",
@@ -269,7 +269,7 @@ const content = {
         id: 6,
         title: "Payment and Billing",
         content: [
-          "Payments are received through PayTR secure payment system",
+          "Payments are received through İyzico secure payment system",
           "Credit card, debit card and wire transfer options are available",
           "Invoices are issued electronically",
           "VAT inclusive prices are shown",

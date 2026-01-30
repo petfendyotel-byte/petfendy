@@ -3523,33 +3523,18 @@ export function AdminDashboard() {
                       />
                     </div>
 
-                    {newGateway.provider === "paytr" ? (
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium flex items-center gap-2">
-                          <Lock className="w-4 h-4" />
-                          Merchant Salt * (Şifreli saklanır)
-                        </label>
-                        <Input
-                          type="password"
-                          placeholder="PayTR Merchant Salt"
-                          value={newGateway.merchantSalt}
-                          onChange={(e) => setNewGateway({ ...newGateway, merchantSalt: e.target.value })}
-                        />
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium flex items-center gap-2">
-                          <Lock className="w-4 h-4" />
-                          API Key * (Şifreli saklanır)
-                        </label>
-                        <Input
-                          type="password"
-                          placeholder="Paratika API Key"
-                          value={newGateway.apiKey}
-                          onChange={(e) => setNewGateway({ ...newGateway, apiKey: e.target.value })}
-                        />
-                      </div>
-                    )}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium flex items-center gap-2">
+                        <Lock className="w-4 h-4" />
+                        Secret Key * (Şifreli saklanır)
+                      </label>
+                      <Input
+                        type="password"
+                        placeholder="İyzico Secret Key"
+                        value={newGateway.secretKey}
+                        onChange={(e) => setNewGateway({ ...newGateway, secretKey: e.target.value })}
+                      />
+                    </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
@@ -3572,45 +3557,21 @@ export function AdminDashboard() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Para Birimi</label>
-                        <Select value={newGateway.currency} onValueChange={(v) => setNewGateway({ ...newGateway, currency: v })}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="TL">TL (Türk Lirası)</SelectItem>
-                            <SelectItem value="USD">USD (Dolar)</SelectItem>
-                            <SelectItem value="EUR">EUR (Euro)</SelectItem>
-                          </SelectContent>
-                        </Select>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Para Birimi</label>
+                          <Select value={newGateway.currency} onValueChange={(v) => setNewGateway({ ...newGateway, currency: v })}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="TRY">TRY (Türk Lirası)</SelectItem>
+                              <SelectItem value="USD">USD (Dolar)</SelectItem>
+                              <SelectItem value="EUR">EUR (Euro)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
-                      {newGateway.provider === "paytr" && (
-                        <>
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium">Max Taksit</label>
-                            <Input
-                              type="number"
-                              min="1"
-                              max="12"
-                              value={newGateway.maxInstallment}
-                              onChange={(e) => setNewGateway({ ...newGateway, maxInstallment: parseInt(e.target.value) })}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium">Timeout (sn)</label>
-                            <Input
-                              type="number"
-                              min="10"
-                              max="300"
-                              value={newGateway.timeoutLimit}
-                              onChange={(e) => setNewGateway({ ...newGateway, timeoutLimit: parseInt(e.target.value) })}
-                            />
-                          </div>
-                        </>
-                      )}
-                    </div>
 
                     <div className="flex items-center gap-2">
                       <input
@@ -3656,7 +3617,7 @@ export function AdminDashboard() {
                         <div className="flex justify-between items-start">
                           <div>
                             <CardTitle className="text-lg flex items-center gap-2">
-                              {gateway.provider === "paytr" ? "PayTR" : "Paratika"}
+                              İyzico
                               {gateway.isDefault && <Badge variant="default">Varsayılan</Badge>}
                             </CardTitle>
                             <CardDescription>{gateway.name}</CardDescription>

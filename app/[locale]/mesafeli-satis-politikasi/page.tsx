@@ -22,28 +22,28 @@ const content = {
           { term: "Bakanlık", desc: "Ticaret Bakanlığı" },
           { term: "Kanun", desc: "6502 sayılı Tüketicinin Korunması Hakkında Kanun" },
           { term: "Yönetmelik", desc: "Mesafeli Sözleşmeler Yönetmeliği" },
-          { term: "Satıcı", desc: "BSG EVCİL HAYVAN BAKIM DIŞ TİCARET PAZARLAMA VE SANAYİ LİMİTED ŞİRKETİ, platform aracılığıyla pet sahipleri ve hizmet sağlayıcıları arasında aracılık hizmeti sunmaktadır." },
-          { term: "Alıcı", desc: "Satıcı'nın platformu üzerinden hizmet talep eden ve bu hizmetlerin bedelini ödeyen tüketici." },
-          { term: "Platform", desc: "Satıcı tarafından işletilen ve Alıcıların hizmet sağlayıcılarından hizmet satın almasını sağlayan dijital platform." },
+          { term: "Satıcı", desc: "BSG EVCİL HAYVAN BAKIM DIŞ TİCARET PAZARLAMA VE SANAYİ LİMİTED ŞİRKETİ, dijital rezervasyon ve organizasyon hizmeti sunmaktadır." },
+          { term: "Alıcı", desc: "Satıcı'dan dijital rezervasyon ve organizasyon hizmeti satın alan tüketici." },
+          { term: "Hizmet", desc: "Petfendy tarafından sunulan dijital rezervasyon ve organizasyon hizmeti." },
         ]
       },
       {
         num: 3,
         title: "Madde 3 - Konu",
-        text: "İşbu sözleşme, Alıcı'nın Satıcı'ya ait platform üzerinden hizmet sağlayıcılardan satın alabileceği hizmetlere ilişkin tarafların hak ve yükümlülüklerini düzenler."
+        text: "İşbu sözleşme, Alıcı'nın Satıcı'dan satın aldığı dijital rezervasyon ve organizasyon hizmetine ilişkin tarafların hak ve yükümlülüklerini düzenler."
       },
       {
         num: 4,
         title: "Madde 4 - Sözleşme Konusu Hizmetin Özellikleri ve Bedeli",
-        text: "Alıcı, platform üzerinden seçmiş olduğu hizmetin detayları, fiyatı, koşulları ve hizmet sağlayıcısına ilişkin bilgileri satın alma işleminden önce incelemekle yükümlüdür."
+        text: "Alıcı, satın almış olduğu dijital rezervasyon ve organizasyon hizmetinin detayları, fiyatı ve koşullarını satın alma işleminden önce incelemekle yükümlüdür."
       },
       {
         num: 5,
         title: "Madde 5 - Ödeme ve İade Koşulları",
         items: [
-          "Alıcı, platformda belirtilen hizmet bedelini online ödeme yöntemleriyle gerçekleştirecektir.",
-          "Alıcı'nın cayma hakkını kullanması durumunda, ödeme iade süreci 14 iş günü içinde tamamlanacaktır.",
-          "Hizmetin sağlayıcı tarafından ifa edilmemesi durumunda, iade süreci Satıcı'nın değerlendirmesi sonrasında yürütülecektir."
+          "Alıcı, dijital rezervasyon ve organizasyon hizmeti bedelini online ödeme yöntemleriyle gerçekleştirecektir.",
+          "Hizmet başlamadan 24 saat öncesine kadar ücretsiz iptal hakkı bulunmaktadır.",
+          "Hizmet başladıktan sonra iade talepleri değerlendirilmeyecektir."
         ]
       },
       {
@@ -59,8 +59,8 @@ const content = {
         num: 7,
         title: "Madde 7 - Satıcı'nın Yükümlülükleri",
         items: [
-          "Satıcı, platformda yer alan bilgilerin doğru, eksiksiz ve güncel olmasını sağlamakla yükümlüdür.",
-          "Satıcı, hizmet sağlayıcılar ile Alıcılar arasında aracılık yapmaktadır."
+          "Satıcı, dijital rezervasyon ve organizasyon hizmetini kendi adına sunmaktadır.",
+          "Satıcı, hizmet kalitesinden ve müşteri memnuniyetinden sorumludur."
         ]
       },
       {

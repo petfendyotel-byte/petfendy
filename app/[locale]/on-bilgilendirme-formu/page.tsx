@@ -30,7 +30,7 @@ const content = {
         icon: "credit",
         title: "Ödeme Bilgileri",
         items: [
-          { label: "Ödeme Yöntemi", value: "Kredi Kartı / Banka Kartı (PayTR altyapısı)" },
+          { label: "Ödeme Yöntemi", value: "Kredi Kartı / Banka Kartı (İyzico altyapısı)" },
           { label: "Taksit Seçenekleri", value: "Banka kartlarına göre değişkenlik gösterir" },
           { label: "Fatura", value: "Elektronik fatura e-posta adresinize gönderilir" },
         ]
@@ -72,7 +72,7 @@ const content = {
         icon: "credit",
         title: "Payment Information",
         items: [
-          { label: "Payment Method", value: "Credit Card / Debit Card (PayTR infrastructure)" },
+          { label: "Payment Method", value: "Credit Card / Debit Card (İyzico infrastructure)" },
           { label: "Installment Options", value: "Varies according to bank cards" },
           { label: "Invoice", value: "Electronic invoice is sent to your email address" },
         ]
