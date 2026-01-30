@@ -195,7 +195,7 @@ export interface AboutPage {
   updatedAt: Date
 }
 
-export type PaymentProvider = "paytr" | "paratika"
+export type PaymentProvider = "iyzico"
 
 export interface PaymentGateway {
   id: string
@@ -203,31 +203,16 @@ export interface PaymentGateway {
   name: string
   isActive: boolean
   isDefault: boolean
-  config: PayTRConfig | ParatikaConfig
+  config: IyzicoConfig
   createdAt: Date
   updatedAt: Date
 }
 
-export interface PayTRConfig {
-  merchantId: string
-  merchantKey: string // Encrypted
-  merchantSalt: string // Encrypted
+export interface IyzicoConfig {
+  apiKey: string
+  secretKey: string // Encrypted
   testMode: boolean
-  successUrl: string
-  failUrl: string
-  timeoutLimit: number // seconds
-  maxInstallment: number
-  currency: "TL" | "USD" | "EUR"
-}
-
-export interface ParatikaConfig {
-  merchantId: string
-  merchantKey: string // Encrypted
-  apiKey: string // Encrypted
-  testMode: boolean
-  successUrl: string
-  failUrl: string
-  currency: "TRY" | "USD" | "EUR"
+  currency: "TRY"
 }
 
 // CMS Page Management

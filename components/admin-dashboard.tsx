@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { AdminDashboardMobile } from "./admin-dashboard-mobile"
 import { useIsMobile } from "@/hooks/use-mobile"
 import Image from "next/image"
-import type { Order, HotelRoom, TaxiService, TaxiVehicle, RoomPricing, AboutPage, PaymentGateway, PayTRConfig, ParatikaConfig } from "@/lib/types"
+import type { Order, HotelRoom, TaxiService, TaxiVehicle, RoomPricing, AboutPage, PaymentGateway, IyzicoConfig } from "@/lib/types"
 import { mockHotelRooms, mockTaxiServices } from "@/lib/mock-data"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -223,31 +223,19 @@ export function AdminDashboard() {
   }
 
   const [newGateway, setNewGateway] = useState<{
-    provider: "paytr" | "paratika"
+    provider: "iyzico"
     name: string
     testMode: boolean
-    merchantId: string
-    merchantKey: string
-    merchantSalt: string
     apiKey: string
-    successUrl: string
-    failUrl: string
-    timeoutLimit: number
-    maxInstallment: number
+    secretKey: string
     currency: string
   }>({
-    provider: "paytr",
+    provider: "iyzico",
     name: "",
     testMode: true,
-    merchantId: "",
-    merchantKey: "",
-    merchantSalt: "",
     apiKey: "",
-    successUrl: "",
-    failUrl: "",
-    timeoutLimit: 30,
-    maxInstallment: 12,
-    currency: "TL"
+    secretKey: "",
+    currency: "TRY"
   })
 
   // API Functions for Pages
@@ -1148,24 +1136,6 @@ export function AdminDashboard() {
 
   const handleAddPaymentGateway = () => {
     // Validation
-    const credentials = {
-      merchantId: newGateway.merchantId,
-      merchantKey: newGateway.merchantKey,
-      merchantSalt: newGateway.merchantSalt,
-      apiKey: newGateway.apiKey
-    }
-
-    const validation = validatePaymentCredentials(newGateway.provider, credentials)
-
-    if (!validation.valid) {
-      toast({
-        title: "Hata",
-        description: validation.errors.join(', '),
-        variant: "destructive"
-      })
-      return
-    }
-
     if (!newGateway.name || newGateway.name.length < 3) {
       toast({
         title: "Hata",
@@ -1175,51 +1145,32 @@ export function AdminDashboard() {
       return
     }
 
-    // Sanitize URLs
-    const successUrl = sanitizePaymentUrl(newGateway.successUrl)
-    const failUrl = sanitizePaymentUrl(newGateway.failUrl)
-
-    if (!successUrl || !failUrl) {
+    if (!newGateway.apiKey || newGateway.apiKey.length < 10) {
       toast({
         title: "Hata",
-        description: "Geçerli URL adresleri giriniz",
+        description: "İyzico API Key gereklidir",
         variant: "destructive"
       })
       return
     }
 
-    // Encrypt sensitive data
-    const encryptedMerchantKey = encryptPaymentCredential(newGateway.merchantKey)
-    const encryptedMerchantSalt = encryptPaymentCredential(newGateway.merchantSalt)
-    const encryptedApiKey = encryptPaymentCredential(newGateway.apiKey)
+    if (!newGateway.secretKey || newGateway.secretKey.length < 10) {
+      toast({
+        title: "Hata",
+        description: "İyzico Secret Key gereklidir",
+        variant: "destructive"
+      })
+      return
+    }
 
     // If this is the first gateway, make it default
     const isFirstGateway = paymentGateways.length === 0
 
-    let config: PayTRConfig | ParatikaConfig
-
-    if (newGateway.provider === "paytr") {
-      config = {
-        merchantId: newGateway.merchantId,
-        merchantKey: encryptedMerchantKey,
-        merchantSalt: encryptedMerchantSalt,
-        testMode: newGateway.testMode,
-        successUrl,
-        failUrl,
-        timeoutLimit: newGateway.timeoutLimit,
-        maxInstallment: newGateway.maxInstallment,
-        currency: newGateway.currency as "TL" | "USD" | "EUR"
-      }
-    } else {
-      config = {
-        merchantId: newGateway.merchantId,
-        merchantKey: encryptedMerchantKey,
-        apiKey: encryptedApiKey,
-        testMode: newGateway.testMode,
-        successUrl,
-        failUrl,
-        currency: newGateway.currency === "TL" ? "TRY" : newGateway.currency as "USD" | "EUR"
-      }
+    const config: IyzicoConfig = {
+      apiKey: newGateway.apiKey,
+      secretKey: newGateway.secretKey,
+      testMode: newGateway.testMode,
+      currency: newGateway.currency as "TRY"
     }
 
     const gateway: PaymentGateway = {
@@ -1235,18 +1186,12 @@ export function AdminDashboard() {
 
     savePaymentGateways([...paymentGateways, gateway])
     setNewGateway({
-      provider: "paytr",
+      provider: "iyzico",
       name: "",
       testMode: true,
-      merchantId: "",
-      merchantKey: "",
-      merchantSalt: "",
       apiKey: "",
-      successUrl: "",
-      failUrl: "",
-      timeoutLimit: 30,
-      maxInstallment: 12,
-      currency: "TL"
+      secretKey: "",
+      currency: "TRY"
     })
     setShowAddGateway(false)
 
@@ -3498,7 +3443,7 @@ export function AdminDashboard() {
                     Sanal Pos Yönetimi
                   </CardTitle>
                   <CardDescription>
-                    PayTR veya Paratika sanal pos ayarlarınızı yönetin
+                    İyzico sanal pos ayarlarınızı yönetin
                   </CardDescription>
                 </div>
                 <Button onClick={() => setShowAddGateway(!showAddGateway)} className="gap-2">
@@ -3520,21 +3465,20 @@ export function AdminDashboard() {
                         <label className="text-sm font-medium">Pos Sağlayıcı *</label>
                         <Select
                           value={newGateway.provider}
-                          onValueChange={(v) => setNewGateway({ ...newGateway, provider: v as "paytr" | "paratika" })}
+                          onValueChange={(v) => setNewGateway({ ...newGateway, provider: v as "iyzico" })}
                         >
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="paytr">PayTR</SelectItem>
-                            <SelectItem value="paratika">Paratika</SelectItem>
+                            <SelectItem value="iyzico">İyzico</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Pos Adı *</label>
                         <Input
-                          placeholder="Örn: Ana PayTR Pos"
+                          placeholder="Örn: Ana İyzico Pos"
                           value={newGateway.name}
                           onChange={(e) => setNewGateway({ ...newGateway, name: e.target.value })}
                         />
@@ -3544,12 +3488,25 @@ export function AdminDashboard() {
                     <div className="space-y-2">
                       <label className="text-sm font-medium flex items-center gap-2">
                         <Lock className="w-4 h-4" />
-                        Merchant ID *
+                        İyzico API Key *
                       </label>
                       <Input
-                        placeholder={newGateway.provider === "paytr" ? "PayTR Merchant ID" : "Paratika Merchant ID"}
-                        value={newGateway.merchantId}
-                        onChange={(e) => setNewGateway({ ...newGateway, merchantId: e.target.value })}
+                        placeholder="İyzico API Key"
+                        value={newGateway.apiKey}
+                        onChange={(e) => setNewGateway({ ...newGateway, apiKey: e.target.value })}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium flex items-center gap-2">
+                        <Lock className="w-4 h-4" />
+                        İyzico Secret Key *
+                      </label>
+                      <Input
+                        type="password"
+                        placeholder="İyzico Secret Key"
+                        value={newGateway.secretKey}
+                        onChange={(e) => setNewGateway({ ...newGateway, secretKey: e.target.value })}
                       />
                     </div>
 

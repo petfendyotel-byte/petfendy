@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { processPayment } from "@/lib/payment-service-secure"
+import { processIyzicoPayment } from "@/lib/iyzico-service"
 import { validateCardNumber, validateCVV } from "@/lib/encryption"
 import { CreditCard, Lock, User, Building2 } from "lucide-react"
 import type { CartItem } from "@/lib/types"
@@ -244,7 +244,7 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
         throw new Error("Geçersiz kart numarası uzunluğu")
       }
 
-      const paymentResult = await processPayment(sanitizedPaymentData)
+      const paymentResult = await processIyzicoPayment(sanitizedPaymentData)
 
       if (paymentResult.success) {
         setSuccess(true)
@@ -291,8 +291,8 @@ export function PaymentModal({ isOpen, onClose, onSuccess, cartItems, totalAmoun
         {/* Test Card Info */}
         <Alert className="border-blue-200 bg-blue-50 py-2">
           <AlertDescription className="text-blue-800 text-xs sm:text-sm">
-            <strong>Test Kartı (PayTR):</strong><br />
-            Kart: 4242 4242 4242 4242<br />
+            <strong>Test Kartı (İyzico):</strong><br />
+            Kart: 5528 7900 0000 0004<br />
             Tarih: 12/30 | CVV: 123
           </AlertDescription>
         </Alert>
