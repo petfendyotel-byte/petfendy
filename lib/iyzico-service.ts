@@ -306,8 +306,6 @@ export async function processIyzicoPayment(paymentData: {
   }
 }
 
-export const iyzicoService = new IyzicoService()
-
 // Environment'tan otomatik yapılandırma kontrolü
 export function validateIyzicoConfig(): boolean {
   const requiredEnvVars = [
