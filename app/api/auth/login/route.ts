@@ -8,7 +8,7 @@ import bcrypt from 'bcryptjs'
 const loginSchema = {
   email: { required: true, type: 'email' },
   password: { required: true, type: 'string', minLength: 1 },
-  recaptchaToken: { required: true, type: 'string' }
+  recaptchaToken: { required: false, type: 'string' } // Optional for backward compatibility
 }
 
 export async function POST(request: NextRequest) {
@@ -33,32 +33,35 @@ export async function POST(request: NextRequest) {
 
     const { email, password, recaptchaToken } = validation.data!
 
-    // Verify reCAPTCHA
-    const recaptchaResponse = await fetch(`${process.env.NEXTAUTH_URL || 'https://petfendy.com'}/api/verify-recaptcha`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        token: recaptchaToken,
-        action: 'login',
-        minScore: 0.5
-      })
-    })
+    // Verify reCAPTCHA (only if token provided and reCAPTCHA is configured)
+    if (recaptchaToken && process.env.RECAPTCHA_SECRET_KEY) {
+      try {
+        const recaptchaResponse = await fetch(`${process.env.NEXTAUTH_URL || 'https://petfendy.com'}/api/verify-recaptcha`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            token: recaptchaToken,
+            action: 'login',
+            minScore: 0.5
+          })
+        })
 
-    if (!recaptchaResponse.ok) {
-      logSecurityEvent({
-        type: 'RECAPTCHA_FAILED',
-        details: { email, action: 'login' }
-      })
-      return NextResponse.json({ 
-        error: 'Güvenlik doğrulaması başarısız' 
-      }, { status: 400 })
-    }
-
-    const recaptchaResult = await recaptchaResponse.json()
-    if (!recaptchaResult.success) {
-      return NextResponse.json({ 
-        error: 'Güvenlik doğrulaması başarısız' 
-      }, { status: 400 })
+        if (recaptchaResponse.ok) {
+          const recaptchaResult = await recaptchaResponse.json()
+          if (!recaptchaResult.success) {
+            logSecurityEvent({
+              type: 'RECAPTCHA_FAILED',
+              details: { email, action: 'login', score: recaptchaResult.score }
+            })
+            return NextResponse.json({ 
+              error: 'Güvenlik doğrulaması başarısız. Lütfen tekrar deneyin.' 
+            }, { status: 400 })
+          }
+        }
+      } catch (recaptchaError) {
+        console.error('reCAPTCHA verification error:', recaptchaError)
+        // Continue with login if reCAPTCHA fails (don't block users)
+      }
     }
 
     // Sanitize email
