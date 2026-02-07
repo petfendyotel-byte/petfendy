@@ -74,9 +74,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error('Geçerli bir email adresi giriniz')
       }
 
-      // Get reCAPTCHA token (this should be passed from the login form)
-      // For now, we'll skip reCAPTCHA in the context and handle it in the form
-      const recaptchaToken = (window as any).lastRecaptchaToken || ''
+      // Get reCAPTCHA token if available (optional)
+      const recaptchaToken = (window as any).lastRecaptchaToken || undefined
 
       // Call login API
       const response = await fetch('/api/auth/login', {
@@ -87,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({
           email,
           password,
-          recaptchaToken
+          ...(recaptchaToken && { recaptchaToken }) // Only include if available
         })
       })
 
@@ -154,8 +153,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error('Şifre en az bir büyük harf, bir küçük harf ve bir rakam içermelidir')
       }
 
-      // Get reCAPTCHA token (this should be passed from the register form)
-      const recaptchaToken = (window as any).lastRecaptchaToken || ''
+      // Get reCAPTCHA token if available (optional)
+      const recaptchaToken = (window as any).lastRecaptchaToken || undefined
 
       // Call register API
       const response = await fetch('/api/auth/register', {
@@ -168,7 +167,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           password,
           name,
           phone,
-          recaptchaToken
+          ...(recaptchaToken && { recaptchaToken }) // Only include if available
         })
       })
 
