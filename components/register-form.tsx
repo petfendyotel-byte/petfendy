@@ -77,15 +77,19 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
 
     setIsLoading(true)
     try {
-      // Execute reCAPTCHA
-      const recaptchaToken = await executeRecaptcha('register')
-      if (!recaptchaToken) {
-        setErrors({ submit: "Güvenlik doğrulaması başarısız. Lütfen tekrar deneyin." })
-        return
+      // Execute reCAPTCHA if available (optional)
+      if (isLoaded) {
+        try {
+          const recaptchaToken = await executeRecaptcha('register')
+          if (recaptchaToken) {
+            // Store token globally for auth context to use
+            ;(window as any).lastRecaptchaToken = recaptchaToken
+          }
+        } catch (recaptchaError) {
+          console.warn('reCAPTCHA execution failed, continuing without it:', recaptchaError)
+          // Continue without reCAPTCHA - don't block user
+        }
       }
-
-      // Store token globally for auth context to use
-      ;(window as any).lastRecaptchaToken = recaptchaToken
 
       // Generate verification code
       const verificationCode = Math.floor(100000 + Math.random() * 900000).toString()
@@ -291,7 +295,7 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
             {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading || !isLoaded}>
+          <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? (
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -304,12 +308,6 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
               </div>
             )}
           </Button>
-
-          {!isLoaded && (
-            <div className="text-xs text-muted-foreground text-center">
-              Güvenlik doğrulaması yükleniyor...
-            </div>
-          )}
         </form>
       </CardContent>
     </Card>

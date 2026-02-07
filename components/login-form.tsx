@@ -40,32 +40,31 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
 
     setIsLoading(true)
     try {
-      // Execute reCAPTCHA with production keys
+      // Execute reCAPTCHA if available (optional)
       if (isLoaded) {
-        const recaptchaToken = await executeRecaptcha('login')
-        
-        if (!recaptchaToken) {
-          setError("Güvenlik doğrulaması başarısız. Lütfen sayfayı yenileyin ve tekrar deneyin.")
-          return
-        }
-
-        // Store token globally for auth context to use
-        ;(window as any).lastRecaptchaToken = recaptchaToken
-
-        await login(sanitizedEmail, password)
-        onSuccess?.()
-        
-        // Check if user has items in cart and redirect to cart
-        if (typeof window !== 'undefined') {
-          const cart = localStorage.getItem('petfendy_cart')
-          if (cart && JSON.parse(cart).length > 0) {
-            // User will be redirected to cart tab automatically by parent component
-            console.log('User has items in cart, will be redirected to cart')
+        try {
+          const recaptchaToken = await executeRecaptcha('login')
+          if (recaptchaToken) {
+            // Store token globally for auth context to use
+            ;(window as any).lastRecaptchaToken = recaptchaToken
           }
+        } catch (recaptchaError) {
+          console.warn('reCAPTCHA execution failed, continuing without it:', recaptchaError)
+          // Continue without reCAPTCHA - don't block user
         }
-      } else {
-        setError("Güvenlik doğrulaması yüklenemedi. Lütfen sayfayı yenileyin.")
-        return
+      }
+
+      // Proceed with login regardless of reCAPTCHA status
+      await login(sanitizedEmail, password)
+      onSuccess?.()
+      
+      // Check if user has items in cart and redirect to cart
+      if (typeof window !== 'undefined') {
+        const cart = localStorage.getItem('petfendy_cart')
+        if (cart && JSON.parse(cart).length > 0) {
+          // User will be redirected to cart tab automatically by parent component
+          console.log('User has items in cart, will be redirected to cart')
+        }
       }
     } catch (err: any) {
       // Show the actual error message from auth context
@@ -122,7 +121,7 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
             />
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading || !isLoaded}>
+          <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? (
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -135,12 +134,6 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
               </div>
             )}
           </Button>
-
-          {!isLoaded && (
-            <div className="text-xs text-muted-foreground text-center">
-              Güvenlik doğrulaması yükleniyor...
-            </div>
-          )}
         </form>
       </CardContent>
     </Card>
