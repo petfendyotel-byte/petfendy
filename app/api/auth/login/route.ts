@@ -69,8 +69,10 @@ export async function POST(request: NextRequest) {
 
     // Find user in database
     let user = null
+    let prisma = null
+    
     try {
-      const prisma = (await import('@/lib/prisma')).default
+      prisma = (await import('@/lib/prisma')).default
       user = await prisma.user.findUnique({
         where: { email: sanitizedEmail }
       })
@@ -170,11 +172,18 @@ export async function POST(request: NextRequest) {
     // Generate JWT tokens
     const tokens = await jwtService.generateTokenPair(user.id, user.role)
 
-    // Update last login time
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { updatedAt: new Date() }
-    })
+    // Update last login time (only if prisma is available)
+    if (prisma) {
+      try {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { updatedAt: new Date() }
+        })
+      } catch (updateError) {
+        console.error('Failed to update last login time:', updateError)
+        // Don't fail login if update fails
+      }
+    }
 
     // Log successful login
     logSecurityEvent({
