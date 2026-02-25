@@ -4,11 +4,11 @@ import { useParams } from "next/navigation"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { Card, CardContent } from "@/components/ui/card"
-import { 
-  Shield, 
-  Lock, 
-  CreditCard, 
-  CheckCircle, 
+import {
+  Shield,
+  Lock,
+  CreditCard,
+  CheckCircle,
   AlertTriangle,
   Eye,
   Server,
@@ -16,7 +16,9 @@ import {
   Globe,
   FileText,
   Phone,
-  Mail
+  Mail,
+  Clock,
+  Building2
 } from "lucide-react"
 
 const content = {
@@ -24,6 +26,18 @@ const content = {
     title: "ÖDEME GÜVENLİĞİ",
     subtitle: "Petfendy olarak ödeme güvenliğinizi en üst düzeyde tutmak için endüstri standardı güvenlik önlemleri alıyoruz.",
     
+    businessModel: {
+      title: "Petfendy Ödeme Sistemi",
+      subtitle: "Doğrudan Hizmet Sağlayıcı",
+      description: "Petfendy, kendi bünyesinde pet otel, pet kreş ve pet taksi hizmetleri sunan doğrudan hizmet sağlayıcısıdır. Tüm ödemeler, Petfendy'nin kendi tesislerinde sunduğu hizmetler için alınmaktadır.",
+      services: [
+        "Pet Otel - Konaklama hizmetleri için rezervasyon ödemeleri",
+        "Pet Kreş - Gündüz bakım hizmetleri için rezervasyon ödemeleri",
+        "Pet Taksi - Ulaşım hizmetleri için rezervasyon ödemeleri"
+      ],
+      note: "Petfendy bir aracı platform değildir. Tüm hizmetler doğrudan Petfendy tarafından sunulmakta ve ödemeler Petfendy tarafından tahsil edilmektedir."
+    },
+
     iyzicoSection: {
       title: "İyzico Güvenli Ödeme Altyapısı",
       description: "Tüm ödemeleriniz İyzico'nun PCI-DSS sertifikalı güvenli altyapısı üzerinden işlenmektedir.",
@@ -152,6 +166,18 @@ const content = {
     title: "PAYMENT SECURITY",
     subtitle: "At Petfendy, we implement industry-standard security measures to keep your payment security at the highest level.",
     
+    businessModel: {
+      title: "Petfendy Payment System",
+      subtitle: "Direct Service Provider",
+      description: "Petfendy is a direct service provider offering pet hotel, pet daycare, and pet taxi services at its own facilities. All payments are collected for services provided directly by Petfendy.",
+      services: [
+        "Pet Hotel - Reservation payments for accommodation services",
+        "Pet Daycare - Reservation payments for daycare services",
+        "Pet Taxi - Reservation payments for transportation services"
+      ],
+      note: "Petfendy is not an intermediary platform. All services are provided directly by Petfendy and payments are collected by Petfendy."
+    },
+
     iyzicoSection: {
       title: "İyzico Secure Payment Infrastructure",
       description: "All your payments are processed through İyzico's PCI-DSS certified secure infrastructure.",
@@ -315,7 +341,37 @@ export default function PaymentSecurityPage() {
       </section>
 
       <div className="max-w-6xl mx-auto px-4 py-12 space-y-12">
-        
+
+        {/* Business Model Section */}
+        <Card className="border-0 shadow-xl bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200">
+          <CardContent className="p-8">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-14 h-14 bg-emerald-600 rounded-xl flex items-center justify-center">
+                <Building2 className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-emerald-600 mb-1">{t.businessModel.subtitle}</p>
+                <h2 className="text-2xl font-bold text-gray-900">{t.businessModel.title}</h2>
+              </div>
+            </div>
+            <p className="text-gray-700 mb-6 text-lg">{t.businessModel.description}</p>
+            <div className="grid md:grid-cols-3 gap-4 mb-6">
+              {t.businessModel.services.map((service, index) => (
+                <div key={index} className="flex items-start gap-3 p-4 bg-white rounded-lg shadow-sm">
+                  <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700 text-sm">{service}</span>
+                </div>
+              ))}
+            </div>
+            <div className="p-4 bg-emerald-100 rounded-lg border border-emerald-200">
+              <p className="text-emerald-800 font-medium text-sm flex items-center gap-2">
+                <Shield className="w-4 h-4" />
+                {t.businessModel.note}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* İyzico Section */}
         <Card className="border-0 shadow-lg">
           <CardContent className="p-8">

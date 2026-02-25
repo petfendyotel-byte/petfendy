@@ -19,6 +19,7 @@ const content = {
         content: [
           "Bu şartlar ve koşullar, Petfendy platformunun kullanımını düzenler.",
           "Platform, BSG EVCİL HAYVAN BAKIM DIŞ TİCARET PAZARLAMA VE SANAYİ LİMİTED ŞİRKETİ tarafından işletilmektedir.",
+          "Petfendy, kendi bünyesinde pet otel, pet kreş ve pet taksi hizmetleri sunan doğrudan hizmet sağlayıcısıdır. Petfendy bir aracı platform değildir.",
           "Platformu kullanarak bu şartları kabul etmiş sayılırsınız.",
           "Şartlar değiştirildiğinde, güncel versiyon web sitesinde yayınlanacaktır."
         ]
@@ -28,10 +29,10 @@ const content = {
         title: "Tanımlar",
         definitions: [
           { term: "Platform", desc: "Petfendy web sitesi ve mobil uygulaması" },
-          { term: "Kullanıcı", desc: "Platformu kullanan pet sahipleri ve hizmet sağlayıcıları" },
-          { term: "Hizmet Sağlayıcı", desc: "Pet otel, taksi ve diğer hizmetleri sunan işletmeler" },
-          { term: "Pet Sahibi", desc: "Evcil hayvan sahibi olan ve hizmet talep eden kişiler" },
-          { term: "Rezervasyon", desc: "Platform üzerinden yapılan hizmet talepleri" },
+          { term: "Petfendy", desc: "Kendi bünyesinde pet otel, pet kreş ve pet taksi hizmetleri sunan doğrudan hizmet sağlayıcısı işletme" },
+          { term: "Kullanıcı/Pet Sahibi", desc: "Petfendy'nin sunduğu hizmetlerden faydalanan evcil hayvan sahipleri" },
+          { term: "Hizmetler", desc: "Petfendy'nin kendi tesislerinde sunduğu pet otel, pet kreş ve pet taksi hizmetleri" },
+          { term: "Rezervasyon", desc: "Petfendy'nin hizmetleri için platform üzerinden yapılan talepler" },
           { term: "İçerik", desc: "Platform üzerindeki tüm metin, görsel, video ve diğer materyaller" }
         ]
       },
@@ -66,18 +67,20 @@ const content = {
         title: "Hizmet Koşulları",
         subsections: [
           {
-            title: "Pet Otel Hizmetleri",
+            title: "Pet Otel ve Kreş Hizmetleri",
             items: [
+              "Petfendy kendi bünyesinde pet otel ve kreş hizmetleri sunmaktadır",
               "Rezervasyon onay süreci 24 saat içinde tamamlanır",
-              "Pet sağlık durumu ön muayenede kontrol edilir",
+              "Pet sağlık durumu tesise kabul öncesi kontrol edilir",
               "Aşı kartı ve sağlık belgesi zorunludur",
-              "Hizmet sağlayıcının kurallarına uyum gereklidir",
-              "Zarar durumunda sorumluluk hizmet sağlayıcıya aittir"
+              "Petfendy tesis kurallarına uyum gereklidir",
+              "Evcil hayvanların güvenliği Petfendy sorumluluğundadır"
             ]
           },
           {
             title: "Pet Taksi Hizmetleri",
             items: [
+              "Petfendy kendi bünyesinde pet taksi hizmeti sunmaktadır",
               "Rezervasyon en az 2 saat önceden yapılmalıdır",
               "Pet güvenliği için taşıma kafesi gerekebilir",
               "Mesafe hesaplaması Google Maps API ile yapılır",
@@ -101,10 +104,11 @@ const content = {
       },
       {
         id: 7,
-        title: "Sorumluluk Sınırlaması",
+        title: "Sorumluluk ve Hizmet Güvencesi",
         content: [
-          "Petfendy aracılık hizmeti sunar, doğrudan hizmet sağlayıcısı değildir",
-          "Hizmet kalitesinden hizmet sağlayıcı sorumludur",
+          "Petfendy, kendi bünyesinde pet otel, pet kreş ve pet taksi hizmetleri sunan doğrudan hizmet sağlayıcısıdır",
+          "Sunulan tüm hizmetlerin kalitesinden Petfendy sorumludur",
+          "Evcil hayvanların güvenliği ve sağlığı öncelikli sorumluluğumuzdur",
           "Platform kesintilerinden dolayı sorumluluk sınırlıdır",
           "Kullanıcı verileri güvenliği için azami özen gösterilir",
           "Mücbir sebeplerden dolayı sorumluluk kabul edilmez",
@@ -197,6 +201,7 @@ const content = {
         content: [
           "These terms and conditions govern the use of the Petfendy platform.",
           "The platform is operated by BSG PET CARE FOREIGN TRADE MARKETING AND INDUSTRY LIMITED COMPANY.",
+          "Petfendy is a direct service provider offering pet hotel, pet daycare, and pet taxi services at its own facilities. Petfendy is not an intermediary platform.",
           "By using the platform, you are deemed to have accepted these terms.",
           "When terms are changed, the current version will be published on the website."
         ]
@@ -206,10 +211,10 @@ const content = {
         title: "Definitions",
         definitions: [
           { term: "Platform", desc: "Petfendy website and mobile application" },
-          { term: "User", desc: "Pet owners and service providers using the platform" },
-          { term: "Service Provider", desc: "Businesses offering pet hotel, taxi and other services" },
-          { term: "Pet Owner", desc: "Persons who own pets and request services" },
-          { term: "Reservation", desc: "Service requests made through the platform" },
+          { term: "Petfendy", desc: "A direct service provider operating its own pet hotel, pet daycare, and pet taxi services" },
+          { term: "User/Pet Owner", desc: "Pet owners who benefit from the services provided by Petfendy" },
+          { term: "Services", desc: "Pet hotel, pet daycare, and pet taxi services provided by Petfendy at its own facilities" },
+          { term: "Reservation", desc: "Requests made through the platform for Petfendy's services" },
           { term: "Content", desc: "All text, images, videos and other materials on the platform" }
         ]
       },
@@ -244,18 +249,20 @@ const content = {
         title: "Service Conditions",
         subsections: [
           {
-            title: "Pet Hotel Services",
+            title: "Pet Hotel and Daycare Services",
             items: [
+              "Petfendy provides pet hotel and daycare services at its own facilities",
               "Reservation approval process is completed within 24 hours",
-              "Pet health status is checked in preliminary examination",
+              "Pet health status is checked before admission to the facility",
               "Vaccination card and health certificate are mandatory",
-              "Compliance with service provider rules is required",
-              "Service provider is responsible for damage"
+              "Compliance with Petfendy facility rules is required",
+              "Pet safety is Petfendy's responsibility"
             ]
           },
           {
             title: "Pet Taxi Services",
             items: [
+              "Petfendy provides pet taxi services with its own vehicles",
               "Reservations must be made at least 2 hours in advance",
               "Transport cage may be required for pet safety",
               "Distance calculation is made with Google Maps API",
@@ -279,10 +286,11 @@ const content = {
       },
       {
         id: 7,
-        title: "Limitation of Liability",
+        title: "Responsibility and Service Guarantee",
         content: [
-          "Petfendy provides intermediary services, not direct service provider",
-          "Service provider is responsible for service quality",
+          "Petfendy is a direct service provider offering pet hotel, pet daycare, and pet taxi services at its own facilities",
+          "Petfendy is responsible for the quality of all services provided",
+          "The safety and health of pets is our primary responsibility",
           "Liability for platform interruptions is limited",
           "Maximum care is taken for user data security",
           "No liability is accepted for force majeure",

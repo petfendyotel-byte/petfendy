@@ -76,7 +76,7 @@ const content = {
         title: "Madde 8 - Alıcı'nın Yükümlülükleri",
         items: [
           "Alıcı, platform üzerinden seçtiği hizmete ilişkin tüm bilgileri dikkatle incelemekle yükümlüdür.",
-          "Alıcı, hizmet sağlayıcıdan aldığı hizmet sırasında oluşabilecek sorunlarda Satıcı ile iletişime geçebilecektir."
+          "Alıcı, hizmet sırasında oluşabilecek sorunlarda Satıcı ile iletişime geçebilecektir."
         ]
       },
       {
@@ -116,45 +116,53 @@ const content = {
           { term: "Ministry", desc: "Ministry of Trade" },
           { term: "Law", desc: "Consumer Protection Law No. 6502" },
           { term: "Regulation", desc: "Distance Contracts Regulation" },
-          { term: "Seller", desc: "BSG PET CARE FOREIGN TRADE MARKETING AND INDUSTRY LIMITED COMPANY provides intermediary services between pet owners and service providers through the platform." },
-          { term: "Buyer", desc: "The consumer who requests services through the Seller's platform and pays for these services." },
-          { term: "Platform", desc: "The digital platform operated by the Seller that enables Buyers to purchase services from service providers." },
+          { term: "Seller", desc: "BSG PET CARE FOREIGN TRADE MARKETING AND INDUSTRY LIMITED COMPANY is a direct service provider offering digital reservation and organization services for its own pet hotel, pet daycare, and pet taxi services." },
+          { term: "Buyer", desc: "A natural or legal person who purchases digital reservation and organization services from the Seller." },
+          { term: "Service", desc: "Digital reservation and organization services provided by Petfendy for its own pet hotel, pet daycare, and pet taxi facilities." },
+          { term: "Platform", desc: "The www.petfendy.com website where the Seller offers its services." },
         ]
       },
       {
         num: 3,
         title: "Article 3 - Subject",
-        text: "This agreement regulates the rights and obligations of the parties regarding the services that the Buyer can purchase from service providers through the Seller's platform."
+        text: "This agreement regulates the rights and obligations of the parties regarding the digital reservation and organization services that the Buyer purchases from the Seller, in accordance with Consumer Protection Law No. 6502 and Electronic Commerce Regulation Law No. 6563."
       },
       {
         num: 4,
         title: "Article 4 - Features and Price of the Service",
-        text: "The Buyer is obliged to review the details, price, conditions and information about the service provider of the service selected through the platform before making a purchase."
+        text: "The Buyer is obliged to review the details, price and conditions of the digital reservation and organization service purchased before making a purchase."
       },
       {
         num: 5,
         title: "Article 5 - Payment and Refund Conditions",
         items: [
-          "The Buyer will pay the service fee specified on the platform through online payment methods.",
-          "If the Buyer exercises the right of withdrawal, the refund process will be completed within 14 business days.",
-          "If the service is not provided by the provider, the refund process will be carried out after the Seller's evaluation."
+          "The service fee is collected by the Seller through the İyzico secure payment system.",
+          "Payments can be made by credit card or debit card.",
+          "Refund processes are completed within 10-14 business days using the same payment method.",
+          "The right of withdrawal is valid for 14 days before the service begins, in accordance with Law No. 6502.",
+          "The right of withdrawal cannot be exercised once the service has commenced."
         ]
       },
       {
         num: 6,
         title: "Article 6 - Right of Withdrawal",
         items: [
-          "The Buyer may exercise the right of withdrawal within 14 days after purchasing the service without giving any reason.",
-          "If the right of withdrawal is exercised, the withdrawal notification can be made to the Seller in writing or through the relevant section on the platform.",
-          "If the right of withdrawal is exercised, the service fee will be refunded to the Buyer using the same payment method."
+          "The Buyer may exercise the right of withdrawal within 14 days from the date of conclusion of the service agreement without giving any reason, in accordance with Article 47 of Consumer Protection Law No. 6502.",
+          "The right of withdrawal can be exercised before the service begins. The right of withdrawal lapses once the service has commenced.",
+          "The withdrawal notification must be communicated to the Seller (petfendyotel@gmail.com) in writing or through a durable medium.",
+          "If the right of withdrawal is exercised, the amount paid will be refunded using the same payment method within 14 business days.",
+          "Refund processes are carried out through the İyzico payment system."
         ]
       },
       {
         num: 7,
         title: "Article 7 - Seller's Obligations",
         items: [
-          "The Seller is obliged to ensure that the information on the platform is accurate, complete and up-to-date.",
-          "The Seller acts as an intermediary between service providers and Buyers."
+          "The Seller provides digital reservation and organization services on its own behalf and for its own account.",
+          "The Seller is directly responsible for service quality and customer satisfaction.",
+          "The Seller collects service fees through the İyzico payment system.",
+          "The Seller is obliged to process refunds using the same payment method.",
+          "The Seller is responsible for fulfilling its legal obligations regarding consumer rights."
         ]
       },
       {
@@ -162,7 +170,7 @@ const content = {
         title: "Article 8 - Buyer's Obligations",
         items: [
           "The Buyer is obliged to carefully review all information regarding the service selected through the platform.",
-          "The Buyer may contact the Seller in case of problems during the service received from the service provider."
+          "The Buyer may contact the Seller in case of any problems that may arise during the service."
         ]
       },
       {
