@@ -193,6 +193,139 @@ export default function HizmetlerPage() {
         </div>
       </section>
 
+      {/* Business Model Section - NEW */}
+      <section className="py-16 px-4 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-100 rounded-full mb-6">
+              <Shield className="w-10 h-10 text-blue-600" />
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Petfendy İş Modeli
+            </h2>
+            <p className="text-xl text-blue-600 font-semibold mb-4">
+              Doğrudan Hizmet Sağlayıcı - Aracısız Profesyonel Pet Bakım
+            </p>
+            <p className="text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed">
+              Petfendy, <strong>kendi bünyesinde</strong> pet otel, pet kreş ve pet taksi hizmetleri sunan <strong>doğrudan hizmet sağlayıcı</strong> bir işletmedir. 
+              Bir marketplace veya aracı platform <strong>değiliz</strong>.
+            </p>
+          </div>
+
+          {/* Key Points */}
+          <div className="grid md:grid-cols-2 gap-6 mb-12">
+            <Card className="border-0 shadow-xl rounded-2xl bg-white">
+              <CardContent className="p-8">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <HomeIcon className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-xl text-gray-900 mb-3">Kendi Tesislerimiz</h3>
+                    <p className="text-gray-600 leading-relaxed">
+                      Ankara'da bulunan <strong>kendi tesisimizde</strong> hizmet veriyoruz. 
+                      50+ lüks oda, oyun alanları ve bakım bölümleri <strong>Petfendy'ye aittir</strong>. 
+                      Başka işletmelerin tesislerini kullanmıyoruz.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-xl rounded-2xl bg-white">
+              <CardContent className="p-8">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <PawPrint className="w-6 h-6 text-green-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-xl text-gray-900 mb-3">Kendi Personelimiz</h3>
+                    <p className="text-gray-600 leading-relaxed">
+                      Veteriner hekimler, eğitmenler, bakım uzmanları ve şoförler <strong>Petfendy bünyesinde çalışan</strong> profesyonel personellerimizdir. 
+                      Üçüncü taraf hizmet sağlayıcı <strong>bulunmamaktadır</strong>.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-xl rounded-2xl bg-white">
+              <CardContent className="p-8">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Car className="w-6 h-6 text-purple-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-xl text-gray-900 mb-3">Kendi Araç Filomuz</h3>
+                    <p className="text-gray-600 leading-relaxed">
+                      10+ araçlık <strong>kendi araç filomuz</strong> mevcut. 
+                      Tüm araçlar Petfendy'ye aittir. Pet taksi hizmeti için başka firmalardan araç kiralanmaz.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-xl rounded-2xl bg-white">
+              <CardContent className="p-8">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-6 h-6 text-orange-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-xl text-gray-900 mb-3">Doğrudan Rezervasyon</h3>
+                    <p className="text-gray-600 leading-relaxed">
+                      Müşteriler, <strong>Petfendy'nin kendi hizmetleri</strong> için doğrudan rezervasyon yapar. 
+                      Başka işletmelere aracılık yapmıyoruz. Komisyon veya aracılık ücreti <strong>yoktur</strong>.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Payment Model */}
+          <Card className="border-0 shadow-2xl rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50">
+            <CardContent className="p-8 md:p-12">
+              <div className="text-center mb-8">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                  <Shield className="w-8 h-8 text-green-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">Ödeme Modeli</h3>
+                <p className="text-lg text-gray-700 max-w-2xl mx-auto">
+                  Müşteriler, Petfendy'nin <strong>kendi hizmetleri</strong> için <strong>doğrudan Petfendy'ye</strong> ödeme yapar. 
+                  Tüm ödemeler Petfendy'ye aittir ve başka bir işletmeye aktarılmaz.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="text-center p-6 bg-white rounded-xl shadow-sm">
+                  <div className="text-4xl mb-3">1️⃣</div>
+                  <h4 className="font-bold mb-2">Rezervasyon</h4>
+                  <p className="text-sm text-gray-600">Müşteri Petfendy.com'dan rezervasyon yapar</p>
+                </div>
+                <div className="text-center p-6 bg-white rounded-xl shadow-sm">
+                  <div className="text-4xl mb-3">2️⃣</div>
+                  <h4 className="font-bold mb-2">Ödeme</h4>
+                  <p className="text-sm text-gray-600">Ödeme doğrudan Petfendy hesabına gelir</p>
+                </div>
+                <div className="text-center p-6 bg-white rounded-xl shadow-sm">
+                  <div className="text-4xl mb-3">3️⃣</div>
+                  <h4 className="font-bold mb-2">Hizmet</h4>
+                  <p className="text-sm text-gray-600">Petfendy kendi tesisinde hizmeti sunar</p>
+                </div>
+              </div>
+
+              <div className="mt-8 p-6 bg-white rounded-xl border-2 border-green-200">
+                <p className="text-center text-gray-700 font-medium">
+                  ✅ Komisyon yok &nbsp;|&nbsp; ✅ Aracılık yok &nbsp;|&nbsp; ✅ Üçüncü taraf yok
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
       {/* Why Choose Us */}
       <section className="py-16 px-4 bg-gray-50">
         <div className="max-w-6xl mx-auto">
