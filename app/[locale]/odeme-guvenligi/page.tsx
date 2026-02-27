@@ -93,7 +93,7 @@ const content = {
       title: "Kredi Kartı Güvenliği",
       description: "Kredi kartı bilgileriniz hiçbir zaman sunucularımızda saklanmaz.",
       points: [
-        "Kart bilgileri doğrudan İyzico'ya iletilir",
+        "Kart bilgileri doğrudan Sanal Pos tarafına iletilir",
         "Petfendy sunucularında kart verisi saklanmaz",
         "PCI-DSS uyumlu ödeme işlemi",
         "Tokenization ile güvenli saklama",
@@ -233,7 +233,7 @@ const content = {
       title: "Credit Card Security",
       description: "Your credit card information is never stored on our servers.",
       points: [
-        "Card details are sent directly to İyzico",
+        "Card details are sent directly to Virtual POS",
         "No card data stored on Petfendy servers",
         "PCI-DSS compliant payment processing",
         "Secure storage with tokenization",
