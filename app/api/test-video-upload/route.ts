@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isS3Configured } from '@/lib/s3'
 
+// Güvenlik: Production'da devre dışı
+const isProduction = process.env.NODE_ENV === 'production'
+
 export async function GET() {
+  if (isProduction) return NextResponse.json({ error: 'Not Found' }, { status: 404 })
   try {
     const s3Status = isS3Configured()
     

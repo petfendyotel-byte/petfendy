@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 // Email test endpoint - Mailpit bağlantısını test etmek için
+// Güvenlik: Production'da devre dışı
+const isProduction = process.env.NODE_ENV === 'production'
+const PROD_GUARD = NextResponse.json({ error: 'Not Found' }, { status: 404 })
 
 export async function GET(request: NextRequest) {
+  if (isProduction) return PROD_GUARD
   try {
     // Test email gönder
     const testEmailResponse = await fetch(`${request.nextUrl.origin}/api/send-email`, {
@@ -97,6 +101,7 @@ Bu email Mailpit üzerinden başarıyla gönderildi!
 }
 
 export async function POST(request: NextRequest) {
+  if (isProduction) return PROD_GUARD
   try {
     const { to, subject, message } = await request.json()
 

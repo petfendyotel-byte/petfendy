@@ -41,12 +41,23 @@ class JWTService {
   private refreshTokenExpiry: string = '7d' // 7 days
 
   constructor() {
-    this.accessTokenSecret = process.env.JWT_SECRET || 'fallback-secret-change-in-production'
-    this.refreshTokenSecret = process.env.JWT_REFRESH_SECRET || 'fallback-refresh-secret-change-in-production'
+    const jwtSecret = process.env.JWT_SECRET
+    const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET
 
-    if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
-      console.warn('⚠️ [JWT] Using fallback secrets. Set JWT_SECRET and JWT_REFRESH_SECRET in production!')
+    // Güvenlik: Production'da eksik veya kısa secret varsa başlatmayı engelle
+    if (process.env.NODE_ENV === 'production') {
+      if (!jwtSecret || jwtSecret.length < 32) {
+        throw new Error('[JWT] JWT_SECRET production ortamında zorunludur ve en az 32 karakter olmalıdır.')
+      }
+      if (!jwtRefreshSecret || jwtRefreshSecret.length < 32) {
+        throw new Error('[JWT] JWT_REFRESH_SECRET production ortamında zorunludur ve en az 32 karakter olmalıdır.')
+      }
+    } else if (!jwtSecret || !jwtRefreshSecret) {
+      console.warn('⚠️ [JWT] JWT_SECRET veya JWT_REFRESH_SECRET set edilmemiş. Yalnızca development modunda çalışıyor.')
     }
+
+    this.accessTokenSecret = jwtSecret || 'dev-only-fallback-not-for-production'
+    this.refreshTokenSecret = jwtRefreshSecret || 'dev-only-refresh-fallback-not-for-production'
   }
 
   /**

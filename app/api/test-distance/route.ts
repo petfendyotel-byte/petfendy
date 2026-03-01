@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+// Güvenlik: Production'da devre dışı
+const isProduction = process.env.NODE_ENV === 'production'
+const PROD_GUARD = NextResponse.json({ error: 'Not Found' }, { status: 404 })
+
 export async function GET() {
-  return NextResponse.json({ 
+  if (isProduction) return PROD_GUARD
+  return NextResponse.json({
     message: 'Distance API Test Working!',
     timestamp: new Date().toISOString()
   })
 }
 
 export async function POST(request: NextRequest) {
+  if (isProduction) return PROD_GUARD
   try {
     const body = await request.json()
     

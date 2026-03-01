@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { recaptchaService } from '@/lib/recaptcha-service'
 import { protectAPI } from '@/lib/api-waf-middleware'
 
+// Güvenlik: Test endpoint'leri production'da devre dışı
+const PROD_GUARD = NextResponse.json({ error: 'Not Found' }, { status: 404 })
+const isProduction = process.env.NODE_ENV === 'production'
+
 export async function GET() {
+  if (isProduction) return PROD_GUARD
   const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
   const secretKey = process.env.RECAPTCHA_SECRET_KEY
 
@@ -16,6 +21,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  if (isProduction) return PROD_GUARD
   // WAF Protection for test endpoint
   const protection = await protectAPI(request, {
     endpoint: 'test-recaptcha',

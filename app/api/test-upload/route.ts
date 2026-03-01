@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { isS3Configured } from '@/lib/s3'
 
 // Test endpoint for upload configuration
+// Güvenlik: Production'da devre dışı
+const isProduction = process.env.NODE_ENV === 'production'
 
 export async function GET(request: NextRequest) {
+  if (isProduction) return NextResponse.json({ error: 'Not Found' }, { status: 404 })
   try {
     // Check MinIO/S3 configuration
     const s3Configured = isS3Configured()

@@ -3,7 +3,11 @@ import { wafService } from '@/lib/waf-service'
 import { protectAPI } from '@/lib/api-waf-middleware'
 
 // WAF Test Endpoint - For testing attack detection
+// Güvenlik: Production'da devre dışı
+const isProduction = process.env.NODE_ENV === 'production'
+
 export async function GET(request: NextRequest) {
+  if (isProduction) return NextResponse.json({ error: 'Not Found' }, { status: 404 })
   // Light protection for test endpoint
   const protection = await protectAPI(request, {
     endpoint: 'waf-test',
@@ -38,6 +42,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  if (isProduction) return NextResponse.json({ error: 'Not Found' }, { status: 404 })
   // Enable WAF for POST testing
   const protection = await protectAPI(request, {
     endpoint: 'waf-test-post',
@@ -73,6 +78,7 @@ export async function POST(request: NextRequest) {
 
 // Simulate attack patterns for testing
 export async function PUT(request: NextRequest) {
+  if (isProduction) return NextResponse.json({ error: 'Not Found' }, { status: 404 })
   const { searchParams } = new URL(request.url)
   const attack = searchParams.get('attack')
 
