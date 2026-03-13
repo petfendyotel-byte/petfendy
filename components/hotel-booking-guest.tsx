@@ -29,7 +29,8 @@ export function HotelBookingGuest() {
   const params = useParams()
   const locale = (params?.locale as string) || 'tr'
   
-  const [rooms, setRooms] = useState<HotelRoom[]>(mockHotelRooms)
+    const [rooms, setRooms] = useState<HotelRoom[]>([])
+      const [roomsLoading, setRoomsLoading] = useState(true)
   const [selectedRoom, setSelectedRoom] = useState<HotelRoom | null>(null)
   const [selectedServices, setSelectedServices] = useState<string[]>([])
   const [detailRoom, setDetailRoom] = useState<HotelRoom | null>(null)
@@ -58,10 +59,9 @@ export function HotelBookingGuest() {
         const response = await fetch('/api/rooms?available=true')
         if (response.ok) {
           const data = await response.json()
-          if (data.length > 0) {
-            setRooms(data)
-            return
-          }
+          setRooms(data)
+                        setRoomsLoading(false)
+                                      return
         }
       } catch (error) {
         console.error('Failed to fetch rooms from API:', error)
@@ -76,6 +76,7 @@ export function HotelBookingGuest() {
         }
       }
     }
+          setRoomsLoading(false)
 
     fetchRooms()
 
@@ -306,7 +307,12 @@ export function HotelBookingGuest() {
             <span className="font-semibold">Oda Tipi</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {rooms.filter(r => r.available).map((room) => (
+          {roomsLoading ? (
+                        <div className="col-span-3 text-center py-8 text-muted-foreground">Odalar yükleniyor...</div>
+                                    ) : rooms.filter(r => r.available).length === 0 ? (
+                                                  <div className="col-span-3 text-center py-8 text-muted-foreground">Henüz oda eklenmemiş</div>
+                                                              ) : null}
+                                                                                      {rooms.filter(r => r.available).map((room) => (
               <div
                 key={room.id}
                 className={`relative rounded-xl cursor-pointer transition-all overflow-hidden ${
@@ -354,9 +360,8 @@ export function HotelBookingGuest() {
                   <p className="text-xs text-muted-foreground mb-2">
                     {room.type === "standard" ? "Standart" : room.type === "deluxe" ? "Deluxe" : "Suit"}
                   </p>
-                  {/* Geçici olarak fiyat gizlendi */}
-                  {/* <p className="text-xl font-bold text-orange-500">₺{room.pricePerNight}</p>
-                  <p className="text-xs text-muted-foreground">/gece</p> */}
+                  <p className="text-xl font-bold text-orange-500">₺{room.pricePerNight}</p>
+                                  <p className="text-xs text-muted-foreground">/gece</p>>
                 </div>
 
                 {/* Detail Button */}
@@ -418,8 +423,7 @@ export function HotelBookingGuest() {
                   <span className="text-xl">{service.icon}</span>
                   <span className="font-medium">{service.name}</span>
                 </div>
-                {/* Geçici olarak fiyat gizlendi */}
-                {/* <span className="text-orange-500 font-semibold">₺{service.price}</span> */}
+                <span className="text-orange-500 font-semibold">₺{service.price}</span>>
               </div>
             ))}
           </div>
@@ -480,8 +484,7 @@ export function HotelBookingGuest() {
             <div className="flex justify-between items-center mb-4">
               <div>
                 <p className="text-sm text-muted-foreground">Rezervasyon Özeti</p>
-                {/* Geçici olarak fiyat gizlendi */}
-                {/* <p className="text-3xl font-bold text-primary">₺{calculateTotal().toFixed(2)}</p> */}
+                <p className="text-3xl font-bold text-primary">₺{calculateTotal().toFixed(2)}</p>>
                 <p className="text-lg font-semibold text-primary">{selectedRoom.name}</p>
                 <p className="text-xs text-muted-foreground">
                   {calculateNights()} gece + {selectedServices.length} hizmet
