@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate JWT tokens
-    const tokens = await jwtService.generateTokenPair(user.id, user.role)
+    const tokens = jwtService.generateTokenPair(user.id, user.email, user.role.toLowerCase())
 
     // Log successful registration
     logSecurityEvent({
@@ -164,7 +164,7 @@ export async function POST(request: NextRequest) {
         email: user.email,
         phone: user.phone,
         emailVerified: user.emailVerified,
-        role: user.role
+        role: user.role.toLowerCase()
       },
       tokens
     }, { status: 201 })

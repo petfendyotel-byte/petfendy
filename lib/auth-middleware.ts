@@ -129,7 +129,7 @@ export async function authenticateRequest(request: NextRequest): Promise<AuthRes
       user: {
         userId: user.id,
         email: user.email,
-        role: user.role as 'user' | 'admin',
+        role: user.role.toLowerCase() as 'user' | 'admin',
         emailVerified: user.emailVerified
       }
     }

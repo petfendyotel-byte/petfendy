@@ -88,7 +88,7 @@ export async function applySecurityMiddleware(
           context.user = user
           context.isAuthenticated = true
           context.isEmailVerified = user.emailVerified
-          context.isAdmin = user.role === 'admin'
+          context.isAdmin = user.role.toLowerCase() === 'admin'
         }
       } catch (dbError) {
         console.error('❌ [Security] User lookup failed:', dbError)
