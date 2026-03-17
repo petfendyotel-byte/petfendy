@@ -310,15 +310,14 @@ export function AdminDashboard() {
     try {
       const response = await fetch('/api/rooms')
       if (response.ok) {
-          const data = await response.json()
-                  setRooms(Array.isArray(data) ? data : [])
-                            return
-                                    }
-                                          } catch (error) {
-                                                  console.error('Failed to fetch rooms:', error)
-                                                        }
-                                                              setRooms([])
-                                                                  }
+        const data = await response.json()
+        setRooms(Array.isArray(data) ? data : [])
+        return
+      }
+    } catch (error) {
+      console.error('Failed to fetch rooms:', error)
+      setRooms([])
+    }
   }
 
   const createRoomAPI = async (roomData: any): Promise<HotelRoom | null> => {
