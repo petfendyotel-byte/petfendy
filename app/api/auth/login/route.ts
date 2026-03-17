@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate JWT tokens
-    const tokens = await jwtService.generateTokenPair(user.id, user.role)
+    const tokens = await jwtService.generateTokenPair(user.id, user.email, user.role.toLowerCase())
 
     // Update last login time (only if prisma is available)
     if (prisma) {
@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
         email: user.email,
         phone: user.phone,
         emailVerified: user.emailVerified,
-        role: user.role
+        role: user.role.toLowerCase()
       },
       tokens
     })
