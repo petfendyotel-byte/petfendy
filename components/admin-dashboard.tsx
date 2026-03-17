@@ -19,6 +19,7 @@ import { FileUpload } from "@/components/file-upload"
 import { VideoUpload } from "@/components/video-upload"
 import { RoomEditModal } from "./room-edit-modal"
 import { sanitizeInput } from "@/lib/security"
+import { getAuthToken } from "@/lib/storage"
 import { encryptPaymentCredential, decryptPaymentCredential, maskCredential, validatePaymentCredentials, sanitizePaymentUrl } from "@/lib/encryption"
 import { 
   Plus, 
