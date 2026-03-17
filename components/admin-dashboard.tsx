@@ -259,7 +259,7 @@ export function AdminDashboard() {
     try {
       const response = await fetch('/api/pages', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getAuthToken()}` },
         body: JSON.stringify(pageData)
       })
       if (response.ok) {
@@ -277,7 +277,7 @@ export function AdminDashboard() {
     try {
       const response = await fetch(`/api/pages/${slug}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getAuthToken()}` },
         body: JSON.stringify(pageData)
       })
       if (response.ok) {
@@ -310,59 +310,22 @@ export function AdminDashboard() {
     try {
       const response = await fetch('/api/rooms')
       if (response.ok) {
-        const data = await response.json()
-        // If API returns empty array, use localStorage or mock data
-        if (Array.isArray(data) && data.length > 0) {
-          setRooms(data)
-          localStorage.setItem("petfendy_rooms", JSON.stringify(data))
-        } else {
-          // API returned empty, try localStorage first
-          const storedRooms = localStorage.getItem("petfendy_rooms")
-          if (storedRooms) {
-            const parsed = JSON.parse(storedRooms)
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              setRooms(parsed)
-              return
-            }
-          }
-          // Use mock data as last resort
-          setRooms(mockHotelRooms)
-          localStorage.setItem("petfendy_rooms", JSON.stringify(mockHotelRooms))
-        }
-      } else {
-        // API error - fallback to localStorage or mock
-        const storedRooms = localStorage.getItem("petfendy_rooms")
-        if (storedRooms) {
-          const parsed = JSON.parse(storedRooms)
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setRooms(parsed)
-            return
-          }
-        }
-        setRooms(mockHotelRooms)
-      }
-    } catch (error) {
-      console.error('Failed to fetch rooms:', error)
-      // Fallback to localStorage or mock
-      const storedRooms = localStorage.getItem("petfendy_rooms")
-      if (storedRooms) {
-        try {
-          const parsed = JSON.parse(storedRooms)
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setRooms(parsed)
-            return
-          }
-        } catch (e) {}
-      }
-      setRooms(mockHotelRooms)
-    }
+          const data = await response.json()
+                  setRooms(Array.isArray(data) ? data : [])
+                            return
+                                    }
+                                          } catch (error) {
+                                                  console.error('Failed to fetch rooms:', error)
+                                                        }
+                                                              setRooms([])
+                                                                  }
   }
 
   const createRoomAPI = async (roomData: any): Promise<HotelRoom | null> => {
     try {
       const response = await fetch('/api/rooms', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getAuthToken()}` },
         body: JSON.stringify(roomData)
       })
       if (response.ok) {
@@ -379,7 +342,7 @@ export function AdminDashboard() {
     try {
       const response = await fetch(`/api/rooms/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getAuthToken()}` },
         body: JSON.stringify(roomData)
       })
       if (response.ok) {
