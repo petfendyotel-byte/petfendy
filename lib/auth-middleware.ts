@@ -145,8 +145,8 @@ export async function authenticateRequest(request: NextRequest): Promise<AuthRes
 /**
  * Require authentication middleware with WAF protection
  */
-export function requireAuth(handler: (request: NextRequest, user: AuthenticatedUser) => Promise<NextResponse>) {
-  return async (request: NextRequest): Promise<NextResponse> => {
+export function requireAuth(handler: (request: NextRequest, user: AuthenticatedUser, context?: any) => Promise<NextResponse>) {
+  return async (request: NextRequest, context?: any): Promise<NextResponse> => {
     // WAF Protection first
     const wafProtection = await protectAPI(request, {
       endpoint: 'auth-required',
@@ -161,7 +161,7 @@ export function requireAuth(handler: (request: NextRequest, user: AuthenticatedU
     }
 
     const clientIP = getClientIP(request)
-    
+
     // Legacy API rate limiting (keeping for backward compatibility)
     if (apiRateLimiter.isLimited(clientIP)) {
       return NextResponse.json(
@@ -181,7 +181,7 @@ export function requireAuth(handler: (request: NextRequest, user: AuthenticatedU
 
     // Call the actual handler
     try {
-      return await handler(request, authResult.user)
+      return await handler(request, authResult.user, context)
     } catch (error) {
       console.error('API Handler Error:', error)
       return NextResponse.json(
@@ -195,17 +195,19 @@ export function requireAuth(handler: (request: NextRequest, user: AuthenticatedU
 /**
  * Require admin role middleware
  */
-export function requireAdmin(handler: (request: NextRequest, user: AuthenticatedUser) => Promise<NextResponse>) {
-  return requireAuth(async (request: NextRequest, user: AuthenticatedUser) => {
-    if (user.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Admin access required' },
-        { status: 403 }
-      )
-    }
-    
-    return await handler(request, user)
-  })
+export function requireAdmin(handler: (request: NextRequest, user: AuthenticatedUser, context?: any) => Promise<NextResponse>) {
+  return async (request: NextRequest, context?: any): Promise<NextResponse> => {
+    const requireAuthHandler = requireAuth(async (req: NextRequest, user: AuthenticatedUser, ctx?: any) => {
+      if (user.role !== 'admin') {
+        return NextResponse.json(
+          { error: 'Admin access required' },
+          { status: 403 }
+        )
+      }
+      return await handler(req, user, ctx)
+    })
+    return requireAuthHandler(request, context)
+  }
 }
 
 /**
