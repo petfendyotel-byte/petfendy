@@ -17,10 +17,10 @@ const bookingUpdateSchema = {
 export const GET = requireAuth(async (
   request: NextRequest,
   user,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) => {
   try {
-    const { id } = params
+    const { id } = await params
 
     // Validate ID format
     if (!id || typeof id !== 'string' || id.length < 10) {
@@ -81,10 +81,10 @@ export const GET = requireAuth(async (
 export const PUT = requireAuth(async (
   request: NextRequest,
   user,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) => {
   try {
-    const { id } = params
+    const { id } = await params
 
     // Validate ID format
     if (!id || typeof id !== 'string' || id.length < 10) {
@@ -289,10 +289,10 @@ export const PUT = requireAuth(async (
 export const DELETE = requireAuth(async (
   request: NextRequest,
   user,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) => {
   try {
-    const { id } = params
+    const { id } = await params
 
     // Validate ID format
     if (!id || typeof id !== 'string' || id.length < 10) {

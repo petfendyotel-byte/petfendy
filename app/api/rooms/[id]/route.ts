@@ -22,10 +22,10 @@ const roomUpdateSchema = {
 // GET - Tek oda getir (public endpoint)
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
 
     // Validate ID format
     if (!id || typeof id !== 'string' || id.length < 10) {
@@ -82,12 +82,12 @@ export async function GET(
 
 // PUT - Oda güncelle (Admin only)
 export const PUT = requireAdmin(async (
-  request: NextRequest, 
+  request: NextRequest,
   user,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) => {
   try {
-    const { id } = params
+    const { id } = await params
 
     // Validate ID format
     if (!id || typeof id !== 'string' || id.length < 10) {
@@ -306,10 +306,10 @@ export const PUT = requireAdmin(async (
 export const DELETE = requireAdmin(async (
   request: NextRequest,
   user,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) => {
   try {
-    const { id } = params
+    const { id } = await params
 
     // Validate ID format
     if (!id || typeof id !== 'string' || id.length < 10) {

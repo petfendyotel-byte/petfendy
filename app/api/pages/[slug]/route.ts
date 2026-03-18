@@ -22,10 +22,10 @@ const pageUpdateSchema = {
 // GET - Get single page by slug (public endpoint)
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = params
+    const { slug } = await params
 
     // Validate slug format
     if (!slug || typeof slug !== 'string' || slug.length < 2) {
@@ -63,10 +63,10 @@ export async function GET(
 export const PUT = requireAdmin(async (
   request: NextRequest,
   user,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) => {
   try {
-    const { slug } = params
+    const { slug } = await params
 
     // Validate slug format
     if (!slug || typeof slug !== 'string' || slug.length < 2) {
@@ -200,10 +200,10 @@ export const PUT = requireAdmin(async (
 export const DELETE = requireAdmin(async (
   request: NextRequest,
   user,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) => {
   try {
-    const { slug } = params
+    const { slug } = await params
 
     // Validate slug format
     if (!slug || typeof slug !== 'string' || slug.length < 2) {
