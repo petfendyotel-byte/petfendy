@@ -306,12 +306,40 @@ export function AdminDashboard() {
     }
   }
 
+  // Token yenileme yardımcısı
+  const tryRefreshToken = async (): Promise<boolean> => {
+    const refreshToken = typeof window !== 'undefined'
+      ? localStorage.getItem('petfendy_refresh_token')
+      : null
+    if (!refreshToken) return false
+    try {
+      const response = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken }),
+      })
+      if (!response.ok) return false
+      const data = await response.json()
+      const newAccessToken = data.data?.tokens?.accessToken
+      const newRefreshToken = data.data?.tokens?.refreshToken
+      if (!newAccessToken) return false
+      setAuthToken(newAccessToken)
+      if (newRefreshToken) localStorage.setItem('petfendy_refresh_token', newRefreshToken)
+      return true
+    } catch {
+      return false
+    }
+  }
+
   // API Functions for Rooms
   const fetchRooms = async () => {
     try {
-      const response = await fetch('/api/rooms')
+      const response = await fetch('/api/rooms', { cache: 'no-store' })
       if (response.ok) {
         const data = await response.json()
+        if (Array.isArray(data) && data.length > 0) {
+          console.log('fetchRooms: first room id =', data[0]?.id, '| total =', data.length)
+        }
         setRooms(Array.isArray(data) ? data : [])
         return
       }
@@ -338,7 +366,7 @@ export function AdminDashboard() {
     }
   }
 
-  const updateRoomAPI = async (id: string, roomData: any): Promise<HotelRoom | null> => {
+  const updateRoomAPI = async (id: string, roomData: any): Promise<HotelRoom | 'UNAUTHORIZED' | null> => {
     try {
       const response = await fetch(`/api/rooms/${id}`, {
         method: 'PUT',
@@ -348,6 +376,9 @@ export function AdminDashboard() {
       if (response.ok) {
         return await response.json()
       }
+      const errBody = await response.json().catch(() => ({}))
+      console.error('updateRoomAPI failed:', response.status, errBody)
+      if (response.status === 401) return 'UNAUTHORIZED'
       return null
     } catch (error) {
       console.error('Failed to update room:', error)
@@ -791,6 +822,15 @@ export function AdminDashboard() {
   }
 
   const handleUpdateRoom = async (updatedRoom: HotelRoom) => {
+    if (!updatedRoom.id) {
+      console.error('handleUpdateRoom: room id eksik!', updatedRoom)
+      toast({
+        title: "⚠️ Hata",
+        description: "Oda ID bulunamadı. Sayfayı yenileyip tekrar deneyin.",
+        variant: "destructive",
+      })
+      return
+    }
     setIsLoading(true)
 
     // Try API first
@@ -807,21 +847,59 @@ export function AdminDashboard() {
       videos: updatedRoom.videos || [],
     })
 
-    if (result) {
-      // API success - refresh rooms from API
-      await fetchRooms()
-    } else {
-      // Fallback to localStorage
-      saveRooms(rooms.map((r) => (r.id === updatedRoom.id ? updatedRoom : r)))
+    if (result === 'UNAUTHORIZED') {
+      // Token süresi dolmuş, yenilemeyi dene
+      const refreshed = await tryRefreshToken()
+      if (refreshed) {
+        // Yeni token ile tekrar dene (bir kere)
+        const retryResult = await updateRoomAPI(updatedRoom.id!, {
+          name: updatedRoom.name,
+          type: updatedRoom.type,
+          capacity: updatedRoom.capacity,
+          pricePerNight: updatedRoom.pricePerNight,
+          available: updatedRoom.available,
+          description: updatedRoom.description,
+          amenities: updatedRoom.amenities,
+          features: updatedRoom.features,
+          images: updatedRoom.images || [],
+          videos: updatedRoom.videos || [],
+        })
+        if (retryResult && retryResult !== 'UNAUTHORIZED') {
+          setRooms(prev => prev.map(r => r.id === retryResult.id ? retryResult : r))
+          toast({ title: "✅ Kaydedildi", description: `${updatedRoom.name} veritabanına kaydedildi` })
+          setEditingRoom(null)
+          setIsLoading(false)
+          return
+        }
+      }
+      toast({
+        title: "⚠️ Oturum sona erdi",
+        description: "Lütfen çıkış yapıp tekrar giriş yapın.",
+        variant: "destructive",
+      })
+      setEditingRoom(null)
+      setIsLoading(false)
+      return
     }
 
+    if (result) {
+      // API'den gelen güncel veriyi doğrudan state'e yaz
+      setRooms(prev => prev.map(r => r.id === result.id ? result : r))
+      toast({
+        title: "✅ Kaydedildi",
+        description: `${updatedRoom.name} veritabanına kaydedildi`,
+      })
+    } else {
+      // Fallback: sadece oturumda geçerli, DB'ye yazılmadı
+      saveRooms(rooms.map(r => r.id === updatedRoom.id ? updatedRoom : r))
+      toast({
+        title: "⚠️ Sunucu hatası",
+        description: "Kaydedilemedi. Lütfen tekrar deneyin.",
+        variant: "destructive",
+      })
+    }
     setEditingRoom(null)
     setIsLoading(false)
-    
-    toast({
-      title: "✅ Güncellendi",
-      description: `${updatedRoom.name} güncellendi`,
-    })
   }
 
   const handleDeleteRoom = async (roomId: string) => {
