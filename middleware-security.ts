@@ -83,12 +83,12 @@ export function securityMiddleware(request: NextRequest) {
   // Content-Security-Policy: Strict CSP for PCI-DSS compliance
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.google.com https://*.googleapis.com https://*.gstatic.com https://*.paytr.com",
+    "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.google.com https://*.googleapis.com https://*.gstatic.com https://*.googletagmanager.com https://www.googletagmanager.com https://*.paytr.com",
     "style-src 'self' 'unsafe-inline' https://*.googleapis.com",
     "img-src 'self' data: https: blob:",
     "font-src 'self' data: https://*.googleapis.com https://*.gstatic.com",
-    "connect-src 'self' https: wss:",
-    "frame-src 'self' https://*.google.com https://www.google.com https://maps.google.com https://maps.googleapis.com https://*.paytr.com https://*.openstreetmap.org https://www.openstreetmap.org",
+    "connect-src 'self' https: wss: https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net",
+    "frame-src 'self' https://*.google.com https://www.google.com https://maps.google.com https://maps.googleapis.com https://*.googletagmanager.com https://www.googletagmanager.com https://*.paytr.com https://*.openstreetmap.org https://www.openstreetmap.org",
     "frame-ancestors 'self'",
     "base-uri 'self'",
     "form-action 'self' https://*.paytr.com",
