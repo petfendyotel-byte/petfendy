@@ -349,7 +349,7 @@ export function AdminDashboard() {
     }
   }
 
-  const createRoomAPI = async (roomData: any): Promise<HotelRoom | null> => {
+  const createRoomAPI = async (roomData: any): Promise<{ room?: HotelRoom; unauthorized?: boolean; error?: string }> => {
     try {
       const response = await fetch('/api/rooms', {
         method: 'POST',
@@ -357,12 +357,16 @@ export function AdminDashboard() {
         body: JSON.stringify(roomData)
       })
       if (response.ok) {
-        return await response.json()
+        return { room: await response.json() }
       }
-      return null
+      const errBody = await response.json().catch(() => ({}))
+      console.error('createRoomAPI failed:', response.status, errBody)
+      if (response.status === 401) return { unauthorized: true }
+      const details = Array.isArray(errBody.details) ? ` (${errBody.details.join(', ')})` : ''
+      return { error: `${errBody.error || 'Sunucu hatası'}${details}` }
     } catch (error) {
       console.error('Failed to create room:', error)
-      return null
+      return { error: 'Sunucuya ulaşılamadı' }
     }
   }
 
@@ -386,13 +390,17 @@ export function AdminDashboard() {
     }
   }
 
-  const deleteRoomAPI = async (id: string): Promise<boolean> => {
+  const deleteRoomAPI = async (id: string): Promise<{ ok?: boolean; unauthorized?: boolean; error?: string }> => {
     try {
       const response = await fetch(`/api/rooms/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${getAuthToken()}` } })
-      return response.ok
+      if (response.ok) return { ok: true }
+      const errBody = await response.json().catch(() => ({}))
+      console.error('deleteRoomAPI failed:', response.status, errBody)
+      if (response.status === 401) return { unauthorized: true }
+      return { error: errBody.error || 'Sunucu hatası' }
     } catch (error) {
       console.error('Failed to delete room:', error)
-      return false
+      return { error: 'Sunucuya ulaşılamadı' }
     }
   }
 
@@ -793,21 +801,36 @@ export function AdminDashboard() {
       videos: newRoomVideos || [],
     }
 
-    // Try API first
-    const createdRoom = await createRoomAPI(roomData)
-    
-    if (createdRoom) {
-      // API success - refresh rooms from API
-      await fetchRooms()
-    } else {
-      // Fallback to localStorage
-      const room: HotelRoom = {
-        id: `room-${Date.now()}`,
-        ...roomData,
-        available: true,
+    let result = await createRoomAPI(roomData)
+
+    if (result.unauthorized) {
+      // Token süresi dolmuş olabilir, yenileyip bir kez daha dene
+      if (await tryRefreshToken()) {
+        result = await createRoomAPI(roomData)
       }
-      saveRooms([...rooms, room])
+      if (result.unauthorized) {
+        setIsLoading(false)
+        toast({
+          title: "⚠️ Oturum sona erdi",
+          description: "Lütfen çıkış yapıp tekrar giriş yapın.",
+          variant: "destructive",
+        })
+        return
+      }
     }
+
+    if (!result.room) {
+      // Hata durumunda formu koru, gerçek nedeni göster (yerel kayda düşme)
+      setIsLoading(false)
+      toast({
+        title: "⚠️ Oda eklenemedi",
+        description: result.error || "Bilinmeyen hata",
+        variant: "destructive",
+      })
+      return
+    }
+
+    await fetchRooms()
 
     setNewRoom({ name: "", type: "standard", capacity: 1, pricePerNight: 0, amenities: [], description: "", features: [] })
     setNewRoomImages([])
@@ -906,22 +929,27 @@ export function AdminDashboard() {
     const room = rooms.find(r => r.id === roomId)
     setIsLoading(true)
 
-    // Try API first
-    const success = await deleteRoomAPI(roomId)
+    let result = await deleteRoomAPI(roomId)
 
-    if (success) {
-      // API success - refresh rooms from API
-      await fetchRooms()
-    } else {
-      // Fallback to localStorage
-      saveRooms(rooms.filter((r) => r.id !== roomId))
+    if (result.unauthorized && (await tryRefreshToken())) {
+      result = await deleteRoomAPI(roomId)
     }
 
     setIsLoading(false)
-    
+
+    if (result.ok) {
+      await fetchRooms()
+      toast({
+        title: "🗑️ Silindi",
+        description: `${room?.name} silindi`,
+      })
+      return
+    }
+
     toast({
-      title: "🗑️ Silindi",
-      description: `${room?.name} silindi`,
+      title: "⚠️ Oda silinemedi",
+      description: result.unauthorized ? "Oturum sona erdi. Lütfen çıkış yapıp tekrar giriş yapın." : (result.error || "Bilinmeyen hata"),
+      variant: "destructive",
     })
   }
 
