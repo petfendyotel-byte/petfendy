@@ -44,10 +44,14 @@ export async function withWAF(
     headers[key] = value
   })
 
-  // Get request body if present
+  // Get request body if present.
+  // Dosya yüklemeleri (multipart) metin olarak taranmaz: ikili içerik rastgele
+  // saldırı kalıplarına uyup meşru yüklemeleri engelliyordu. Bu isteklerin içeriğini
+  // /api/upload kendisi doğrular (uzantı, MIME, imza, boyut).
+  const isMultipartUpload = (headers['content-type'] || '').toLowerCase().includes('multipart/form-data')
   let body = ''
   try {
-    if (request.body && method !== 'GET') {
+    if (request.body && method !== 'GET' && !isMultipartUpload) {
       const clonedRequest = request.clone()
       body = await clonedRequest.text()
     }
