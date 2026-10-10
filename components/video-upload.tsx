@@ -1,5 +1,6 @@
 "use client"
 
+import { getAuthToken } from "@/lib/storage"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -193,6 +194,7 @@ export function VideoUpload({ existingVideos, onVideosChange, maxVideos = 5 }: V
 
         const response = await fetch('/api/upload', {
           method: 'POST',
+          headers: { 'Authorization': `Bearer ${getAuthToken()}` },
           body: formData
         })
 

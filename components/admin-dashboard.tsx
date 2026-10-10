@@ -388,7 +388,7 @@ export function AdminDashboard() {
 
   const deleteRoomAPI = async (id: string): Promise<boolean> => {
     try {
-      const response = await fetch(`/api/rooms/${id}`, { method: 'DELETE' })
+      const response = await fetch(`/api/rooms/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${getAuthToken()}` } })
       return response.ok
     } catch (error) {
       console.error('Failed to delete room:', error)
