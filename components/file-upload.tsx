@@ -1,5 +1,6 @@
 "use client"
 
+import { getAuthToken } from "@/lib/storage"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -80,6 +81,7 @@ export function FileUpload({ type, existingFiles, onFilesChange, maxFiles = 10 }
         try {
           const response = await fetch('/api/upload', {
             method: 'POST',
+            headers: { 'Authorization': `Bearer ${getAuthToken()}` },
             body: formData
           })
 
@@ -147,7 +149,8 @@ export function FileUpload({ type, existingFiles, onFilesChange, maxFiles = 10 }
     // Try to delete from server
     try {
       await fetch(`/api/upload?url=${encodeURIComponent(urlToRemove)}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${getAuthToken()}` }
       })
     } catch (error) {
       console.warn('Failed to delete file from server:', error)
