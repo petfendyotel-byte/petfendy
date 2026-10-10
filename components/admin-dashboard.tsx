@@ -2094,6 +2094,7 @@ export function AdminDashboard() {
                           onClick={() => {
                             setEditingRoom(room)
                             setShowRoomEditModal(true)
+                            setTimeout(() => document.getElementById('room-edit-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
                           }}
                         >
                           <Edit className="w-3 h-3 mr-1" />
@@ -2113,7 +2114,7 @@ export function AdminDashboard() {
               </div>
 
           {editingRoom && (
-                <Card className="border-primary">
+                <Card id="room-edit-card" className="border-primary">
               <CardHeader>
                     <CardTitle>Oda Düzenle: {editingRoom.name}</CardTitle>
               </CardHeader>
