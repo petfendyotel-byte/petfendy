@@ -13,7 +13,7 @@ import { smsService } from "@/lib/sms-service"
 
 // İşletme sahibi bilgileri (env'den veya varsayılan)
 const OWNER_EMAIL = process.env.NEXT_PUBLIC_OWNER_EMAIL || "petfendyotel@gmail.com"
-const OWNER_PHONE = process.env.NEXT_PUBLIC_OWNER_PHONE || "+905551234567"
+const OWNER_PHONE = process.env.NEXT_PUBLIC_OWNER_PHONE || "+905323073264"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"

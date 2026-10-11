@@ -110,7 +110,7 @@
     "preliminaryInfo": "Preliminary Information Form",
     "cookiePolicy": "Cookie Policy",
     "workingHours": "Working Hours",
-    "hours": "Mon-Sun 08:00-20:00"
+    "hours": "Every day, 24/7 available"
   },
   "common": {
     "appName": "Petfendy",
@@ -300,7 +300,7 @@
       "phone": "Phone: +90 532 307 3264",
       "email": "Email: petfendyotel@gmail.com",
       "workingHours": "Working Hours",
-      "hours": "Monday - Sunday\n08:00 - 20:00",
+      "hours": "Every day\n24/7 available",
       "services": "Services",
       "dogTraining": "Dog Training",
       "petHotel": "Cat - Dog Hotel",
