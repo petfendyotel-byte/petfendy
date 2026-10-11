@@ -66,8 +66,7 @@ const content = {
         id: "taksi",
         title: "Pet Taksi",
         faqs: [
-          { question: "Pet taksi hizmeti nasıl çalışır?", answer: "İl ve ilçe seçimi yaparak mesafe hesaplaması yaptırabilirsiniz. VIP veya paylaşımlı taksi seçeneklerinden birini seçerek rezervasyon oluşturabilirsiniz." },
-          { question: "VIP ve Paylaşımlı taksi arasındaki fark nedir?", answer: "VIP takside evcil hayvanınız tek başına özel araçla taşınır. Paylaşımlı takside ise diğer evcil hayvanlarla birlikte daha uygun fiyata taşıma yapılır." },
+          { question: "Pet taksi hizmeti nasıl çalışır?", answer: "İl ve ilçe seçimi yaparak mesafe hesaplaması yaptırabilirsiniz. VIP taksi ile rezervasyon oluşturabilirsiniz." },
           { question: "Uzun mesafe taşıma yapıyor musunuz?", answer: "Evet, Türkiye'nin her yerine uzun mesafe pet taşıma hizmeti sunuyoruz. Ankara merkezli olarak tüm illere ulaşım sağlıyoruz." },
           { question: "Araçlarınız güvenli mi?", answer: "Tüm araçlarımız klimalı, hijyenik ve evcil hayvan taşımacılığına uygun donanıma sahiptir. Sürücülerimiz eğitimli ve deneyimlidir." }
         ]
@@ -134,8 +133,7 @@ const content = {
         id: "taksi",
         title: "Pet Taxi",
         faqs: [
-          { question: "How does the pet taxi service work?", answer: "You can calculate the distance by selecting province and district. You can create a reservation by choosing one of the VIP or shared taxi options." },
-          { question: "What is the difference between VIP and Shared taxi?", answer: "In VIP taxi, your pet is transported alone in a private vehicle. In shared taxi, transportation is done with other pets at a more affordable price." },
+          { question: "How does the pet taxi service work?", answer: "You can calculate the distance by selecting province and district. You can create a reservation with our VIP taxi." },
           { question: "Do you do long distance transportation?", answer: "Yes, we offer long distance pet transportation service to all parts of Turkey. We provide transportation to all provinces from our Ankara headquarters." },
           { question: "Are your vehicles safe?", answer: "All our vehicles are air-conditioned, hygienic and equipped for pet transportation. Our drivers are trained and experienced." }
         ]
