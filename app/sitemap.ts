@@ -9,6 +9,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const pages = [
     { path: '', priority: 1.0, changeFreq: 'daily' as const }, // Ana sayfa
     { path: 'home', priority: 0.9, changeFreq: 'daily' as const },
+    { path: 'ankara-pet-taksi', priority: 0.95, changeFreq: 'weekly' as const },
+    { path: 'ankara-pet-otel', priority: 0.95, changeFreq: 'weekly' as const },
+    { path: 'ankara-pet-kres', priority: 0.9, changeFreq: 'weekly' as const },
     { path: 'booking/hotel', priority: 0.95, changeFreq: 'daily' as const }, // Pet Otel - yüksek öncelik
     { path: 'booking/taxi', priority: 0.95, changeFreq: 'daily' as const }, // Pet Taksi - yüksek öncelik
     { path: 'booking/daycare', priority: 0.95, changeFreq: 'daily' as const }, // Pet Kreş - yüksek öncelik
