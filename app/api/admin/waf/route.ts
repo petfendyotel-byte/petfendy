@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { wafService } from '@/lib/waf-service'
 import { protectAPI } from '@/lib/api-waf-middleware'
+import { requireAdmin } from '@/lib/auth-middleware'
 
 // WAF Management API - Admin only
-export async function GET(request: NextRequest) {
+async function handleGet(request: NextRequest) {
   // Protect this admin endpoint
   const protection = await protectAPI(request, {
     endpoint: 'admin-waf',
@@ -71,7 +72,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+async function handlePost(request: NextRequest) {
   // Protect this admin endpoint
   const protection = await protectAPI(request, {
     endpoint: 'admin-waf-post',
@@ -140,3 +141,7 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+// Yalnızca yönetici (admin) rolü erişebilir
+export const GET = requireAdmin(async (request: NextRequest) => handleGet(request))
+export const POST = requireAdmin(async (request: NextRequest) => handlePost(request))

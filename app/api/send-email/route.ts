@@ -1,9 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { protectAPI } from '@/lib/api-waf-middleware'
 
 // E-posta gönderimi için API route
 // Mailpit, Resend, SMTP veya diğer servisler ile entegre edilebilir
 
 export async function POST(request: NextRequest) {
+  // Bu uç nokta giriş yapmamış ziyaretçilerin akışlarında da kullanılıyor (kayıt doğrulaması,
+  // misafir rezervasyon onayı). Kötüye kullanımı sınırlamak için IP başına hız sınırı uygulanır.
+  // WAF taraması kapalı: e-posta HTML'indeki "#", "'" gibi karakterler yanlış alarm üretir.
+  const protection = await protectAPI(request, {
+    endpoint: 'send-email',
+    maxRequests: 15,
+    windowMs: 10 * 60 * 1000,
+    enableWAF: false,
+    enableRateLimit: true
+  })
+  if (!protection.allowed) {
+    return protection.response!
+  }
+
   try {
     const { to, subject, html, text } = await request.json()
 
@@ -12,6 +27,16 @@ export async function POST(request: NextRequest) {
         { error: 'Missing required fields: to, subject, html' },
         { status: 400 }
       )
+    }
+
+    // Tek, geçerli bir alıcı; başlık enjeksiyonu ve boyut sınırları
+    if (
+      typeof to !== 'string' || typeof subject !== 'string' || typeof html !== 'string' ||
+      !/^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]+$/.test(to) || to.length > 254 ||
+      /[\r\n]/.test(subject) || subject.length > 200 ||
+      html.length > 200_000 || (text !== undefined && (typeof text !== 'string' || text.length > 100_000))
+    ) {
+      return NextResponse.json({ error: 'Invalid email payload' }, { status: 400 })
     }
 
     // 1. Resend API kullan (eğer API key varsa)
