@@ -302,7 +302,7 @@ export function TaxiBooking() {
                     setSelectedVehicle(vehicle || null)
                   }}>
                     <div className="grid gap-3">
-                      {taxiVehicles.filter(v => v.isAvailable).map((vehicle) => (
+                      {taxiVehicles.filter(v => v.isAvailable && v.type === "vip").map((vehicle) => (
                         <div key={vehicle.id} className="relative">
                           <RadioGroupItem
                             value={vehicle.id}

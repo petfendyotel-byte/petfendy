@@ -29,7 +29,7 @@ export function TaxiBookingGuest() {
   const [calculatedDistance, setCalculatedDistance] = useState<number | null>(null)
   const [calculatedPrice, setCalculatedPrice] = useState<number | null>(null)
   const [pricePerKm, setPricePerKm] = useState({ vip: 0, shared: 0 })
-  const [selectedTaxiType, setSelectedTaxiType] = useState<"vip" | "shared">("shared")
+  const [selectedTaxiType, setSelectedTaxiType] = useState<"vip" | "shared">("vip")
   const [isCalculating, setIsCalculating] = useState(false)
   
   const [petName, setPetName] = useState("")
@@ -155,14 +155,7 @@ export function TaxiBookingGuest() {
       <Card className="border-0 shadow-sm">
         <CardContent className="pt-6">
           <Label className="text-base font-semibold mb-4 block">Taksi Tipi</Label>
-          <RadioGroup value={selectedTaxiType} onValueChange={(v) => setSelectedTaxiType(v as "vip" | "shared")} className="grid grid-cols-2 gap-4">
-            <div className="relative">
-              <RadioGroupItem value="shared" id="shared" className="peer sr-only" />
-              <Label htmlFor="shared" className="flex flex-col items-center p-4 border-2 rounded-xl cursor-pointer peer-data-[state=checked]:border-blue-500 peer-data-[state=checked]:bg-blue-50 hover:bg-gray-50 transition-colors">
-                <Car className="w-8 h-8 text-blue-500 mb-2" />
-                <span className="font-semibold">Paylasimli Taksi</span>
-              </Label>
-            </div>
+          <RadioGroup value={selectedTaxiType} onValueChange={(v) => setSelectedTaxiType(v as "vip" | "shared")} className="grid grid-cols-1 gap-4">
             <div className="relative">
               <RadioGroupItem value="vip" id="vip" className="peer sr-only" />
               <Label htmlFor="vip" className="flex flex-col items-center p-4 border-2 rounded-xl cursor-pointer peer-data-[state=checked]:border-orange-500 peer-data-[state=checked]:bg-orange-50 hover:bg-gray-50 transition-colors">
