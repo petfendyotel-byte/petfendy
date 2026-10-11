@@ -179,7 +179,7 @@ export default function CheckoutSuccessPage() {
               Tel: +90 532 307 3264 | Email: petfendyotel@gmail.com
             </p>
             <p className="text-center text-xs text-gray-500 mt-2">
-              Pazartesi - Pazar: 08:00 - 20:00
+              Her gün 7/24 ulaşılabilir
             </p>
           </CardContent>
         </Card>
