@@ -1,5 +1,6 @@
 "use client"
 
+import { getAuthToken } from "@/lib/storage"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -45,7 +46,7 @@ export function WAFDashboard() {
     setError(null)
     
     try {
-      const response = await fetch('/api/admin/waf?action=stats')
+      const response = await fetch('/api/admin/waf?action=stats', { headers: { 'Authorization': `Bearer ${getAuthToken()}` } })
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`)
       }
@@ -70,7 +71,7 @@ export function WAFDashboard() {
     try {
       const response = await fetch('/api/admin/waf', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getAuthToken()}` },
         body: JSON.stringify({ action: 'block', ip: newBlockIP.trim() })
       })
 
@@ -92,7 +93,7 @@ export function WAFDashboard() {
     try {
       const response = await fetch('/api/admin/waf', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getAuthToken()}` },
         body: JSON.stringify({ action: 'unblock', ip: unblockIP.trim() })
       })
 
