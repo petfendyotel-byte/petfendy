@@ -40,13 +40,6 @@ export const metadata = {
   creator: "Petfendy - Ankara Pet Otel & Pet Taksi",
   publisher: "BSG Evcil Hayvan Bakım Ltd. Şti.",
   metadataBase: new URL('https://petfendy.com'),
-  alternates: {
-    canonical: '/',
-    languages: {
-      'tr-TR': '/tr',
-      'en-US': '/en',
-    },
-  },
   // Facebook Domain Verification
   verification: {
     facebook: 'qbbtfhzhlsy8o3ypu4m0bjz99rwnph',
