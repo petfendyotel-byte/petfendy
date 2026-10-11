@@ -49,6 +49,11 @@ export async function withWAF(
   // saldırı kalıplarına uyup meşru yüklemeleri engelliyordu. Bu isteklerin içeriğini
   // /api/upload kendisi doğrular (uzantı, MIME, imza, boyut).
   const isMultipartUpload = (headers['content-type'] || '').toLowerCase().includes('multipart/form-data')
+  if (isMultipartUpload) {
+    // Tarayıcının eklediği rastgele boundary ("----WebKitFormBoundary...") "--" içerdiği için
+    // SQL yorum kuralına (sqli-003) takılıyordu. Analiz için yalnızca medya tipi bırakılır.
+    headers['content-type'] = 'multipart/form-data'
+  }
   let body = ''
   try {
     if (request.body && method !== 'GET' && !isMultipartUpload) {
