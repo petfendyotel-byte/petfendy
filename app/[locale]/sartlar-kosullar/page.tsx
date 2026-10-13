@@ -185,7 +185,7 @@ const content = {
       description: "Şartlar ve koşullar hakkında sorularınız için:",
       email: "hukuk@petfendy.com",
       phone: "+90 532 307 32 64",
-      address: "Bağlıca, Şehit Hikmet Özer Cd. No:101 Etimesgut/Ankara"
+      address: "İstasyon Mah. Şehit Hikmet Özer Cd. No:101 Etimesgut/Ankara"
     }
   },
   
@@ -367,7 +367,7 @@ const content = {
       description: "For questions about terms and conditions:",
       email: "legal@petfendy.com",
       phone: "+90 532 307 32 64",
-      address: "Bağlıca, Şehit Hikmet Özer St. No:101 Etimesgut/Ankara, Turkey"
+      address: "İstasyon Mah. Şehit Hikmet Özer St. No:101 Etimesgut/Ankara, Turkey"
     }
   }
 }

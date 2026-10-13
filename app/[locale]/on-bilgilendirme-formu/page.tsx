@@ -16,7 +16,7 @@ const content = {
         title: "Satıcı Bilgileri",
         items: [
           { label: "Ticari Unvan", value: "BSG EVCİL HAYVAN BAKIM DIŞ TİCARET PAZARLAMA VE SANAYİ LİMİTED ŞİRKETİ" },
-          { label: "Adres", value: "Bağlıca, Şehit Hikmet Özer Cd. No:101 Etimesgut/Ankara" },
+          { label: "Adres", value: "İstasyon Mah. Şehit Hikmet Özer Cd. No:101 Etimesgut/Ankara" },
           { label: "Telefon", value: "+90 532 307 32 64" },
           { label: "E-posta", value: "petfendyotel@gmail.com" },
         ]
@@ -58,7 +58,7 @@ const content = {
         title: "Seller Information",
         items: [
           { label: "Trade Name", value: "BSG PET CARE FOREIGN TRADE MARKETING AND INDUSTRY LIMITED COMPANY" },
-          { label: "Address", value: "Bağlıca, Şehit Hikmet Özer St. No:101 Etimesgut/Ankara, Turkey" },
+          { label: "Address", value: "İstasyon Mah. Şehit Hikmet Özer St. No:101 Etimesgut/Ankara, Turkey" },
           { label: "Phone", value: "+90 532 307 32 64" },
           { label: "Email", value: "petfendyotel@gmail.com" },
         ]
