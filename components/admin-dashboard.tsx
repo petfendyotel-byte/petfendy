@@ -9,6 +9,7 @@ import { mockHotelRooms, mockTaxiServices } from "@/lib/mock-data"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { CommaListInput } from "@/components/comma-list-input"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -1992,23 +1993,17 @@ export function AdminDashboard() {
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Olanaklar (virgülle ayırın)</label>
-                      <Input
-                        value={newRoom.amenities.join(", ")}
-                        onChange={(e) => setNewRoom({ 
-                          ...newRoom, 
-                          amenities: e.target.value.split(",").map((a) => a.trim()).filter(a => a)
-                        })}
+                      <CommaListInput
+                        value={newRoom.amenities}
+                        onChange={(amenities) => setNewRoom({ ...newRoom, amenities })}
                         placeholder="Yatak, Klima, Oyuncak, Kamera, 7/24 Bakım"
                       />
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Özellikler (virgülle ayırın)</label>
-                      <Input
-                        value={newRoom.features.join(", ")}
-                        onChange={(e) => setNewRoom({ 
-                          ...newRoom, 
-                          features: e.target.value.split(",").map((f) => f.trim()).filter(f => f)
-                        })}
+                      <CommaListInput
+                        value={newRoom.features}
+                        onChange={(features) => setNewRoom({ ...newRoom, features })}
                         placeholder="Günlük temizlik, Doğal ışık, Ses yalıtımı"
                       />
                     </div>
@@ -2203,23 +2198,19 @@ export function AdminDashboard() {
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Olanaklar (virgülle ayırın)</label>
-                      <Input
-                        value={editingRoom.amenities?.join(", ") || ""}
-                        onChange={(e) => setEditingRoom({
-                          ...editingRoom,
-                          amenities: e.target.value.split(",").map((a) => a.trim()).filter(a => a)
-                        })}
+                      <CommaListInput
+                        key={editingRoom.id}
+                        value={editingRoom.amenities}
+                        onChange={(amenities) => setEditingRoom({ ...editingRoom, amenities })}
                         placeholder="Yatak, Klima, Oyuncak, Kamera, 7/24 Bakım"
                       />
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Özellikler (virgülle ayırın)</label>
-                      <Input
-                        value={editingRoom.features?.join(", ") || ""}
-                        onChange={(e) => setEditingRoom({
-                          ...editingRoom,
-                          features: e.target.value.split(",").map((f) => f.trim()).filter(f => f)
-                        })}
+                      <CommaListInput
+                        key={editingRoom.id}
+                        value={editingRoom.features}
+                        onChange={(features) => setEditingRoom({ ...editingRoom, features })}
                         placeholder="Günlük temizlik, Doğal ışık, Ses yalıtımı"
                       />
                     </div>
@@ -3252,13 +3243,10 @@ export function AdminDashboard() {
 
                 <div>
                   <label className="text-sm font-medium">Özellikler (virgülle ayırın)</label>
-                  <Input
+                  <CommaListInput
                     placeholder="Örn: Klimalı, Hayvan kafesi, Su kabı"
-                    value={newVehicle.features.join(", ")}
-                    onChange={(e) => setNewVehicle({ 
-                      ...newVehicle, 
-                      features: e.target.value.split(",").map(f => f.trim()).filter(f => f)
-                    })}
+                    value={newVehicle.features}
+                    onChange={(features) => setNewVehicle({ ...newVehicle, features })}
                   />
                 </div>
 
@@ -3370,14 +3358,10 @@ export function AdminDashboard() {
 
                 <div>
                   <label className="text-sm font-medium">Özellikler (virgülle ayırın)</label>
-                  <Input
-                    value={editingVehicle.features?.join(", ") || ""}
-                    onChange={(e) =>
-                      setEditingVehicle({
-                        ...editingVehicle,
-                        features: e.target.value.split(',').map(f => f.trim())
-                      })
-                    }
+                  <CommaListInput
+                    key={editingVehicle.id}
+                    value={editingVehicle.features}
+                    onChange={(features) => setEditingVehicle({ ...editingVehicle, features })}
                   />
                 </div>
 
