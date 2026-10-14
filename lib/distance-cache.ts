@@ -87,8 +87,9 @@ class DistanceCacheService {
     segments: DistanceSegment[] = [],
     isVipTransfer: boolean = false
   ): Promise<void> {
-    // TTL belirleme - Google API sonuçları daha uzun süre cache'lenir
-    const ttl = method === 'google' ? 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000 // 24 saat vs 7 gün
+    // TTL: Google sonuçları 24 saat. Yedek (tahmini) sonuçlar yalnızca 5 dakika tutulur; böylece Google
+    // düzeldiğinde yanlış/tahmini fiyatlar günlerce müşterilere gösterilmeye devam etmez.
+    const ttl = method === 'google' ? 24 * 60 * 60 * 1000 : 5 * 60 * 1000
     
     const cacheData: DistanceCache = {
       key,

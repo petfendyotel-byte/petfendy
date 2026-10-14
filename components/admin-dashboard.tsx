@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input"
 import { CommaListInput } from "@/components/comma-list-input"
 import { AdminGallery } from "@/components/admin-gallery"
 import { AdminBlog } from "@/components/admin-blog"
+import { authFetch as adminFetch, errorMessage as adminErrorMessage } from "@/lib/admin-fetch"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -443,6 +444,13 @@ export function AdminDashboard() {
     if (storedTaxiPrices) {
       setTaxiPrices(JSON.parse(storedTaxiPrices))
     }
+    // Km fiyatları artık veritabanında (müşteri formu da buradan okur). Kayıtlıysa o değerler kullanılır.
+    fetch("/api/settings/taxi-prices", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (data?.saved) setTaxiPrices({ vipPricePerKm: data.vipPricePerKm, sharedPricePerKm: data.sharedPricePerKm })
+      })
+      .catch(() => {})
 
     // Paylaşımlı taksi seferlerini yükle
     const storedSchedules = localStorage.getItem("petfendy_shared_taxi_schedules")
@@ -492,12 +500,27 @@ export function AdminDashboard() {
   }
 
   // Taksi km fiyatlarını kaydet
-  const saveTaxiPrices = () => {
-    localStorage.setItem("petfendy_taxi_prices", JSON.stringify(taxiPrices))
-    toast({
-      title: "✅ Fiyatlar Güncellendi",
-      description: `VIP: ₺${taxiPrices.vipPricePerKm}/km, Paylaşımlı: ₺${taxiPrices.sharedPricePerKm}/km`,
-    })
+  const saveTaxiPrices = async () => {
+    try {
+      // Veritabanına kaydedilir; müşteri formu fiyatı oradan okur (eskiden yalnızca bu tarayıcıda saklanıyordu)
+      const response = await adminFetch("/api/settings/taxi-prices", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(taxiPrices),
+      })
+      if (!response.ok) throw new Error(await adminErrorMessage(response, "Fiyatlar kaydedilemedi"))
+      localStorage.setItem("petfendy_taxi_prices", JSON.stringify(taxiPrices))
+      toast({
+        title: "✅ Fiyatlar Güncellendi",
+        description: `VIP: ₺${taxiPrices.vipPricePerKm}/km, Paylaşımlı: ₺${taxiPrices.sharedPricePerKm}/km. Müşteri formunda hemen geçerlidir.`,
+      })
+    } catch (error) {
+      toast({
+        title: "⚠️ Fiyatlar kaydedilemedi",
+        description: error instanceof Error ? error.message : "Bilinmeyen hata",
+        variant: "destructive",
+      })
+    }
   }
 
   // Paylaşımlı taksi sefer yönetimi

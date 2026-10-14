@@ -6,6 +6,7 @@
  */
 
 import { distanceCacheService, type DistanceSegment } from './distance-cache'
+import { estimateRoadKm } from './tr-provinces'
 
 interface Location {
   province: string
@@ -377,11 +378,9 @@ class DistanceCalculator {
     dropoff: Location,
     cacheKey: string
   ): DistanceCalculationResult {
-    const distancesFromAnkara = this.getDistancesFromAnkara()
-
     // Ankara çıkışlı transfer
     if (pickup.province === 'Ankara') {
-      const oneWayDistance = distancesFromAnkara[dropoff.province] || 300
+      const oneWayDistance = this.fromAnkara(dropoff.province)
       const totalDistance = oneWayDistance * 2
       const segments: DistanceSegment[] = [
         { from: 'Ankara, Turkey', to: `${dropoff.district}, ${dropoff.province}, Turkey`, distance: oneWayDistance },
@@ -401,7 +400,7 @@ class DistanceCalculator {
 
     // Ankara varışlı transfer
     if (dropoff.province === 'Ankara') {
-      const oneWayDistance = distancesFromAnkara[pickup.province] || 300
+      const oneWayDistance = this.fromAnkara(pickup.province)
       const totalDistance = oneWayDistance * 2
       const segments: DistanceSegment[] = [
         { from: `${pickup.district}, ${pickup.province}, Turkey`, to: 'Ankara, Turkey', distance: oneWayDistance },
@@ -452,26 +451,35 @@ class DistanceCalculator {
    * Fallback mesafe verilerini getirir
    */
   private getFallbackDistances(pickupProvince: string, dropoffProvince: string) {
-    const distancesFromAnkara = this.getDistancesFromAnkara()
     const interCityDistances = this.getInterCityDistances()
 
-    const ankaraToPickup = distancesFromAnkara[pickupProvince] || 300
-    const dropoffToAnkara = distancesFromAnkara[dropoffProvince] || 300
+    const ankaraToPickup = this.fromAnkara(pickupProvince)
+    const dropoffToAnkara = this.fromAnkara(dropoffProvince)
 
     let pickupToDropoff: number
     if (pickupProvince === dropoffProvince) {
       pickupToDropoff = 30 // Aynı il içi
     } else {
-      const directKey = `${pickupProvince}-${dropoffProvince}`
-      pickupToDropoff = interCityDistances[directKey] || 
+      pickupToDropoff =
+        interCityDistances[`${pickupProvince}-${dropoffProvince}`] ??
+        // 81 ilin koordinatlarından tahmini karayolu mesafesi (kuş uçuşu x 1,3)
+        estimateRoadKm(pickupProvince, dropoffProvince) ??
         Math.round(Math.sqrt(
-          Math.pow(ankaraToPickup, 2) + 
-          Math.pow(dropoffToAnkara, 2) - 
+          Math.pow(ankaraToPickup, 2) +
+          Math.pow(dropoffToAnkara, 2) -
           ankaraToPickup * dropoffToAnkara
         ))
     }
 
     return { ankaraToPickup, pickupToDropoff, dropoffToAnkara }
+  }
+
+  /**
+   * Ankara'dan bir ile tahmini mesafe: bilinen tablo, yoksa koordinat tahmini, o da yoksa 300 km.
+   * (Eskiden tabloda olmayan 60'tan fazla il sessizce 300 km sayılıyordu: Batman gibi.)
+   */
+  private fromAnkara(province: string): number {
+    return this.getDistancesFromAnkara()[province] ?? estimateRoadKm('Ankara', province) ?? 300
   }
 
   /**

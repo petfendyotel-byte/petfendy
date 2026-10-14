@@ -48,14 +48,17 @@ export function TaxiBookingGuest() {
   const [specialNotes, setSpecialNotes] = useState("")
 
   useEffect(() => {
-    const storedPrices = localStorage.getItem("petfendy_taxi_prices")
-    if (storedPrices) {
-      const prices = JSON.parse(storedPrices)
-      setPricePerKm({ vip: prices.vipPricePerKm || 15, shared: prices.sharedPricePerKm || 8 })
-    } else {
-      // Varsayilan fiyatlar
-      setPricePerKm({ vip: 15, shared: 8 })
-    }
+    // Km fiyati yonetim panelinde belirlenir ve veritabaninda saklanir; herkes ayni fiyati gorur.
+    // Varsayilan degerler yalnizca sunucuya ulasilamazsa kullanilir.
+    setPricePerKm({ vip: 15, shared: 8 })
+    fetch("/api/settings/taxi-prices", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (data && typeof data.vipPricePerKm === "number" && typeof data.sharedPricePerKm === "number") {
+          setPricePerKm({ vip: data.vipPricePerKm, shared: data.sharedPricePerKm })
+        }
+      })
+      .catch(() => {})
     const storedSchedules = localStorage.getItem("petfendy_shared_taxi_schedules")
     if (storedSchedules) {
       const schedules = JSON.parse(storedSchedules)
@@ -87,7 +90,7 @@ export function TaxiBookingGuest() {
         setCalculatedDistance(data.totalDistance)
         const kmPrice = selectedTaxiType === "vip" ? pricePerKm.vip : pricePerKm.shared
         setCalculatedPrice(data.totalDistance * kmPrice)
-        toast({ title: "Fiyat Hesaplandi", description: pickupProvince + " - " + dropoffProvince + " guzergahi icin fiyat belirlendi", duration: 3000 })
+        toast({ title: "Fiyat Hesaplandi", description: pickupProvince + " - " + dropoffProvince + " guzergahi icin fiyat belirlendi" + (data.estimated ? " (mesafe tahmini hesaplandi, kesin fiyat icin bizi arayin)" : ""), duration: 4000 })
       } else {
         toast({ title: "Hata", description: "Fiyat hesaplanamadi", variant: "destructive" })
       }
