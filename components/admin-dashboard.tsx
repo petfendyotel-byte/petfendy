@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { CommaListInput } from "@/components/comma-list-input"
+import { AdminGallery } from "@/components/admin-gallery"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -20,7 +21,7 @@ import { FileUpload } from "@/components/file-upload"
 import { VideoUpload } from "@/components/video-upload"
 import { RoomEditModal } from "./room-edit-modal"
 import { sanitizeInput } from "@/lib/security"
-import { getAuthToken } from "@/lib/storage"
+import { getAuthToken, setAuthToken } from "@/lib/storage"
 import { encryptPaymentCredential, decryptPaymentCredential, maskCredential, validatePaymentCredentials, sanitizePaymentUrl } from "@/lib/encryption"
 import { 
   Plus, 
@@ -48,7 +49,8 @@ import {
   Eye,
   EyeOff,
   CheckCircle,
-  XCircle
+  XCircle,
+  Image as ImageIcon
 } from "lucide-react"
 import * as XLSX from 'xlsx'
 import jsPDF from 'jspdf'
@@ -1656,6 +1658,10 @@ export function AdminDashboard() {
             <TabsTrigger value="pages" className="flex-shrink-0 gap-1.5 px-3 py-2.5 text-xs font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <FileText className="w-4 h-4" />
               <span>Sayfa Yönetimi</span>
+            </TabsTrigger>
+            <TabsTrigger value="gallery" className="flex-shrink-0 gap-1.5 px-3 py-2.5 text-xs font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <ImageIcon className="w-4 h-4" />
+              <span>Galeri</span>
             </TabsTrigger>
             <TabsTrigger value="about" className="flex-shrink-0 gap-1.5 px-3 py-2.5 text-xs font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <FileText className="w-4 h-4" />
@@ -4014,6 +4020,11 @@ export function AdminDashboard() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Gallery Tab */}
+        <TabsContent value="gallery" className="space-y-4">
+          <AdminGallery />
         </TabsContent>
 
         {/* About Page Tab */}

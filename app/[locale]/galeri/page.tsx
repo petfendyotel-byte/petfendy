@@ -7,7 +7,6 @@ import Image from "next/image"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { Card, CardContent } from "@/components/ui/card"
-import { getGalleryImages } from "@/lib/storage"
 import { mockGalleryImages } from "@/lib/mock-data"
 import type { GalleryImage } from "@/lib/types"
 
@@ -18,15 +17,19 @@ export default function GalleryPage() {
   const [images, setImages] = useState<GalleryImage[]>([])
 
   useEffect(() => {
-    // Try to get from localStorage first
-    let galleryImages = getGalleryImages()
-    
-    // If empty, use mock data
-    if (galleryImages.length === 0) {
-      galleryImages = mockGalleryImages
+    // Galeri veritabanından gelir (yönetim panelinden yönetilir). Ulaşılamazsa örnek resimler gösterilir.
+    let cancelled = false
+    fetch('/api/gallery', { cache: 'no-store' })
+      .then((response) => (response.ok ? response.json() : Promise.reject(new Error('gallery'))))
+      .then((data) => {
+        if (!cancelled) setImages(data.images || [])
+      })
+      .catch(() => {
+        if (!cancelled) setImages(mockGalleryImages)
+      })
+    return () => {
+      cancelled = true
     }
-    
-    setImages(galleryImages)
   }, [])
 
   return (
@@ -83,4 +86,3 @@ export default function GalleryPage() {
     </div>
   )
 }
-
