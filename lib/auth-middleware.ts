@@ -145,14 +145,19 @@ export async function authenticateRequest(request: NextRequest): Promise<AuthRes
 /**
  * Require authentication middleware with WAF protection
  */
-export function requireAuth(handler: (request: NextRequest, user: AuthenticatedUser, context?: any) => Promise<NextResponse>) {
+export function requireAuth(
+  handler: (request: NextRequest, user: AuthenticatedUser, context?: any) => Promise<NextResponse>,
+  // waf: false => istek gövdesi WAF kurallarıyla taranmaz (zengin metin içeren yönetici uç noktaları için:
+  // "Ankara'da" gibi kesme işaretleri SQL kuralına takılıyor). Giriş şartı ve hız sınırı aynen geçerlidir.
+  options: { waf?: boolean } = {}
+) {
   return async (request: NextRequest, context?: any): Promise<NextResponse> => {
     // WAF Protection first
     const wafProtection = await protectAPI(request, {
       endpoint: 'auth-required',
       maxRequests: 200,
       windowMs: 60 * 1000,
-      enableWAF: true,
+      enableWAF: options.waf !== false,
       enableRateLimit: true
     })
 
@@ -195,7 +200,10 @@ export function requireAuth(handler: (request: NextRequest, user: AuthenticatedU
 /**
  * Require admin role middleware
  */
-export function requireAdmin(handler: (request: NextRequest, user: AuthenticatedUser, context?: any) => Promise<NextResponse>) {
+export function requireAdmin(
+  handler: (request: NextRequest, user: AuthenticatedUser, context?: any) => Promise<NextResponse>,
+  options: { waf?: boolean } = {}
+) {
   return async (request: NextRequest, context?: any): Promise<NextResponse> => {
     const requireAuthHandler = requireAuth(async (req: NextRequest, user: AuthenticatedUser, ctx?: any) => {
       if (user.role !== 'admin') {
@@ -205,7 +213,7 @@ export function requireAdmin(handler: (request: NextRequest, user: Authenticated
         )
       }
       return await handler(req, user, ctx)
-    })
+    }, options)
     return requireAuthHandler(request, context)
   }
 }

@@ -208,4 +208,4 @@ export const POST = requireAdmin(async (request: NextRequest, user) => {
     
     return NextResponse.json({ error: 'Oda eklenirken hata oluştu' }, { status: 500 })
   }
-})
+}, { waf: false })

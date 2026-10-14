@@ -300,7 +300,7 @@ export const PUT = requireAdmin(async (
     
     return NextResponse.json({ error: 'Oda güncellenirken hata oluştu' }, { status: 500 })
   }
-})
+}, { waf: false })
 
 // DELETE - Oda sil (Admin only)
 export const DELETE = requireAdmin(async (

@@ -23,7 +23,7 @@ export const PATCH = requireAdmin(async (request: NextRequest, user, context?: C
     console.error('Gallery update error:', error)
     return NextResponse.json({ error: 'Resim güncellenemedi' }, { status: 500 })
   }
-})
+}, { waf: false })
 
 // DELETE - Resmi galeriden kaldır (yalnızca admin). Dosya depoda silinmez, başka yerlerde kullanılıyor olabilir.
 export const DELETE = requireAdmin(async (_request: NextRequest, user, context?: Ctx) => {
