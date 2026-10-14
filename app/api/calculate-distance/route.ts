@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { distanceCalculator } from '../../../lib/distance-calculator'
 import { distanceCacheService } from '../../../lib/distance-cache'
+import { optionalAuth } from '@/lib/auth-middleware'
 
 // Enhanced Distance Calculation API with Caching
 // Aynı rotalar için her zaman aynı mesafeyi döndürür
@@ -58,6 +59,8 @@ export async function POST(request: NextRequest) {
       success: true,
       totalDistance: result.totalDistance,
       method: result.method,
+      // true: Google kullanılamadı, mesafe 81 il koordinatlarından tahmin edildi
+      estimated: result.method === 'fallback',
       cached: result.cached,
       isVipTransfer: result.isVipTransfer,
       segments: result.segments,
@@ -89,6 +92,12 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const action = searchParams.get('action')
+
+  // Önbellek yönetimi yalnızca yönetici içindir (eskiden herkes önbelleği silebiliyordu)
+  const user = await optionalAuth(request)
+  if (user?.role !== 'admin') {
+    return NextResponse.json({ error: 'Yetkisiz' }, { status: user ? 403 : 401 })
+  }
 
   try {
     switch (action) {
