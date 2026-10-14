@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input"
 import { CommaListInput } from "@/components/comma-list-input"
 import { AdminGallery } from "@/components/admin-gallery"
+import { AdminBlog } from "@/components/admin-blog"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -1662,6 +1663,10 @@ export function AdminDashboard() {
             <TabsTrigger value="gallery" className="flex-shrink-0 gap-1.5 px-3 py-2.5 text-xs font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <ImageIcon className="w-4 h-4" />
               <span>Galeri</span>
+            </TabsTrigger>
+            <TabsTrigger value="blog" className="flex-shrink-0 gap-1.5 px-3 py-2.5 text-xs font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <FileText className="w-4 h-4" />
+              <span>Blog Yazıları</span>
             </TabsTrigger>
             <TabsTrigger value="about" className="flex-shrink-0 gap-1.5 px-3 py-2.5 text-xs font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <FileText className="w-4 h-4" />
@@ -4025,6 +4030,11 @@ export function AdminDashboard() {
         {/* Gallery Tab */}
         <TabsContent value="gallery" className="space-y-4">
           <AdminGallery />
+        </TabsContent>
+
+        {/* Blog Tab */}
+        <TabsContent value="blog" className="space-y-4">
+          <AdminBlog />
         </TabsContent>
 
         {/* About Page Tab */}

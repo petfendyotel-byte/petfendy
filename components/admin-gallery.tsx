@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "@/components/ui/use-toast"
-import { getAuthToken, setAuthToken } from "@/lib/storage"
+import { authFetch, errorMessage } from "@/lib/admin-fetch"
 import { ArrowLeft, ArrowRight, Loader2, Trash2, Upload } from "lucide-react"
 
 interface GalleryItem {
@@ -17,42 +17,6 @@ interface GalleryItem {
 
 const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"]
 const MAX_SIZE = 10 * 1024 * 1024
-
-async function refreshToken(): Promise<boolean> {
-  const refresh = typeof window !== "undefined" ? localStorage.getItem("petfendy_refresh_token") : null
-  if (!refresh) return false
-  try {
-    const response = await fetch("/api/auth/refresh", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refreshToken: refresh }),
-    })
-    if (!response.ok) return false
-    const data = await response.json()
-    const access = data.data?.tokens?.accessToken
-    if (!access) return false
-    setAuthToken(access)
-    if (data.data?.tokens?.refreshToken) localStorage.setItem("petfendy_refresh_token", data.data.tokens.refreshToken)
-    return true
-  } catch {
-    return false
-  }
-}
-
-// Giriş bilgisiyle istek atar; oturum süresi dolmuşsa (401) yenileyip bir kez tekrar dener.
-async function authFetch(url: string, init: RequestInit = {}): Promise<Response> {
-  const send = () =>
-    fetch(url, { ...init, headers: { ...(init.headers || {}), Authorization: `Bearer ${getAuthToken()}` } })
-  let response = await send()
-  if (response.status === 401 && (await refreshToken())) response = await send()
-  return response
-}
-
-async function errorMessage(response: Response, fallback: string): Promise<string> {
-  const body = await response.json().catch(() => ({}))
-  if (response.status === 401) return "Oturum sona erdi. Lütfen çıkış yapıp tekrar giriş yapın."
-  return body.error ? `${body.error}` : fallback
-}
 
 // Başlık ve açıklama kutuları; odak kutudan çıkınca (blur) iki alan birlikte kaydedilir.
 function TextFields({ item, onSave }: { item: GalleryItem; onSave: (title: string, description: string) => void }) {

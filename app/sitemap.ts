@@ -1,6 +1,10 @@
 import { MetadataRoute } from 'next'
+import { getPublishedPosts } from '@/lib/blog-db'
 
-export default function sitemap(): MetadataRoute.Sitemap {
+// Blog yazıları yönetim panelinden değişir; site haritası her istekte güncel okunur.
+export const dynamic = 'force-dynamic'
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://petfendy.com'
   const locales = ['tr', 'en']
   const lastModified = new Date()
@@ -62,13 +66,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
   })
 
   // SEO odaklı ek URL'ler - Ankara lokasyon sayfaları
+  // Not: ankara-pet-otel/taksi/kres yukarıdaki sayfa listesinde zaten var (çift kayıt olmasın).
+  // Var olmayan (404 veren) etimesgut/cankaya/kecioren sayfaları listeden çıkarıldı.
   const locationPages = [
-    'ankara-pet-otel',
-    'ankara-pet-taksi', 
-    'ankara-pet-kres',
-    'etimesgut-pet-otel',
-    'cankaya-pet-otel',
-    'kecioren-pet-otel',
+    'istanbul-pet-otel',
   ]
 
   locationPages.forEach((locationPage) => {
@@ -87,6 +88,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
       })
     })
   })
+
+  // Yayındaki blog yazıları (yönetim panelinden eklenenler dahil). Veritabanına ulaşılamazsa site haritası bozulmasın.
+  try {
+    const posts = await getPublishedPosts()
+    posts.forEach((post) => {
+      sitemapEntries.push({
+        url: `${baseUrl}/tr/blog/${post.slug}`,
+        lastModified: new Date(post.updatedAt),
+        changeFrequency: 'monthly',
+        priority: 0.6,
+      })
+    })
+  } catch (error) {
+    console.error('Sitemap blog error:', error)
+  }
 
   return sitemapEntries
 }

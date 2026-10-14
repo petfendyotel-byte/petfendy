@@ -47,7 +47,9 @@ export const POST = requireAdmin(async (request: NextRequest, user) => {
     console.error('Gallery add error:', error)
     return NextResponse.json({ error: 'Resim eklenemedi' }, { status: 500 })
   }
-})
+},
+  { waf: false }
+)
 
 // PUT - Sıralamayı kaydet (yalnızca admin). Gövde: { order: ["id1", "id2", ...] }
 export const PUT = requireAdmin(async (request: NextRequest, user) => {
