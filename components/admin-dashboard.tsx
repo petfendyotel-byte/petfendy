@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { AdminDashboardMobile } from "./admin-dashboard-mobile"
 import { useIsMobile } from "@/hooks/use-mobile"
 import Image from "next/image"
@@ -375,7 +375,11 @@ export function AdminDashboard() {
     }
   }
 
+  // Son oda güncelleme hatasının metni (ekranda gerçek nedeni göstermek için)
+  const roomUpdateError = useRef<string>("")
+
   const updateRoomAPI = async (id: string, roomData: any): Promise<HotelRoom | 'UNAUTHORIZED' | null> => {
+    roomUpdateError.current = ""
     try {
       const response = await fetch(`/api/rooms/${id}`, {
         method: 'PUT',
@@ -388,9 +392,12 @@ export function AdminDashboard() {
       const errBody = await response.json().catch(() => ({}))
       console.error('updateRoomAPI failed:', response.status, errBody)
       if (response.status === 401) return 'UNAUTHORIZED'
+      const details = Array.isArray(errBody.details) ? ` (${errBody.details.join(', ')})` : ''
+      roomUpdateError.current = `${errBody.error || 'Sunucu hatası'}${details} [${response.status}]`
       return null
     } catch (error) {
       console.error('Failed to update room:', error)
+      roomUpdateError.current = 'Sunucuya ulaşılamadı. İnternet bağlantınızı kontrol edin.'
       return null
     }
   }
@@ -921,13 +928,19 @@ export function AdminDashboard() {
           setIsLoading(false)
           return
         }
+        if (retryResult === null) {
+          // Oturum yenilendi ama kayıt başka bir nedenle reddedildi: gerçek nedeni göster
+          setIsLoading(false)
+          toast({ title: "⚠️ Oda kaydedilemedi", description: roomUpdateError.current || "Bilinmeyen hata", variant: "destructive" })
+          return
+        }
       }
+      // Form açık kalır; girdiğiniz değişiklikler kaybolmaz
       toast({
         title: "⚠️ Oturum sona erdi",
-        description: "Lütfen çıkış yapıp tekrar giriş yapın.",
+        description: "Değişiklikleriniz formda duruyor. Çıkış yapıp tekrar giriş yaptıktan sonra yeniden kaydedin.",
         variant: "destructive",
       })
-      setEditingRoom(null)
       setIsLoading(false)
       return
     }
@@ -940,14 +953,16 @@ export function AdminDashboard() {
         description: `${updatedRoom.name} veritabanına kaydedildi`,
       })
     } else {
-      // Fallback: sadece oturumda geçerli, DB'ye yazılmadı
-      saveRooms(rooms.map(r => r.id === updatedRoom.id ? updatedRoom : r))
+      // Kaydedilemedi: gerçek nedeni göster, formu açık bırak (yerel kayda düşme, yoksa sayfa yenilenince değişiklik kaybolur)
+      setIsLoading(false)
       toast({
-        title: "⚠️ Sunucu hatası",
-        description: "Kaydedilemedi. Lütfen tekrar deneyin.",
+        title: "⚠️ Oda kaydedilemedi",
+        description: roomUpdateError.current || "Bilinmeyen hata",
         variant: "destructive",
       })
+      return
     }
+
     setEditingRoom(null)
     setIsLoading(false)
   }

@@ -239,12 +239,18 @@ export const POST = requireAuth(async (request: NextRequest, user) => {
             details: { error: s3Error.message, fileName: originalName }
           })
           
-          // Fall back to local storage
+          // Üretimde yerel diske yedekleme YAPILMAZ: konteyner diski her deploy'da silinir, resim kaybolur.
+          if (process.env.NODE_ENV === 'production') {
+            throw new Error('Dosya depolama (MinIO) şu anda kullanılamıyor. Lütfen biraz sonra tekrar deneyin.')
+          }
           url = await saveToLocal(buffer, filename, isImage)
-          console.log(`💾 File saved locally: ${url}`)
+          console.log(`💾 File saved locally (development): ${url}`)
         }
       } else {
-        console.log('⚠️  MinIO not configured, using local storage')
+        if (process.env.NODE_ENV === 'production') {
+          throw new Error('Dosya depolama (MinIO) yapılandırılmamış. Yönetici ile iletişime geçin.')
+        }
+        console.log('⚠️  MinIO not configured, using local storage (development)')
         url = await saveToLocal(buffer, filename, isImage)
         console.log(`💾 File saved locally: ${url}`)
       }
