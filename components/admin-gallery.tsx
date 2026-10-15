@@ -18,6 +18,60 @@ interface GalleryItem {
 const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"]
 const MAX_SIZE = 10 * 1024 * 1024
 
+// Dış kaynaklı (ör. Unsplash) resimleri MinIO'ya kopyalar; böylece site dış bağlantılara bağımlı kalmaz.
+function MigrateImagesNotice({ onDone }: { onDone: () => void }) {
+  const [counts, setCounts] = useState<{ gallery: number; blog: number; rooms: number; total: number } | null>(null)
+  const [running, setRunning] = useState(false)
+
+  const check = useCallback(async () => {
+    try {
+      const response = await authFetch("/api/admin/migrate-images")
+      if (response.ok) setCounts(await response.json())
+    } catch {
+      // sayım yapılamazsa kutu gösterilmez
+    }
+  }, [])
+
+  useEffect(() => {
+    check()
+  }, [check])
+
+  if (!counts || counts.total === 0) return null
+
+  const run = async () => {
+    setRunning(true)
+    try {
+      const response = await authFetch("/api/admin/migrate-images", { method: "POST" })
+      if (!response.ok) throw new Error(await errorMessage(response, "Taşıma başarısız oldu"))
+      const result = await response.json()
+      const failed = (result.failed || []).length
+      toast({
+        title: failed ? "Kısmen tamamlandı" : "✅ Resimler MinIO'ya taşındı",
+        description: `${result.updated} resim taşındı${failed ? `, ${failed} resim taşınamadı` : ""}.`,
+        variant: failed ? "destructive" : "default",
+      })
+      await check()
+      onDone()
+    } catch (error) {
+      toast({ title: "Hata", description: error instanceof Error ? error.message : "Taşıma başarısız oldu", variant: "destructive" })
+    } finally {
+      setRunning(false)
+    }
+  }
+
+  return (
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm">
+      <p className="text-amber-900">
+        {counts.total} resim hâlâ dış kaynakta (galeri {counts.gallery}, blog {counts.blog}, oda {counts.rooms}). Kalıcı olması için MinIO'ya taşıyın.
+      </p>
+      <Button size="sm" onClick={run} disabled={running}>
+        {running ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+        MinIO'ya taşı
+      </Button>
+    </div>
+  )
+}
+
 // Başlık ve açıklama kutuları; odak kutudan çıkınca (blur) iki alan birlikte kaydedilir.
 function TextFields({ item, onSave }: { item: GalleryItem; onSave: (title: string, description: string) => void }) {
   const [title, setTitle] = useState(item.title ?? "")
@@ -192,6 +246,7 @@ export function AdminGallery() {
         </div>
       </CardHeader>
       <CardContent>
+        <MigrateImagesNotice onDone={load} />
         {loading ? (
           <div className="flex items-center justify-center py-12 text-muted-foreground">
             <Loader2 className="w-5 h-5 mr-2 animate-spin" /> Yükleniyor...
