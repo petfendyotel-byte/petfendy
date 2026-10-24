@@ -18,10 +18,6 @@ export function WhatsAppButton() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  const handleWhatsAppClick = () => {
-    window.open(whatsappUrl, "_blank", "noopener,noreferrer")
-  }
-
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
@@ -30,13 +26,19 @@ export function WhatsAppButton() {
     <>
       {/* WhatsApp Button - Sol Alt */}
       <Button
-        onClick={handleWhatsAppClick}
+        asChild
         size="lg"
         className="fixed bottom-6 left-6 h-14 w-14 rounded-full bg-green-500 p-0 shadow-lg transition-all hover:bg-green-600 hover:scale-110 z-50"
-        aria-label="WhatsApp ile iletişime geç"
-        title="WhatsApp ile iletişime geç"
       >
-        <MessageCircle className="h-7 w-7 text-white" />
+        <a
+          href={whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="WhatsApp ile iletişime geç"
+          title="WhatsApp ile iletişime geç"
+        >
+          <MessageCircle className="h-7 w-7 text-white" />
+        </a>
       </Button>
 
       {/* Scroll to Top Button - Sağ Alt */}

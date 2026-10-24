@@ -530,12 +530,14 @@ export default function AboutPage() {
                   {t.hotelReservation}
                 </Button>
                 <Button 
+                  asChild
                   size="lg"
                   className="bg-green-500 hover:bg-green-600 text-white font-semibold rounded-full px-8"
-                  onClick={() => window.open('https://wa.me/905323073264', '_blank')}
                 >
-                  <Phone className="w-5 h-5 mr-2" />
-                  {t.contactUs}
+                  <a href="https://wa.me/905323073264" target="_blank" rel="noopener noreferrer">
+                    <Phone className="w-5 h-5 mr-2" />
+                    {t.contactUs}
+                  </a>
                 </Button>
               </div>
             </CardContent>

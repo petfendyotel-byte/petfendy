@@ -83,13 +83,13 @@ export function securityMiddleware(request: NextRequest) {
   // Content-Security-Policy: Strict CSP for PCI-DSS compliance
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.google.com https://*.googleapis.com https://*.gstatic.com https://*.googletagmanager.com https://www.googletagmanager.com https://*.paytr.com",
+    "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.google.com https://*.googleapis.com https://*.gstatic.com https://*.googletagmanager.com https://www.googletagmanager.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://*.doubleclick.net https://*.clarity.ms https://*.paytr.com",
     "style-src 'self' 'unsafe-inline' https://*.googleapis.com",
     "img-src 'self' data: https: blob:",
     "media-src 'self' https: blob:",
     "font-src 'self' data: https://*.googleapis.com https://*.gstatic.com",
     "connect-src 'self' https: wss: https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net",
-    "frame-src 'self' https://*.google.com https://www.google.com https://maps.google.com https://maps.googleapis.com https://*.googletagmanager.com https://www.googletagmanager.com https://*.paytr.com https://*.openstreetmap.org https://www.openstreetmap.org https://www.youtube.com https://www.youtube-nocookie.com",
+    "frame-src 'self' https://*.google.com https://www.google.com https://maps.google.com https://maps.googleapis.com https://*.googletagmanager.com https://www.googletagmanager.com https://*.doubleclick.net https://*.paytr.com https://*.openstreetmap.org https://www.openstreetmap.org https://www.youtube.com https://www.youtube-nocookie.com",
     "frame-ancestors 'self'",
     "base-uri 'self'",
     "form-action 'self' https://*.paytr.com",
