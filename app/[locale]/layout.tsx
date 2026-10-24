@@ -43,7 +43,6 @@ export const metadata = {
   // Facebook Domain Verification
   verification: {
     facebook: 'qbbtfhzhlsy8o3ypu4m0bjz99rwnph',
-    google: 'google-site-verification-code', // Gerçek kod ile değiştirilecek
   },
   openGraph: {
     title: "Pet Otel Ankara | Pet Taksi Ankara | Pet Kreş Ankara - Petfendy",
