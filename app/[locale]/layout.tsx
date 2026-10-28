@@ -400,7 +400,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'AW-11166055599');
-gtag('config', 'G-0X56RK53K5');`}
+gtag('config', 'G-0X56RK53K5');
+document.addEventListener('click', function (e) {
+  var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+  if (!a) return;
+  var h = a.getAttribute('href') || '';
+  if (h.indexOf('wa.me') > -1 || h.indexOf('api.whatsapp.com') > -1) {
+    gtag('event', 'whatsapp_click', { link_url: h, page_path: location.pathname });
+  } else if (h.indexOf('tel:') === 0) {
+    gtag('event', 'phone_click', { link_url: h, page_path: location.pathname });
+  }
+}, true);`}
         </Script>
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`} suppressHydrationWarning>
