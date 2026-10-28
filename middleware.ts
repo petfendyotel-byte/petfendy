@@ -1,6 +1,7 @@
 import createMiddleware from 'next-intl/middleware';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { canonicalRedirectTarget, PATHNAME_HEADER } from './lib/seo';
 import { 
   securityMiddleware, 
   checkRateLimit, 
@@ -13,8 +14,51 @@ import {
 
 const intlMiddleware = createMiddleware({
   locales: ['tr', 'en'],
-  defaultLocale: 'tr'
+  defaultLocale: 'tr',
+  // Prefix is part of the canonical URL for both languages.
+  localePrefix: 'always',
+  // Unprefixed URLs always map to Turkish. Accept-Language must not send
+  // Googlebot to /en while the sitemap lists /tr.
+  localeDetection: false,
+  // hreflang, including x-default, is rendered in HTML metadata.
+  alternateLinks: false,
 });
+
+// 308 keeps the method (the permanent form of the previous 307s).
+const PERMANENT_REDIRECT = 308;
+
+function requestHost(request: NextRequest): string {
+  const forwarded = request.headers.get('x-forwarded-host');
+  const raw = (forwarded || request.headers.get('host') || request.nextUrl.host || '').split(',')[0].trim();
+  return raw;
+}
+
+function requestProtocol(request: NextRequest): string {
+  return (request.headers.get('x-forwarded-proto') || request.nextUrl.protocol || 'https').replace(/:$/, '');
+}
+
+function applySecurityHeaders(request: NextRequest, response: NextResponse) {
+  const secureResponse = securityMiddleware(request);
+  secureResponse.headers.forEach((value, key) => {
+    if (key.toLowerCase().startsWith('x-middleware-')) return;
+    response.headers.set(key, value);
+  });
+  return response;
+}
+
+function forwardRequestHeader(response: NextResponse, name: string, value: string) {
+  const overrideKey = 'x-middleware-override-headers';
+  const current = response.headers.get(overrideKey);
+  const names = new Set(
+    (current ?? '')
+      .split(',')
+      .map((part) => part.trim())
+      .filter(Boolean)
+  );
+  names.add(name);
+  response.headers.set(overrideKey, Array.from(names).join(','));
+  response.headers.set(`x-middleware-request-${name}`, value);
+}
 
 export default function middleware(request: NextRequest) {
   // 1. Security checks
@@ -82,38 +126,41 @@ export default function middleware(request: NextRequest) {
     });
   }
 
-  // 3. Handle locale redirects
+  // 3. One permanent hop to the canonical host + path.
+  // `/` → `/tr/home` (marketing homepage). `/booking/hotel` → `/tr/booking/hotel`.
+  // `/tr` itself stays: that route is the account screen, not the homepage.
   const pathname = request.nextUrl.pathname;
-  
-  // Only redirect exact root path to /tr/home
-  // Let next-intl handle other locale routing
-  if (pathname === '/') {
-    return NextResponse.redirect(new URL('/tr/home', request.url));
+  const redirectTarget = canonicalRedirectTarget({
+    host: requestHost(request),
+    protocol: requestProtocol(request),
+    pathname,
+    search: request.nextUrl.search,
+  });
+  if (redirectTarget) {
+    const redirectResponse = NextResponse.redirect(redirectTarget, PERMANENT_REDIRECT);
+    applySecurityHeaders(request, redirectResponse);
+    redirectResponse.headers.set('X-RateLimit-Remaining', rateLimit.remaining.toString());
+    return redirectResponse;
   }
 
   // 4. Apply internationalization
   const response = intlMiddleware(request);
 
-  // 4. Apply security headers
-  const secureResponse = securityMiddleware(request);
-  
-  // Merge headers from both middlewares
+  // 5. Apply security headers and expose the public pathname to metadata.
   if (response) {
-    secureResponse.headers.forEach((value, key) => {
-      response.headers.set(key, value);
-    });
-    
-    // Add rate limit info
+    applySecurityHeaders(request, response);
+    // Redirects leave the app; only successful responses need the pathname for metadata.
+    if (!response.headers.get('location')) {
+      forwardRequestHeader(response, PATHNAME_HEADER, pathname);
+    }
     response.headers.set('X-RateLimit-Remaining', rateLimit.remaining.toString());
-    
     return response;
   }
 
-  return secureResponse;
+  return applySecurityHeaders(request, NextResponse.next());
 }
 
 export const config = {
   // Match all routes except static files and api
   matcher: ['/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.svg|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.webp).*)']
 };
-
