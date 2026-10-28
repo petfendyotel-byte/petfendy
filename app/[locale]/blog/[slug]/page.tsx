@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { BlogDetailView } from "@/components/blog-detail-view"
 import { getPublishedPostBySlug, getRelatedPosts, sanitizeBlogHtml } from "@/lib/blog-db"
+import { absoluteUrl, languageAlternates, localizedPath } from "@/lib/seo"
 import { stripHtml, type BlogListItem, type BlogPostDto } from "@/lib/blog-shared"
 
 // Yazılar yönetim panelinden değişebilir; her istekte güncel içerik okunur.
@@ -25,7 +26,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
   const title = post.metaTitle || `${post.title} | Petfendy`
   const description = post.metaDescription || post.excerpt || stripHtml(post.content).slice(0, 155)
-  const path = `/${locale}/blog/${post.slug}`
+  const suffix = `blog/${post.slug}`
+  const canonical = absoluteUrl(localizedPath(locale, suffix))
   const images = post.coverImage ? [{ url: post.coverImage, alt: post.coverImageAlt || post.title }] : undefined
 
   return {
@@ -33,14 +35,17 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     description,
     keywords: post.tags.length > 0 ? post.tags : undefined,
     authors: [{ name: post.author }],
-    alternates: { canonical: path },
+    alternates: {
+      canonical,
+      languages: languageAlternates(suffix),
+    },
     openGraph: {
       type: "article",
       title,
       description,
-      url: `https://petfendy.com${path}`,
+      url: canonical,
       siteName: "Petfendy - Ankara Pet Otel",
-      locale: "tr_TR",
+      locale: locale === "en" ? "en_US" : "tr_TR",
       publishedTime: post.publishedAt ?? undefined,
       modifiedTime: post.updatedAt,
       authors: [post.author],

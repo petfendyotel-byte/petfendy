@@ -1,8 +1,20 @@
 import type React from "react"
+import type { Metadata } from "next"
 import Script from "next/script"
+import { headers } from "next/headers"
 import { NextIntlClientProvider } from 'next-intl';
 import { notFound } from 'next/navigation';
 import { Geist, Geist_Mono } from "next/font/google"
+import {
+  absoluteUrl,
+  isNoIndexPath,
+  languageAlternates,
+  localizedPath,
+  PATHNAME_HEADER,
+  pathSuffixFromPathname,
+  serializeJsonLd,
+  SITE_URL,
+} from "@/lib/seo"
 import "../globals.css"
 import { AuthProvider } from "@/components/auth-context"
 import { Toaster } from "@/components/ui/toaster"
@@ -32,72 +44,98 @@ export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
 
-export const metadata = {
-  title: "Pet Otel Ankara | Pet Taksi Ankara | Pet Kreş Ankara - Petfendy",
-  description: "Ankara'da pet otel ve pet kreş, 81 ilde pet taksi hizmeti. Kedi köpek oteli, güvenli hayvan taksi, günlük pet kreş. 7/24 profesyonel bakım. ⭐ 5 yıldızlı hizmet ⭐",
-  keywords: "pet otel ankara, pet taksi ankara, pet kreş ankara, ankara pet otel, ankara pet taksi, ankara pet kreş, hayvan oteli ankara, kedi oteli ankara, köpek oteli ankara, evcil hayvan oteli ankara, hayvan taksi ankara, pet pansiyonu ankara, hayvan pansiyonu ankara, kedi pansiyonu ankara, köpek pansiyonu ankara, pet hotel ankara, animal hotel ankara, pet boarding ankara, dog hotel ankara, cat hotel ankara, pet daycare ankara, petfendy ankara, etimesgut pet otel, ankara evcil hayvan bakım, pet kuaför ankara, köpek eğitimi ankara",
-  authors: [{ name: "Petfendy Pet Otel Ankara" }],
-  creator: "Petfendy - Ankara Pet Otel & Pet Taksi",
-  publisher: "BSG Evcil Hayvan Bakım Ltd. Şti.",
-  metadataBase: new URL('https://petfendy.com'),
-  // Facebook Domain Verification
-  verification: {
-    facebook: 'qbbtfhzhlsy8o3ypu4m0bjz99rwnph',
-  },
-  openGraph: {
-    title: "Pet Otel Ankara | Pet Taksi Ankara | Pet Kreş Ankara - Petfendy",
-    description: "Ankara'da güvenilir pet oteli ve pet kreş, 81 ilde pet taksi hizmeti. Kedi, köpek ve tüm evcil hayvanlarınız için 7/24 profesyonel bakım. Etimesgut merkezli, Ankara geneli hizmet.",
-    type: "website",
-    locale: "tr_TR",
-    alternateLocale: "en_US",
-    siteName: "Petfendy - Ankara Pet Otel",
-    url: "https://petfendy.com",
-    images: [
-      {
-        url: "/images/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Petfendy - Ankara Pet Otel, Pet Taksi ve Pet Kreş Hizmetleri",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Pet Otel Ankara | Pet Taksi Ankara | Pet Kreş Ankara - Petfendy",
-    description: "Ankara'da pet otel ve pet kreş, 81 ilde pet taksi hizmeti. 7/24 profesyonel bakım, güvenli konaklama.",
-    images: ["/images/og-image.jpg"],
-    site: "@petfendy",
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
+const defaultTitle = "Pet Otel Ankara | Pet Taksi Ankara | Pet Kreş Ankara - Petfendy"
+const defaultDescription = "Ankara'da pet otel ve pet kreş, 81 ilde pet taksi hizmeti. Kedi köpek oteli, güvenli hayvan taksi, günlük pet kreş. 7/24 profesyonel bakım. ⭐ 5 yıldızlı hizmet ⭐"
+const ogDescription = "Ankara'da güvenilir pet oteli ve pet kreş, 81 ilde pet taksi hizmeti. Kedi, köpek ve tüm evcil hayvanlarınız için 7/24 profesyonel bakım. Etimesgut merkezli, Ankara geneli hizmet."
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale: localeParam } = await params
+  const locale = localeParam === 'en' ? 'en' : 'tr'
+  const headerList = await headers()
+  const pathname = headerList.get(PATHNAME_HEADER) || `/${locale}`
+  const suffix = pathSuffixFromPathname(pathname)
+  const canonical = absoluteUrl(localizedPath(locale, suffix))
+  const noIndex = isNoIndexPath(pathname)
+
+  return {
+    title: defaultTitle,
+    description: defaultDescription,
+    keywords: "pet otel ankara, pet taksi ankara, pet kreş ankara, ankara pet otel, ankara pet taksi, ankara pet kreş, hayvan oteli ankara, kedi oteli ankara, köpek oteli ankara, evcil hayvan oteli ankara, hayvan taksi ankara, pet pansiyonu ankara, hayvan pansiyonu ankara, kedi pansiyonu ankara, köpek pansiyonu ankara, pet hotel ankara, animal hotel ankara, pet boarding ankara, dog hotel ankara, cat hotel ankara, pet daycare ankara, petfendy ankara, etimesgut pet otel, ankara evcil hayvan bakım, pet kuaför ankara, köpek eğitimi ankara",
+    authors: [{ name: "Petfendy Pet Otel Ankara" }],
+    creator: "Petfendy - Ankara Pet Otel & Pet Taksi",
+    publisher: "BSG Evcil Hayvan Bakım Ltd. Şti.",
+    metadataBase: new URL(SITE_URL),
+    verification: {
+      facebook: 'qbbtfhzhlsy8o3ypu4m0bjz99rwnph',
     },
-  },
-  category: 'pet services',
-  classification: 'Pet Hotel Ankara, Pet Taxi Ankara, Pet Daycare Ankara, Animal Care Services',
-  other: {
-    'geo.region': 'TR-06',
-    'geo.placename': 'Ankara',
-    'geo.position': '39.9334;32.8597',
-    'ICBM': '39.9334, 32.8597',
-  },
+    alternates: noIndex
+      ? { canonical }
+      : { canonical, languages: languageAlternates(suffix) },
+    openGraph: {
+      title: defaultTitle,
+      description: ogDescription,
+      type: "website",
+      locale: locale === 'en' ? 'en_US' : 'tr_TR',
+      alternateLocale: locale === 'en' ? 'tr_TR' : 'en_US',
+      siteName: "Petfendy - Ankara Pet Otel",
+      url: canonical,
+      images: [
+        {
+          url: "/images/og-image.jpg",
+          width: 1200,
+          height: 630,
+          alt: "Petfendy - Ankara Pet Otel, Pet Taksi ve Pet Kreş Hizmetleri",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: defaultTitle,
+      description: "Ankara'da pet otel ve pet kreş, 81 ilde pet taksi hizmeti. 7/24 profesyonel bakım, güvenli konaklama.",
+      images: ["/images/og-image.jpg"],
+      site: "@petfendy",
+    },
+    robots: noIndex
+      ? { index: false, follow: false, googleBot: { index: false, follow: false } }
+      : {
+          index: true,
+          follow: true,
+          googleBot: {
+            index: true,
+            follow: true,
+            'max-video-preview': -1,
+            'max-image-preview': 'large' as const,
+            'max-snippet': -1,
+          },
+        },
+    category: 'pet services',
+    classification: 'Pet Hotel Ankara, Pet Taxi Ankara, Pet Daycare Ankara, Animal Care Services',
+    other: {
+      'geo.region': 'TR-06',
+      'geo.placename': 'Ankara',
+      'geo.position': '39.9334;32.8597',
+      'ICBM': '39.9334, 32.8597',
+    },
+  }
 }
 
 // JSON-LD Structured Data for Local Business
+const BUSINESS_ID = 'https://petfendy.com/tr/home#business'
+
+// AggregateRating yalnızca Türkçe ana sayfada, tek sefer. Aynı grafiğin her
+// sayfada tekrarlanması Search Console'da "Review has multiple aggregate ratings" üretiyordu.
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'LocalBusiness',
-  '@id': 'https://petfendy.com',
+  '@id': BUSINESS_ID,
   name: 'Petfendy - Ankara Pet Otel, Pet Taksi ve Pet Kreş',
   alternateName: ['Petfendy Hayvan Oteli', 'Ankara Pet Otel', 'Ankara Pet Taksi', 'Ankara Pet Kreş'],
   description: 'Ankara\'da pet otel ve pet kreş, 81 ilde pet taksi hizmeti. Kedi köpek oteli, güvenli hayvan taksi, günlük pet kreş. Etimesgut merkezli, Ankara geneli hizmet.',
-  url: 'https://petfendy.com',
+  url: 'https://petfendy.com/tr/home',
   telephone: '+905323073264',
   email: 'petfendyotel@gmail.com',
   image: 'https://petfendy.com/images/petfendy-main-logo.png',
@@ -206,6 +244,7 @@ const jsonLd = {
   review: [
     {
       '@type': 'Review',
+      itemReviewed: { '@id': BUSINESS_ID },
       author: {
         '@type': 'Person',
         name: 'Ayşe K.',
@@ -220,6 +259,7 @@ const jsonLd = {
     },
     {
       '@type': 'Review',
+      itemReviewed: { '@id': BUSINESS_ID },
       author: {
         '@type': 'Person',
         name: 'Mehmet Y.',
@@ -272,6 +312,34 @@ export default async function LocaleLayout({
     messages = (await import(`../../i18n/messages/tr.json`)).default;
   }
 
+  const headerList = await headers()
+  const pathname = headerList.get(PATHNAME_HEADER) || `/${locale}`
+  const showBusinessRating = pathname === '/tr/home'
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: locale === 'en' ? 'Home' : 'Ana Sayfa',
+        item: absoluteUrl(localizedPath(locale, 'home')),
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Pet Otel Ankara',
+        item: absoluteUrl(localizedPath(locale, 'booking/hotel')),
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: 'Pet Taksi Ankara',
+        item: absoluteUrl(localizedPath(locale, 'booking/taxi')),
+      },
+    ],
+  }
+
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
@@ -305,80 +373,6 @@ export default async function LocaleLayout({
           rel="preconnect"
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
-        />
-        
-        {/* Structured Data */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-        
-        {/* Additional Structured Data for FAQ */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'FAQPage',
-              mainEntity: [
-                {
-                  '@type': 'Question',
-                  name: 'Ankara\'da pet otel hizmeti veriyor musunuz?',
-                  acceptedAnswer: {
-                    '@type': 'Answer',
-                    text: 'Evet, Petfendy olarak Ankara\'da kedi ve köpekler için 7/24 pet otel hizmeti veriyoruz. Etimesgut merkezli olarak Ankara geneline hizmet sunmaktayız.',
-                  },
-                },
-                {
-                  '@type': 'Question',
-                  name: 'Pet taksi hizmeti nasıl çalışıyor?',
-                  acceptedAnswer: {
-                    '@type': 'Answer',
-                    text: 'Pet taksi hizmetimiz ile evcil hayvanlarınızı güvenli araçlarımızla istediğiniz adrese ulaştırıyoruz. Ankara içi ve şehirler arası pet taksi hizmeti sunmaktayız.',
-                  },
-                },
-                {
-                  '@type': 'Question',
-                  name: 'Pet kreş hizmeti var mı?',
-                  acceptedAnswer: {
-                    '@type': 'Answer',
-                    text: 'Evet, günlük pet kreş hizmetimiz ile evcil hayvanlarınız oyun, sosyalleşme ve profesyonel bakım hizmeti alabilir.',
-                  },
-                },
-              ],
-            })
-          }}
-        />
-        
-        {/* Breadcrumb Structured Data */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'BreadcrumbList',
-              itemListElement: [
-                {
-                  '@type': 'ListItem',
-                  position: 1,
-                  name: 'Ana Sayfa',
-                  item: 'https://petfendy.com',
-                },
-                {
-                  '@type': 'ListItem',
-                  position: 2,
-                  name: 'Pet Otel Ankara',
-                  item: 'https://petfendy.com/tr/booking/hotel',
-                },
-                {
-                  '@type': 'ListItem',
-                  position: 3,
-                  name: 'Pet Taksi Ankara',
-                  item: 'https://petfendy.com/tr/booking/taxi',
-                },
-              ],
-            })
-          }}
         />
 
         {/* Google Tag Manager */}
@@ -414,6 +408,51 @@ document.addEventListener('click', function (e) {
         </Script>
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`} suppressHydrationWarning>
+        {showBusinessRating && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
+          />
+        )}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: serializeJsonLd({
+              '@context': 'https://schema.org',
+              '@type': 'FAQPage',
+              mainEntity: [
+                {
+                  '@type': 'Question',
+                  name: 'Ankara\'da pet otel hizmeti veriyor musunuz?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'Evet, Petfendy olarak Ankara\'da kedi ve köpekler için 7/24 pet otel hizmeti veriyoruz. Etimesgut merkezli olarak Ankara geneline hizmet sunmaktayız.',
+                  },
+                },
+                {
+                  '@type': 'Question',
+                  name: 'Pet taksi hizmeti nasıl çalışıyor?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'Pet taksi hizmetimiz ile evcil hayvanlarınızı güvenli araçlarımızla istediğiniz adrese ulaştırıyoruz. Ankara içi ve şehirler arası pet taksi hizmeti sunmaktayız.',
+                  },
+                },
+                {
+                  '@type': 'Question',
+                  name: 'Pet kreş hizmeti var mı?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'Evet, günlük pet kreş hizmetimiz ile evcil hayvanlarınız oyun, sosyalleşme ve profesyonel bakım hizmeti alabilir.',
+                  },
+                },
+              ],
+            }),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbLd) }}
+        />
         {/* Google Tag Manager (noscript) */}
         <noscript>
           <iframe
