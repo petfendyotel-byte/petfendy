@@ -2,6 +2,7 @@
 
 import { useRouter, useParams } from "next/navigation"
 import Image from "next/image"
+import Link from "next/link"
 import { useTranslations } from 'next-intl'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -43,17 +44,16 @@ export default function AnkaraPetOtelPage() {
               </div>
               
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
-                Ankara'nın #1 
+                Ankara Pet Otel:
                 <span className="text-gradient bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">
-                  {" "}Pet Otel{" "}
+                  {" "}Kedi Oteli ve Köpek Oteli{" "}
                 </span>
-                Hizmeti
               </h1>
               
               <p className="text-xl text-gray-600 leading-relaxed">
-                Ankara'da kedi ve köpekler için güvenli, konforlu pet otel konaklama hizmeti. 
-                7/24 profesyonel bakım, kafessiz konaklama ve uzman veteriner desteği ile 
-                evcil dostlarınız güvende.
+                Ankara pet oteli arıyorsanız Petfendy, Etimesgut'ta kedi ve köpekler için güvenli,
+                konforlu konaklama sunar. 7/24 profesyonel bakım, kafessiz konaklama ve acil
+                durumlarda veteriner desteği ile evcil dostlarınız güvende.
               </p>
 
               {/* Features */}
@@ -239,6 +239,36 @@ export default function AnkaraPetOtelPage() {
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Kedi / Köpek oteli */}
+      <section className="py-16 px-4">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <h2 className="text-3xl md:text-4xl font-bold text-center">Kedi Oteli ve Köpek Oteli</h2>
+          <p className="text-lg text-gray-700 leading-relaxed">
+            Ankara pet oteli olarak hem kedilere hem köpeklere hizmet veriyoruz. Her tür için ihtiyaçlar farklı olduğundan
+            kedi oteli ve köpek oteli sayfalarımızda konaklama, bakım ve rezervasyon bilgilerini ayrı ayrı anlattık.
+          </p>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Link
+              href={`/${locale}/ankara-kedi-oteli`}
+              className="block rounded-2xl border border-orange-200 p-6 hover:bg-orange-50"
+            >
+              <h3 className="font-bold text-xl mb-2">Ankara Kedi Oteli</h3>
+              <p className="text-gray-600">Kediniz için kafessiz, 7/24 bakımlı konaklama.</p>
+            </Link>
+            <Link
+              href={`/${locale}/ankara-kopek-oteli`}
+              className="block rounded-2xl border border-orange-200 p-6 hover:bg-orange-50"
+            >
+              <h3 className="font-bold text-xl mb-2">Ankara Köpek Oteli</h3>
+              <p className="text-gray-600">Köpeğiniz için kafessiz, 7/24 bakımlı konaklama.</p>
+            </Link>
+          </div>
+          <p className="text-gray-600 text-center">
+            Evden almamızı isterseniz <Link href={`/${locale}/ankara-pet-taksi`} className="text-orange-600 underline">Ankara pet taksi</Link> hizmetimizden de yararlanabilirsiniz.
+          </p>
         </div>
       </section>
 

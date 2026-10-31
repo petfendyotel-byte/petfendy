@@ -2,6 +2,7 @@
 
 import { useRouter, useParams } from "next/navigation"
 import Image from "next/image"
+import Link from "next/link"
 import { useTranslations } from 'next-intl'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -43,17 +44,15 @@ export default function AnkaraPetTaksiPage() {
               </div>
               
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
-                Ankara'nın #1 
+                Ankara Pet Taksi:
                 <span className="text-gradient bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
-                  {" "}Pet Taksi{" "}
+                  {" "}Kedi ve Köpek Taksi{" "}
                 </span>
-                Hizmeti
               </h1>
               
               <p className="text-xl text-gray-600 leading-relaxed">
-                Ankara'da evcil hayvanlarınız için güvenli, konforlu pet taksi hizmeti. 
-                Şehir içi ve şehirler arası pet taksi ile sevdiklerinizi güvenle taşıyoruz. 
-                Mesafe bazlı şeffaf fiyatlandırma.
+                Ankara pet taksi: kedi taksi ve köpek taksi hizmetiyle evcil hayvanlarınızı şehir içinde
+                ve 81 ilde şehirler arası güvenle taşıyoruz. Fiyat mesafeye göre hesaplanır.
               </p>
 
               {/* Features */}
@@ -272,6 +271,36 @@ export default function AnkaraPetTaksiPage() {
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Kedi taksi / Köpek taksi */}
+      <section className="py-16 px-4">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <h2 className="text-3xl md:text-4xl font-bold text-center">Kedi Taksi ve Köpek Taksi</h2>
+          <p className="text-lg text-gray-700 leading-relaxed">
+            Pet taksi hizmetimizi kedi ve köpekler için ayrı sayfalarda ayrıntılandırdık: yolculuğa nasıl hazırlanılır,
+            ücret nasıl hesaplanır ve hangi bölgelere hizmet veriyoruz.
+          </p>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Link
+              href={`/${locale}/ankara-kedi-taksi`}
+              className="block rounded-2xl border border-blue-200 p-6 hover:bg-blue-50"
+            >
+              <h3 className="font-bold text-xl mb-2">Ankara Kedi Taksi</h3>
+              <p className="text-gray-600">Kediniz için güvenli şehir içi ve şehirler arası nakil.</p>
+            </Link>
+            <Link
+              href={`/${locale}/ankara-kopek-taksi`}
+              className="block rounded-2xl border border-blue-200 p-6 hover:bg-blue-50"
+            >
+              <h3 className="font-bold text-xl mb-2">Ankara Köpek Taksi</h3>
+              <p className="text-gray-600">Köpeğiniz için güvenli şehir içi ve şehirler arası nakil.</p>
+            </Link>
+          </div>
+          <p className="text-gray-600 text-center">
+            Konaklama için <Link href={`/${locale}/ankara-pet-otel`} className="text-blue-600 underline">Ankara pet otel</Link> sayfamıza da göz atın.
+          </p>
         </div>
       </section>
 
