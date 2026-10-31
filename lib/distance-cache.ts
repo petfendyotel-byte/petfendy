@@ -14,7 +14,7 @@ interface DistanceSegment {
 interface DistanceCache {
   key: string
   distance: number
-  method: 'google' | 'fallback'
+  method: 'table' | 'google' | 'fallback'
   segments?: DistanceSegment[]
   calculatedAt: Date
   expiresAt: Date
@@ -83,13 +83,13 @@ class DistanceCacheService {
   async set(
     key: string, 
     distance: number, 
-    method: 'google' | 'fallback',
+    method: 'table' | 'google' | 'fallback',
     segments: DistanceSegment[] = [],
     isVipTransfer: boolean = false
   ): Promise<void> {
     // TTL: Google sonuçları 24 saat. Yedek (tahmini) sonuçlar yalnızca 5 dakika tutulur; böylece Google
     // düzeldiğinde yanlış/tahmini fiyatlar günlerce müşterilere gösterilmeye devam etmez.
-    const ttl = method === 'google' ? 24 * 60 * 60 * 1000 : 5 * 60 * 1000
+    const ttl = method !== 'fallback' ? 24 * 60 * 60 * 1000 : 5 * 60 * 1000
     
     const cacheData: DistanceCache = {
       key,

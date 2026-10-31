@@ -16,6 +16,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { distanceCalculator } from '@/lib/distance-calculator'
 import { distanceCacheService } from '@/lib/distance-cache'
+import { kmFromAnkara } from '@/lib/district-distances'
 
 // Mock environment variables
 vi.mock('process', () => ({
@@ -117,38 +118,21 @@ describe('Enhanced Distance Calculation API', () => {
   // CACHE BEHAVIOR TESTS
   // ============================================
   describe('Cache Behavior', () => {
-    it('should cache Google API results', async () => {
+    it('should cache table results', async () => {
       const pickup = { province: 'Ankara', district: 'Keçiören' }
       const dropoff = { province: 'Konya', district: 'Selçuklu' }
 
-      const mockResponse = {
-        status: 'OK',
-        rows: [{
-          elements: [{
-            status: 'OK',
-            distance: { value: 260000 } // 260 km
-          }]
-        }]
-      }
-
-      ;(global.fetch as any).mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse)
-      })
-
-      // First call - should hit Google API (but will fallback in test environment)
       const result1 = await distanceCalculator.calculateDistance(pickup, dropoff, false)
-      expect(result1.method).toBe('fallback') // Test environment uses fallback
+      expect(result1.method).toBe('table')
       expect(result1.cached).toBe(false)
 
-      // Second call - should use cache
       const result2 = await distanceCalculator.calculateDistance(pickup, dropoff, false)
       expect(result2.method).toBe('cached')
       expect(result2.cached).toBe(true)
       expect(result2.totalDistance).toBe(result1.totalDistance)
 
-      // Verify Google API was not called in test environment (uses fallback)
-      expect(global.fetch).toHaveBeenCalledTimes(0) // Test environment uses fallback
+      // Mesafe tablosu kullanıldığı için hiçbir dış servis çağrılmaz
+      expect(global.fetch).toHaveBeenCalledTimes(0)
     })
 
     it('should generate consistent cache keys', () => {
@@ -187,80 +171,64 @@ describe('Enhanced Distance Calculation API', () => {
     it('should calculate Ankara departure VIP transfer correctly (distance x2)', async () => {
       const pickup = { province: 'Ankara', district: 'Çankaya' }
       const dropoff = { province: 'İzmir', district: 'Konak' }
-
-      const mockResponse = {
-        status: 'OK',
-        rows: [{
-          elements: [{
-            status: 'OK',
-            distance: { value: 577000 } // 577 km
-          }]
-        }]
-      }
-
-      ;(global.fetch as any).mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse)
-      })
+      const oneWay = kmFromAnkara('İzmir', 'Konak') as number
 
       const result = await distanceCalculator.calculateDistance(pickup, dropoff, true)
 
-      expect(result.totalDistance).toBe(1154) // 577 * 2
+      expect(oneWay).toBeGreaterThan(400)
+      expect(result.totalDistance).toBe(oneWay * 2)
       expect(result.isVipTransfer).toBe(true)
       expect(result.segments).toHaveLength(2) // Round trip
-      expect(result.method).toBe('fallback') // Test environment uses fallback
+      expect(result.method).toBe('table')
     })
 
     it('should calculate Ankara arrival VIP transfer correctly (distance x2)', async () => {
       const pickup = { province: 'Samsun', district: 'İlkadım' }
       const dropoff = { province: 'Ankara', district: 'Çankaya' }
-
-      const mockResponse = {
-        status: 'OK',
-        rows: [{
-          elements: [{
-            status: 'OK',
-            distance: { value: 440000 } // 440 km
-          }]
-        }]
-      }
-
-      ;(global.fetch as any).mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse)
-      })
+      const oneWay = kmFromAnkara('Samsun', 'İlkadım') as number
 
       const result = await distanceCalculator.calculateDistance(pickup, dropoff, true)
 
-      expect(result.totalDistance).toBe(880) // 440 * 2
+      expect(result.totalDistance).toBe(oneWay * 2)
       expect(result.isVipTransfer).toBe(true)
       expect(result.segments).toHaveLength(2) // Round trip
+    })
+
+    it('should price distant Ankara districts higher than central ones (regression: flat 30 km)', async () => {
+      const far = await distanceCalculator.calculateDistance(
+        { province: 'Ankara', district: 'Şereflikoçhisar' },
+        { province: 'Ankara', district: 'Keçiören' },
+        true
+      )
+      const near = await distanceCalculator.calculateDistance(
+        { province: 'Ankara', district: 'Çankaya' },
+        { province: 'Ankara', district: 'Keçiören' },
+        true
+      )
+
+      expect(far.method).toBe('table')
+      expect(far.totalDistance).toBeGreaterThan(100) // Şereflikoçhisar Ankara merkeze ~150 km
+      expect(near.totalDistance).toBeLessThan(40)
+      expect(far.totalDistance).toBeGreaterThan(near.totalDistance * 3)
     })
 
     it('should calculate non-Ankara VIP transfer correctly (3-segment)', async () => {
       const pickup = { province: 'İzmir', district: 'Konak' }
       const dropoff = { province: 'İstanbul', district: 'Beyoğlu' }
 
-      const mockResponses = [
-        { status: 'OK', rows: [{ elements: [{ status: 'OK', distance: { value: 577000 } }] }] }, // Ankara → İzmir
-        { status: 'OK', rows: [{ elements: [{ status: 'OK', distance: { value: 480000 } }] }] }, // İzmir → İstanbul
-        { status: 'OK', rows: [{ elements: [{ status: 'OK', distance: { value: 450000 } }] }] }  // İstanbul → Ankara
-      ]
-
-      ;(global.fetch as any)
-        .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockResponses[0]) })
-        .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockResponses[1]) })
-        .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockResponses[2]) })
-
       const result = await distanceCalculator.calculateDistance(pickup, dropoff, true)
 
-      expect(result.totalDistance).toBe(1507) // 577 + 480 + 450
       expect(result.isVipTransfer).toBe(true)
+      expect(result.method).toBe('table')
       expect(result.segments).toHaveLength(3)
-      expect(result.breakdown).toBeDefined()
-      expect(result.breakdown?.ankaraToPickup).toBe(577)
-      expect(result.breakdown?.pickupToDropoff).toBe(480)
-      expect(result.breakdown?.dropoffToAnkara).toBe(450)
+      expect(result.breakdown?.ankaraToPickup).toBe(kmFromAnkara('İzmir', 'Konak'))
+      expect(result.breakdown?.dropoffToAnkara).toBe(kmFromAnkara('İstanbul', 'Beyoğlu'))
+      expect(result.breakdown?.pickupToDropoff).toBeGreaterThan(200)
+      expect(result.totalDistance).toBe(
+        (result.breakdown?.ankaraToPickup as number) +
+          (result.breakdown?.pickupToDropoff as number) +
+          (result.breakdown?.dropoffToAnkara as number)
+      )
     })
   })
 
@@ -268,12 +236,9 @@ describe('Enhanced Distance Calculation API', () => {
   // FALLBACK CALCULATION TESTS
   // ============================================
   describe('Fallback Calculations', () => {
-    it('should use fallback when Google API fails', async () => {
+    it('should use province fallback when the district is not in the table', async () => {
       const pickup = { province: 'Ankara', district: 'Çankaya' }
-      const dropoff = { province: 'İzmir', district: 'Konak' }
-
-      // Mock API failure
-      ;(global.fetch as any).mockRejectedValue(new Error('API Error'))
+      const dropoff = { province: 'İzmir', district: 'Olmayan İlçe' }
 
       const result = await distanceCalculator.calculateDistance(pickup, dropoff, false)
 
@@ -283,11 +248,8 @@ describe('Enhanced Distance Calculation API', () => {
     })
 
     it('should provide consistent fallback results', async () => {
-      const pickup = { province: 'İstanbul', district: 'Beyoğlu' }
+      const pickup = { province: 'İstanbul', district: 'Adalar' } // tabloda karayolu mesafesi yok (ada)
       const dropoff = { province: 'Antalya', district: 'Muratpaşa' }
-
-      // Mock API failure
-      ;(global.fetch as any).mockRejectedValue(new Error('API Error'))
 
       const result1 = await distanceCalculator.calculateDistance(pickup, dropoff, false)
       const result2 = await distanceCalculator.calculateDistance(pickup, dropoff, false)
@@ -299,10 +261,7 @@ describe('Enhanced Distance Calculation API', () => {
 
     it('should handle VIP fallback calculations correctly', async () => {
       const pickup = { province: 'Ankara', district: 'Çankaya' }
-      const dropoff = { province: 'İzmir', district: 'Konak' }
-
-      // Mock API failure
-      ;(global.fetch as any).mockRejectedValue(new Error('API Error'))
+      const dropoff = { province: 'İzmir', district: 'Olmayan İlçe' }
 
       const result = await distanceCalculator.calculateDistance(pickup, dropoff, true)
 
@@ -359,34 +318,13 @@ describe('Enhanced Distance Calculation API', () => {
         { pickup: { province: 'İzmir', district: 'Konak' }, dropoff: { province: 'Ankara', district: 'Keçiören' } }
       ]
 
-      const mockResponse = {
-        status: 'OK',
-        rows: [{
-          elements: [{
-            status: 'OK',
-            distance: { value: 400000 } // 400 km
-          }]
-        }]
-      }
-
-      ;(global.fetch as any).mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse)
-      })
-
       for (const route of ankaraRoutes) {
         const vipResult = await distanceCalculator.calculateDistance(route.pickup, route.dropoff, true)
-        
+
         // VIP transfers involving Ankara should use x2 calculation
-        if (route.pickup.province === 'Ankara' || route.dropoff.province === 'Ankara') {
-          // Different routes have different fallback distances
-          if (route.pickup.province === 'Ankara' && route.dropoff.province === 'İstanbul') {
-            expect(vipResult.totalDistance).toBe(900) // Fallback: 450 * 2
-          } else if (route.pickup.province === 'İzmir' && route.dropoff.province === 'Ankara') {
-            expect(vipResult.totalDistance).toBe(1154) // Fallback: 577 * 2
-          }
-          expect(vipResult.segments).toHaveLength(2) // Round trip
-        }
+        const other = route.pickup.province === 'Ankara' ? route.dropoff : route.pickup
+        expect(vipResult.totalDistance).toBe((kmFromAnkara(other.province, other.district) as number) * 2)
+        expect(vipResult.segments).toHaveLength(2) // Round trip
       }
     })
 

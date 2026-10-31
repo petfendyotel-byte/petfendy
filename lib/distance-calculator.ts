@@ -7,6 +7,7 @@
 
 import { distanceCacheService, type DistanceSegment } from './distance-cache'
 import { estimateRoadKm } from './tr-provinces'
+import { kmBetween, kmFromAnkara } from './district-distances'
 
 interface Location {
   province: string
@@ -15,7 +16,7 @@ interface Location {
 
 interface DistanceCalculationResult {
   totalDistance: number
-  method: 'google' | 'fallback' | 'cached'
+  method: 'table' | 'google' | 'fallback' | 'cached'
   cached: boolean
   segments: DistanceSegment[]
   calculatedAt: Date
@@ -88,12 +89,13 @@ class DistanceCalculator {
     // Yeni hesaplama yap
     let result: DistanceCalculationResult
 
-    try {
-      // Google API ile hesapla
-      result = await this.calculateWithGoogle(pickup, dropoff, isVip, cacheKey)
-    } catch (error) {
-      console.warn('Google API failed, using fallback:', error)
-      // Fallback hesaplama
+    // 1) Önceden hazırlanmış ilçe mesafe tablosu (dış servis yok)
+    const fromTable = this.calculateFromTable(pickup, dropoff, isVip, cacheKey)
+    if (fromTable) {
+      result = fromTable
+    } else {
+      // 2) Tabloda ilçe yoksa il bazlı tahmin
+      console.warn(`District table miss: ${pickup.province}/${pickup.district} → ${dropoff.province}/${dropoff.district}, using fallback`)
       result = this.calculateFallback(pickup, dropoff, isVip, cacheKey)
     }
 
@@ -101,12 +103,82 @@ class DistanceCalculator {
     await distanceCacheService.set(
       cacheKey,
       result.totalDistance,
-      result.method as 'google' | 'fallback',
+      result.method as 'table' | 'google' | 'fallback',
       result.segments,
       isVip
     )
 
     return result
+  }
+
+  /**
+   * Önceden hazırlanmış ilçe tablosundan hesaplama (Ankara merkez çıkışlı model).
+   * Normal transfer: Ankara → alış → bırakış → Ankara. VIP Ankara çıkışlı/varışlı: tek yön x2.
+   */
+  private calculateFromTable(
+    pickup: Location,
+    dropoff: Location,
+    isVip: boolean,
+    cacheKey: string
+  ): DistanceCalculationResult | null {
+    const ankara = 'Ankara, Turkey'
+    const pickupName = `${pickup.district}, ${pickup.province}, Turkey`
+    const dropoffName = `${dropoff.district}, ${dropoff.province}, Turkey`
+
+    // Ankara içi rotalarda (iki uç da Ankara) ilçeler önemli: 3 segmentli hesap kullanılır
+    if (isVip && pickup.province === 'Ankara' && dropoff.province !== 'Ankara') {
+      const one = kmFromAnkara(dropoff.province, dropoff.district)
+      if (one === null) return null
+      return {
+        totalDistance: one * 2,
+        method: 'table',
+        cached: false,
+        segments: [
+          { from: ankara, to: dropoffName, distance: one },
+          { from: dropoffName, to: ankara, distance: one }
+        ],
+        calculatedAt: new Date(),
+        isVipTransfer: true,
+        cacheKey
+      }
+    }
+
+    if (isVip && dropoff.province === 'Ankara' && pickup.province !== 'Ankara') {
+      const one = kmFromAnkara(pickup.province, pickup.district)
+      if (one === null) return null
+      return {
+        totalDistance: one * 2,
+        method: 'table',
+        cached: false,
+        segments: [
+          { from: pickupName, to: ankara, distance: one },
+          { from: ankara, to: pickupName, distance: one }
+        ],
+        calculatedAt: new Date(),
+        isVipTransfer: true,
+        cacheKey
+      }
+    }
+
+    const ankaraToPickup = kmFromAnkara(pickup.province, pickup.district)
+    const dropoffToAnkara = kmFromAnkara(dropoff.province, dropoff.district)
+    const pickupToDropoff = kmBetween(pickup, dropoff)
+    if (ankaraToPickup === null || dropoffToAnkara === null || pickupToDropoff === null) return null
+
+    return {
+      totalDistance: ankaraToPickup + pickupToDropoff + dropoffToAnkara,
+      method: 'table',
+      cached: false,
+      segments: [
+        { from: ankara, to: pickupName, distance: ankaraToPickup },
+        { from: pickupName, to: dropoffName, distance: pickupToDropoff },
+        { from: dropoffName, to: ankara, distance: dropoffToAnkara }
+      ],
+      calculatedAt: new Date(),
+      isVipTransfer: isVip,
+      breakdown: { ankaraToPickup, pickupToDropoff, dropoffToAnkara },
+      cacheKey
+    }
   }
 
   /**
