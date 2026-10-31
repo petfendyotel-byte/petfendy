@@ -112,6 +112,17 @@ export async function generateMetadata({
             'max-snippet': -1,
           },
         },
+    // Google arama sonucundaki site simgesi: kare, 48 px'in katı, taranabilir bir simge gerekir
+    icons: {
+      icon: [
+        { url: '/favicon.ico', sizes: '48x48' },
+        { url: '/icons/icon-96.png', sizes: '96x96', type: 'image/png' },
+        { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+        { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+      ],
+      shortcut: '/favicon.ico',
+      apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+    },
     category: 'pet services',
     classification: 'Pet Hotel Ankara, Pet Taxi Ankara, Pet Daycare Ankara, Animal Care Services',
     other: {
